@@ -1,13 +1,15 @@
-
 import { API } from '../api.js';
 
+/* ============================================
+   Session check (shows user in header if logged in)
+   ============================================ */
 (async function checkSession() {
   try {
     const { user } = await API.get('/api/auth/me');
     document.getElementById('user-name').textContent = user.username;
     document.getElementById('user-avatar').textContent = user.username[0];
     document.getElementById('user-menu').onclick = () => {
-      window.location.href = (user.role === 'admin' || user.role === 'staff')
+      window.location.href = user.role === 'admin' || user.role === 'staff'
         ? '/admin/index.html'
         : '/orders.html';
     };
@@ -18,6 +20,9 @@ import { API } from '../api.js';
   }
 })();
 
+/* ============================================
+   Cart count
+   ============================================ */
 (async function loadCartCount() {
   try {
     const { data } = await API.get('/api/cart');
@@ -28,121 +33,313 @@ import { API } from '../api.js';
   }
 })();
 
+/* ============================================
+   Sample vegetable catalog (fallback until API)
+   ============================================ */
 const SAMPLE_PRODUCTS = [
-  { id:'s1',  slug:'broccoli-500g',      name:'Organic Broccoli',       category:'Leafy Greens', price:12000, compareAtPrice:15000, ratingAvg:4.8, ratingCount:142, badge:'sale', image:null },
-  { id:'s2',  slug:'tomatoes-1kg',       name:'Vine-Ripened Tomatoes',  category:'Tomatoes',     price:8500,  compareAtPrice:null,  ratingAvg:4.9, ratingCount:218, badge:'best', image:null },
-  { id:'s3',  slug:'carrots-1kg',        name:'Farm-Fresh Carrots',     category:'Root Veg',     price:7000,  compareAtPrice:null,  ratingAvg:4.7, ratingCount:189, badge:null,   image:null },
-  { id:'s4',  slug:'baby-spinach-250g',  name:'Baby Spinach',           category:'Leafy Greens', price:9500,  compareAtPrice:null,  ratingAvg:4.9, ratingCount:156, badge:'new',  image:null },
-  { id:'s5',  slug:'bell-peppers-trio',  name:'Bell Peppers Trio',      category:'Peppers',      price:13500, compareAtPrice:16000, ratingAvg:4.6, ratingCount:97,  badge:'sale', image:null },
-  { id:'s6',  slug:'cucumber-500g',      name:'Crisp Cucumbers',        category:'Salad Veg',    price:5500,  compareAtPrice:null,  ratingAvg:4.5, ratingCount:76,  badge:null,   image:null },
-  { id:'s7',  slug:'red-onions-1kg',     name:'Red Onions',             category:'Root Veg',     price:6000,  compareAtPrice:null,  ratingAvg:4.4, ratingCount:112, badge:null,   image:null },
-  { id:'s8',  slug:'fresh-herbs-mix',    name:'Fresh Herbs Mix',        category:'Herbs',        price:10500, compareAtPrice:null,  ratingAvg:4.8, ratingCount:64,  badge:'new',  image:null },
-  { id:'s9',  slug:'red-cabbage-1kg',    name:'Red Cabbage',            category:'Leafy Greens', price:8000,  compareAtPrice:null,  ratingAvg:4.6, ratingCount:88,  badge:null,   image:null },
-  { id:'s10', slug:'avocado-pack-3',     name:'Hass Avocado (3-pack)',  category:'Fruits',       price:14500, compareAtPrice:17000, ratingAvg:4.9, ratingCount:203, badge:'sale', image:null },
-  { id:'s11', slug:'green-beans-500g',   name:'Green Beans',            category:'Salad Veg',    price:7500,  compareAtPrice:null,  ratingAvg:4.5, ratingCount:74,  badge:null,   image:null },
-  { id:'s12', slug:'lemons-1kg',         name:'Fresh Lemons',           category:'Fruits',       price:9000,  compareAtPrice:null,  ratingAvg:4.7, ratingCount:131, badge:null,   image:null }
+  {
+    id: 'sample-1',
+    slug: 'organic-broccoli-500g',
+    name: 'Organic Broccoli 500g',
+    category: 'Leafy Greens',
+    price: 12000,
+    compareAtPrice: 15000,
+    ratingAvg: 4.8,
+    ratingCount: 142,
+    stock: 45,
+    badge: 'best',
+    image: 'https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?auto=format&fit=crop&w=500&q=70',
+  },
+  {
+    id: 'sample-2',
+    slug: 'vine-tomatoes-1kg',
+    name: 'Vine-Ripened Tomatoes 1kg',
+    category: 'Tomatoes',
+    price: 8500,
+    compareAtPrice: 10500,
+    ratingAvg: 4.9,
+    ratingCount: 218,
+    stock: 60,
+    badge: 'best',
+    image: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=500&q=70',
+  },
+  {
+    id: 'sample-3',
+    slug: 'fresh-carrots-1kg',
+    name: 'Farm-Fresh Carrots 1kg',
+    category: 'Root Vegetables',
+    price: 7000,
+    ratingAvg: 4.7,
+    ratingCount: 189,
+    stock: 80,
+    image: 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?auto=format&fit=crop&w=500&q=70',
+  },
+  {
+    id: 'sample-4',
+    slug: 'baby-spinach-250g',
+    name: 'Baby Spinach 250g',
+    category: 'Leafy Greens',
+    price: 9500,
+    ratingAvg: 4.9,
+    ratingCount: 156,
+    stock: 22,
+    badge: 'new',
+    image: 'https://images.unsplash.com/photo-1576045057995-568f588f82fb?auto=format&fit=crop&w=500&q=70',
+  },
+  {
+    id: 'sample-5',
+    slug: 'bell-peppers-trio',
+    name: 'Bell Peppers Trio (Red, Yellow, Green)',
+    category: 'Peppers',
+    price: 13500,
+    compareAtPrice: 16000,
+    ratingAvg: 4.6,
+    ratingCount: 97,
+    stock: 40,
+    badge: 'sale',
+    image: 'https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?auto=format&fit=crop&w=500&q=70',
+  },
+  {
+    id: 'sample-6',
+    slug: 'cucumber-500g',
+    name: 'Crisp Cucumbers 500g',
+    category: 'Salad Vegetables',
+    price: 5500,
+    ratingAvg: 4.5,
+    ratingCount: 76,
+    stock: 55,
+    image: 'https://images.unsplash.com/photo-1449300079323-02e209d9d3a6?auto=format&fit=crop&w=500&q=70',
+  },
+  {
+    id: 'sample-7',
+    slug: 'red-onions-1kg',
+    name: 'Red Onions 1kg',
+    category: 'Root Vegetables',
+    price: 6000,
+    ratingAvg: 4.4,
+    ratingCount: 112,
+    stock: 8,
+    image: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=500&q=70',
+  },
+  {
+    id: 'sample-8',
+    slug: 'fresh-herbs-mix',
+    name: 'Fresh Herbs Mix (Rosemary, Thyme, Basil)',
+    category: 'Herbs',
+    price: 10500,
+    ratingAvg: 4.8,
+    ratingCount: 64,
+    stock: 30,
+    badge: 'new',
+    image: 'https://images.unsplash.com/photo-1515586000433-45406d8e6662?auto=format&fit=crop&w=500&q=70',
+  },
+  {
+    id: 'sample-9',
+    slug: 'avocado-pack-4',
+    name: 'Organic Hass Avocados (Pack of 4)',
+    category: 'Fruits',
+    price: 18500,
+    compareAtPrice: 22000,
+    ratingAvg: 4.9,
+    ratingCount: 340,
+    stock: 25,
+    badge: 'best',
+    image: 'https://images.unsplash.com/photo-1601039641847-7857b994d704?auto=format&fit=crop&w=500&q=70',
+  },
+  {
+    id: 'sample-10',
+    slug: 'sweet-corn-2pcs',
+    name: 'Fresh Sweet Corn (2 pcs)',
+    category: 'Corn',
+    price: 4500,
+    ratingAvg: 4.6,
+    ratingCount: 82,
+    stock: 70,
+    badge: 'new',
+    image: 'https://images.unsplash.com/photo-1601593768799-76d2f1d0f8a9?auto=format&fit=crop&w=500&q=70',
+  },
+  {
+    id: 'sample-11',
+    slug: 'green-beans-500g',
+    name: 'Tender Green Beans 500g',
+    category: 'Beans',
+    price: 9000,
+    compareAtPrice: 11000,
+    ratingAvg: 4.7,
+    ratingCount: 128,
+    stock: 35,
+    badge: 'sale',
+    image: 'https://images.unsplash.com/photo-1567375698348-5d9d5ae99de0?auto=format&fit=crop&w=500&q=70',
+  },
+  {
+    id: 'sample-12',
+    slug: 'portobello-mushrooms-300g',
+    name: 'Portobello Mushrooms 300g',
+    category: 'Mushrooms',
+    price: 14000,
+    ratingAvg: 4.8,
+    ratingCount: 91,
+    stock: 18,
+    image: 'https://images.unsplash.com/photo-1504545102780-26774c1bb073?auto=format&fit=crop&w=500&q=70',
+  },
 ];
 
+/* ============================================
+   Formatting helpers
+   ============================================ */
 function formatPrice(cents) {
-  return (cents / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ETB';
+  return (cents / 100).toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }) + ' ETB';
 }
+
 function starBar(rating) {
   const full = Math.floor(rating);
-  const half = rating - full >= 0.5 ? 1 : 0;
-  const empty = 5 - full - half;
+  const half = rating - full >= 0.5;
+  const empty = 5 - full - (half ? 1 : 0);
   return '★'.repeat(full) + (half ? '⯪' : '') + '☆'.repeat(empty);
 }
-function badgeLabel(b) {
-  if (b === 'sale') return 'Sale';
-  if (b === 'new')  return 'New';
-  if (b === 'best') return 'Best Seller';
-  return null;
+
+function stockInfo(stock) {
+  if (stock === 0) return { class: 'out', label: 'Out of stock' };
+  if (stock <= 10) return { class: 'low', label: `Only ${stock} left` };
+  return { class: 'in', label: 'In stock' };
 }
 
-function renderCard(p) {
-  const badge = badgeLabel(p.badge);
-  const badgeHTML = badge
-    ? `<div class="product-badges"><span class="product-badge badge-${p.badge}">${badge}</span></div>`
-    : '';
+function badgeInfo(badge) {
+  switch (badge) {
+    case 'best': return { class: 'badge-best', text: 'Best Seller' };
+    case 'sale': return { class: 'badge-sale', text: 'Sale' };
+    case 'new':  return { class: 'badge-new',  text: 'New' };
+    default: return null;
+  }
+}
 
-  const thumbInner = p.image
-    ? `<img src="${p.image}" alt="${p.name}" loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:12px;" />`
-    : `<div class="img-placeholder light">
-         <span class="img-placeholder-icon">🥬</span>
-         <span class="img-placeholder-text">Product Image<br/><small>800×800</small></span>
-       </div>`;
+function discountPercent(price, compare) {
+  if (!compare || compare <= price) return null;
+  return Math.round(((compare - price) / compare) * 100);
+}
 
-  const compare = p.compareAtPrice
+/* ============================================
+   Card markup
+   ============================================ */
+function renderProductCard(p) {
+  const badge = badgeInfo(p.badge);
+  const stock = stockInfo(p.stock ?? 0);
+  const discount = discountPercent(p.price, p.compareAtPrice);
+
+  const badgesHTML = (badge || discount) ? `
+    <div class="product-badges">
+      ${badge ? `<span class="product-badge ${badge.class}">${badge.text}</span>` : ''}
+      ${discount ? `<span class="product-badge discount">-${discount}%</span>` : ''}
+    </div>` : '';
+
+  const ratingHTML = p.ratingAvg ? `
+    <div class="product-rating">
+      <span class="stars">${starBar(p.ratingAvg)}</span>
+      <span>${p.ratingAvg.toFixed(1)} (${p.ratingCount || 0})</span>
+    </div>` : '';
+
+  const compareHTML = p.compareAtPrice
     ? `<span class="product-compare">${formatPrice(p.compareAtPrice)}</span>`
     : '';
 
   return `
     <a href="/product.html?slug=${encodeURIComponent(p.slug)}" class="product-card">
       <div class="product-thumb">
-        ${thumbInner}
-        ${badgeHTML}
-        <button class="product-add" data-add="${p.id}" aria-label="Add to cart" type="button">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
-            <line x1="12" y1="5" x2="12" y2="19"/>
-            <line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
-        </button>
+        <img src="${p.image}" alt="${p.name}" loading="lazy"
+             onerror="this.style.display='none'" />
+        ${badgesHTML}
       </div>
+
       <div class="product-body">
         <span class="product-cat">${p.category}</span>
         <h3 class="product-name">${p.name}</h3>
-        <div class="product-rating">
-          <span class="stars">${starBar(p.ratingAvg)}</span>
-          <span>${p.ratingAvg.toFixed(1)} (${p.ratingCount})</span>
-        </div>
+        ${ratingHTML}
+        <span class="product-stock ${stock.class}">${stock.label}</span>
+
         <div class="product-price-row">
-          <span class="product-price">${formatPrice(p.price)}</span>
-          ${compare}
+          <div class="product-prices">
+            <span class="product-price">${formatPrice(p.price)}</span>
+            ${compareHTML}
+          </div>
+          <button class="product-add" data-add="${p.id}" type="button" aria-label="Add to cart">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+          </button>
         </div>
       </div>
     </a>
   `;
 }
 
-async function loadProducts() {
-  const grid = document.getElementById('product-grid');
-  if (!grid) return;
+/* ============================================
+   Boot: try API, fall back to sample data
+   ============================================ */
+async function loadFeatured() {
+  const grid = document.getElementById('featured-grid');
 
   try {
-    const res = await API.get('/api/products?limit=12');
+    const res = await API.get('/api/products?featured=true&limit=12');
     const products = res.data || [];
     if (products.length === 0) throw new Error('empty');
-    grid.innerHTML = products.map(renderCard).join('');
+    grid.innerHTML = products.map(renderProductCard).join('');
   } catch {
-    grid.innerHTML = SAMPLE_PRODUCTS.map(renderCard).join('');
+    grid.innerHTML = SAMPLE_PRODUCTS.map(renderProductCard).join('');
   }
 
+  // Wire add-to-cart buttons
   grid.querySelectorAll('[data-add]').forEach((btn) => {
     btn.addEventListener('click', async (e) => {
       e.preventDefault();
       e.stopPropagation();
+      const id = btn.dataset.add;
       try {
-        await API.post('/api/cart/items', { productId: btn.dataset.add, quantity: 1 });
-        const el = document.getElementById('cart-count');
-        el.textContent = (parseInt(el.textContent, 10) || 0) + 1;
+        await API.post('/api/cart/items', { productId: id, quantity: 1 });
+        const countEl = document.getElementById('cart-count');
+        countEl.textContent = (parseInt(countEl.textContent, 10) || 0) + 1;
         btn.style.transform = 'scale(0.85)';
         setTimeout(() => { btn.style.transform = ''; }, 150);
       } catch {
-        alert('Cart coming soon — API is next!');
+        alert('Cart API not available yet — coming in the next block.');
       }
     });
   });
 }
 
+/* ============================================
+   Newsletter (stub)
+   ============================================ */
 document.getElementById('newsletter-form')?.addEventListener('submit', (e) => {
   e.preventDefault();
   const input = e.target.querySelector('input');
-  alert(`Thanks! Updates will go to ${input.value}`);
+  alert(`Thanks! We'll send weekly harvest updates to ${input.value}`);
   input.value = '';
 });
 
-document.getElementById('mobile-menu-btn')?.addEventListener('click', () => {
-  alert('Mobile menu coming soon.');
+/* ---------- Live product search (client-side demo) ---------- */
+document.getElementById('product-search')?.addEventListener('input', (e) => {
+  const q = e.target.value.trim().toLowerCase();
+  document.querySelectorAll('.product-card').forEach((card) => {
+    const name = card.querySelector('.product-name')?.textContent.toLowerCase() || '';
+    const cat  = card.querySelector('.product-cat')?.textContent.toLowerCase() || '';
+    const match = !q || name.includes(q) || cat.includes(q);
+    card.style.display = match ? '' : 'none';
+  });
 });
 
-loadProducts();
+/* ============================================
+   Mobile hamburger
+   ============================================ */
+document.getElementById('mobile-menu-btn')?.addEventListener('click', () => {
+  alert('Menu — coming soon with the mobile drawer.');
+});
+
+/* ============================================
+   Boot
+   ============================================ */
+loadFeatured();
