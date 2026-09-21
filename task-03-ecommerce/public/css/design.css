@@ -1,12 +1,6 @@
-/* ============================================
-   Prodigy Store — Design System
-   Green + Amber + Cream boutique retail
-   ============================================ */
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap');
 
 :root {
-  /* Brand */
   --green:        #0e5c3f;
   --green-dark:   #0a4230;
   --green-light:  #e8f3ee;
@@ -14,58 +8,37 @@
   --amber-dark:   #d99e04;
   --amber-light:  #fef7dd;
 
-  /* Badges */
-  --badge-red:    #e53935;
-  --badge-orange: #ff9500;
-  --badge-green:  #16a34a;
-  --badge-blue:   #2563eb;
-
-  /* Surfaces */
   --bg:           #f5f2ea;
   --bg-2:         #ebe6d9;
   --card:         #ffffff;
-  --card-2:       #fbf9f3;
   --border:       #e6e2d8;
   --border-2:     #d4cfc0;
 
-  /* Text */
   --text:         #0a0a0a;
   --text-2:       #2a2a2a;
   --text-muted:   #7a7568;
   --text-soft:    #a8a294;
 
-  /* Status */
   --success:      #15803d;
   --success-bg:   #dcfce7;
-  --warning:      #d97706;
-  --warning-bg:   #fef3c7;
   --danger:       #dc2626;
   --danger-bg:    #fee2e2;
-  --info:         #1d4ed8;
-  --info-bg:      #dbeafe;
+  --warning:      #d97706;
+  --warning-bg:   #fef3c7;
 
-  /* Radii */
-  --r-xs: 6px;
   --r-sm: 8px;
   --r:    12px;
   --r-lg: 18px;
-  --r-xl: 24px;
   --r-pill: 999px;
 
-  /* Shadows */
-  --shadow-xs: 0 1px 2px rgba(10, 10, 10, 0.05);
   --shadow-sm: 0 1px 3px rgba(10, 10, 10, 0.06);
-  --shadow:    0 4px 12px rgba(10, 10, 10, 0.06);
-  --shadow-md: 0 8px 24px rgba(10, 10, 10, 0.08);
-  --shadow-lg: 0 16px 40px rgba(10, 10, 10, 0.10);
-  --shadow-xl: 0 24px 60px rgba(10, 10, 10, 0.14);
+  --shadow:    0 4px 14px rgba(10, 10, 10, 0.08);
+  --shadow-lg: 0 16px 40px rgba(10, 10, 10, 0.12);
 
-  /* Fonts */
   --font-body:    'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-display: 'Playfair Display', Georgia, serif;
 }
 
-/* ---------- Reset ---------- */
 *, *::before, *::after { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; min-height: 100%; }
 
@@ -75,81 +48,64 @@ body {
   background: var(--bg);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
-h1, h2, h3, h4 {
+h1, h2, h3 {
   font-family: var(--font-body);
   font-weight: 700;
   color: var(--text);
   margin: 0 0 6px;
   line-height: 1.2;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.02em;
 }
-h1 { font-size: 1.875rem; }
-h2 { font-size: 1.5rem; }
-h3 { font-size: 1.15rem; }
+h1 { font-size: 1.75rem; }
+h2 { font-size: 1.4rem; }
+h3 { font-size: 1.1rem; }
 
 p { margin: 0 0 12px; }
-a { color: var(--green); text-decoration: none; }
+a { color: var(--green); text-decoration: none; font-weight: 600; }
 a:hover { text-decoration: underline; }
 
-/* ---------- Buttons ---------- */
+/* Buttons */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 11px 22px;
+  padding: 12px 22px;
   border: none;
   border-radius: var(--r-pill);
   font-family: inherit;
-  font-size: 0.92rem;
+  font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
   text-decoration: none;
   transition: transform 0.1s, background 0.15s, box-shadow 0.15s;
   white-space: nowrap;
 }
-.btn:active { transform: scale(0.97); }
+.btn:active { transform: scale(0.98); }
 .btn:disabled { opacity: 0.55; cursor: not-allowed; }
 
 .btn-primary {
   background: var(--amber);
   color: var(--text);
-  box-shadow: 0 2px 8px rgba(242, 183, 5, 0.35);
+  box-shadow: 0 2px 8px rgba(242, 183, 5, 0.3);
 }
 .btn-primary:hover { background: var(--amber-dark); color: var(--text); text-decoration: none; }
 
 .btn-green {
   background: var(--green);
   color: #fff;
-  box-shadow: 0 2px 8px rgba(14, 92, 63, 0.25);
+  box-shadow: 0 4px 14px rgba(14, 92, 63, 0.25);
 }
 .btn-green:hover { background: var(--green-dark); color: #fff; text-decoration: none; }
 
-.btn-outline {
-  background: transparent;
-  border: 1.5px solid var(--border-2);
-  color: var(--text);
-}
-.btn-outline:hover { border-color: var(--green); color: var(--green); text-decoration: none; }
-
-.btn-ghost {
-  background: transparent;
-  color: var(--text-muted);
-  padding: 8px 12px;
-}
-.btn-ghost:hover { background: var(--bg-2); color: var(--text); text-decoration: none; }
-
 .btn-full { width: 100%; }
-.btn-sm   { padding: 8px 16px; font-size: 0.85rem; }
-.btn-lg   { padding: 14px 28px; font-size: 1rem; }
 
-/* ---------- Inputs ---------- */
+/* Inputs */
 input, select, textarea {
   width: 100%;
-  padding: 11px 14px;
+  padding: 12px 14px;
   border-radius: var(--r-sm);
   border: 1.5px solid var(--border);
   background: #fff;
@@ -173,47 +129,15 @@ label {
   margin-bottom: 6px;
 }
 
-/* ---------- Cards ---------- */
-.card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  box-shadow: var(--shadow-xs);
-}
+.form-group { margin-bottom: 16px; }
 
-/* ---------- Badges ---------- */
-.badge {
-  display: inline-block;
-  padding: 3px 9px;
-  border-radius: var(--r-pill);
-  font-size: 0.68rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-.badge-best    { background: var(--badge-red);    color: #fff; }
-.badge-new     { background: var(--badge-orange); color: #fff; }
-.badge-sale    { background: var(--green);        color: #fff; }
-.badge-info    { background: var(--info-bg);      color: var(--info); }
-.badge-success { background: var(--success-bg);   color: var(--success); }
-
-/* ---------- Alerts ---------- */
-.alert {
-  padding: 12px 16px;
-  border-radius: var(--r-sm);
+/* Alert */
+.msg {
+  min-height: 1.2em;
   font-size: 0.88rem;
-  margin-bottom: 16px;
-  border: 1px solid transparent;
+  margin: 12px 0 0;
 }
-.alert.success { background: var(--success-bg); color: var(--success); border-color: var(--success); }
-.alert.error   { background: var(--danger-bg);  color: var(--danger);  border-color: var(--danger); }
-.alert.warning { background: var(--warning-bg); color: var(--warning); border-color: var(--warning); }
-.alert.info    { background: var(--info-bg);    color: var(--info);    border-color: var(--info); }
+.msg.error   { color: var(--danger); }
+.msg.success { color: var(--success); }
 
-/* ---------- Utilities ---------- */
 .hidden { display: none !important; }
-.text-muted { color: var(--text-muted); }
-.text-center { text-align: center; }
-.mt-2 { margin-top: 8px; }
-.mt-4 { margin-top: 16px; }
-.mb-0 { margin-bottom: 0; }

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Create account · Prodigy Store</title>
+  <link rel="stylesheet" href="/css/design.css" />
+  <link rel="stylesheet" href="/css/auth.css" />
+</head>
+<body>
+  <main class="auth-shell">
+    <div class="auth-card">
+      <a href="/" class="auth-brand">
+        <span class="auth-logo">P</span>
+        <span class="auth-brand-name">Prodigy Store</span>
+      </a>
+
+      <h1 class="auth-title">Create your account</h1>
+      <p class="auth-sub">Join us and start shopping fresh house vegetables.</p>
+
+      <form id="register-form" class="auth-form" novalidate>
+        <div>
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" required
+                 minlength="3" maxlength="30" placeholder="pick a username"
+                 autocomplete="username" />
+        </div>
+
+        <div>
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" required
+                 placeholder="you@example.com" autocomplete="email" />
+        </div>
+
+        <!-- Password field + live feedback -->
+        <div class="pw-field">
+        <label for="password">Password</label>
+
+        <div class="pw-wrap" id="pw-wrap">
+            <input type="password" id="password" name="password" required
+                placeholder="Create a strong password"
+                autocomplete="new-password" />
+
+            <button type="button" class="pw-toggle" id="pw-toggle"
+                    aria-label="Show password" title="Show password">
+            <!-- Eye open icon — shown when password is HIDDEN -->
+            <svg class="icon-show" width="20" height="20" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+            </svg>
+            <!-- Eye slashed icon — shown when password is VISIBLE -->
+            <svg class="icon-hide" width="20" height="20" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                <line x1="1" y1="1" x2="23" y2="23" />
+            </svg>
+            </button>
+        </div>
+
+        <div class="pw-strength" id="pw-strength" aria-hidden="true">
+            <div class="pw-bars">
+            <span class="pw-bar"></span>
+            <span class="pw-bar"></span>
+            <span class="pw-bar"></span>
+            <span class="pw-bar"></span>
+            </div>
+            <span class="pw-label" id="pw-label"></span>
+        </div>
+
+        <p class="pw-hint" id="pw-hint" aria-live="polite">
+            Use
+            <span data-rule="length">8+ characters</span>,
+            <span data-rule="upper">uppercase letter</span>,
+            <span data-rule="lower">lowercase letter</span>,
+            <span data-rule="number">numbers</span>,
+            and <span data-rule="special">special characters</span>.
+        </p>
+        </div>
+
+        <button type="submit" class="btn btn-green btn-full" id="submit-btn">
+          Create account
+        </button>
+      </form>
+
+      <p id="msg" class="msg" role="status"></p>
+
+      <p class="auth-footer">
+        Already have an account?
+        <a href="/index.html">Sign in</a>
+      </p>
+    </div>
+  </main>
+
+  <script type="module" src="/js/auth/register.js"></script>
+</body>
+</html>
