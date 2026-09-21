@@ -43,7 +43,7 @@ form.addEventListener('submit', async (e) => {
     if (user.role === 'admin' || user.role === 'staff') {
       window.location.href = '/admin/index.html';
     } else {
-      window.location.href = '/home.html';
+      window.location.href = '/';
     }
   } catch (err) {
     showMessage(msg, err.message, 'error');
