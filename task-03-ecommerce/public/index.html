@@ -94,7 +94,7 @@
       </div>
     </section>
 
-    <section class="filter-bar">
+    <!-- <section class="filter-bar">
       <h2 class="filter-title">All Products</h2>
 
       <div class="filter-tools">
@@ -126,7 +126,101 @@
           Sort: Popular
         </button>
       </div>
-    </section>
+    </section> -->
+
+    <section class="filter-bar">
+        <div class="filter-bar-left">
+          <h2 class="filter-title">All Products</h2>
+          <span class="filter-count" id="result-count">12 products</span>
+        </div>
+
+        <div class="filter-tools">
+          <div class="search-box">
+            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2.2"
+                stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="7" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input type="search" id="product-search" placeholder="Search vegetables…" />
+          </div>
+
+          <button class="filter-btn" id="filter-toggle" type="button">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="4" y1="6" x2="20" y2="6" />
+              <line x1="7" y1="12" x2="17" y2="12" />
+              <line x1="10" y1="18" x2="14" y2="18" />
+            </svg>
+            Filters
+            <span class="filter-badge hidden" id="filter-badge">0</span>
+          </button>
+
+          <div class="sort-wrap">
+            <button class="filter-btn" id="sort-toggle" type="button">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 6h18M6 12h12M10 18h4" />
+              </svg>
+              Sort: <span id="sort-label">Popular</span>
+            </button>
+
+            <div class="sort-menu hidden" id="sort-menu">
+              <button data-sort="popular"     class="active">Popular</button>
+              <button data-sort="price-asc">Price: Low to High</button>
+              <button data-sort="price-desc">Price: High to Low</button>
+              <button data-sort="newest">Newest</button>
+              <button data-sort="rating">Top Rated</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Filters panel (slides down) -->
+     <div class="filters-panel-wrap hidden" id="filters-panel">
+        <div class="filters-panel filters-panel-compact">
+
+          <div class="filter-group">
+            <h4>Price range (ETB)</h4>
+            <div class="price-range">
+              <input type="number" id="price-min" placeholder="Min" min="0" />
+              <span>—</span>
+              <input type="number" id="price-max" placeholder="Max" min="0" />
+            </div>
+            <div class="price-presets">
+              <button type="button" class="price-preset" data-min="0"   data-max="100">Under 100</button>
+              <button type="button" class="price-preset" data-min="100" data-max="150">100–150</button>
+              <button type="button" class="price-preset" data-min="150" data-max="200">150–200</button>
+              <button type="button" class="price-preset" data-min="200" data-max="">200+</button>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <h4>Availability</h4>
+            <label class="filter-option">
+              <input type="checkbox" id="filter-instock" />
+              <span>In stock only</span>
+            </label>
+            <label class="filter-option">
+              <input type="checkbox" id="filter-onsale" />
+              <span>On sale</span>
+            </label>
+          </div>
+
+          <div class="filter-actions-row">
+            <button type="button" class="btn-text" id="filter-clear">Clear all</button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Empty state (shown when no products match) -->
+      <section class="empty-results hidden" id="empty-results">
+        <div class="empty-icon">🔍</div>
+        <h3>No products found</h3>
+        <p>We couldn't find anything matching your search or filters.</p>
+        <button type="button" class="btn btn-green" id="empty-reset">Clear all filters</button>
+      </section>
 
     <section class="chip-row">
       <a href="/catalog.html" class="chip active">All Products</a>
