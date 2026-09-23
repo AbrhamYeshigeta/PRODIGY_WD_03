@@ -48,11 +48,11 @@
 
       <nav class="site-nav">
         <a href="/" class="active">Home</a>
-        <a href="/catalog.html">Shop All</a>
-        <a href="/catalog.html?category=leafy-greens">Vegetables</a>
-        <a href="/catalog.html?category=fruits">Fruits</a>
-        <a href="/catalog.html?category=peppers">Peppers</a>
-        <a href="/catalog.html?category=herbs">Herbs</a>
+        <a href="/">Shop All</a>
+        <a href="/?category=leafy-greens">Vegetables</a>
+        <a href="/?category=fruits">Fruits</a>
+        <a href="/?category=peppers">Peppers</a>
+        <a href="/?category=herbs">Herbs</a>
       </nav>
 
       <div class="site-actions">
@@ -84,7 +84,7 @@
         <span class="hero-eyebrow">🌱 Fresh from local farms</span>
         <h1>Get free delivery on<br/>orders over <em>500 ETB</em></h1>
         <p>Hand-picked vegetables, fruits, and herbs from growers around Addis Ababa — delivered the same day they're harvested.</p>
-        <a href="/catalog.html" class="btn btn-amber btn-lg">Shop Now →</a>
+        <a href="/" class="btn btn-amber btn-lg">Shop Now →</a>
       </div>
       <div class="hero-banner-visual">
         <div class="img-placeholder img-lg">
@@ -130,7 +130,7 @@
 
     <section class="filter-bar">
         <div class="filter-bar-left">
-          <h2 class="filter-title">All Products</h2>
+          <h2 class="filter-title" id="section-title">All Products</h2>
           <span class="filter-count" id="result-count">12 products</span>
         </div>
 
@@ -222,15 +222,15 @@
         <button type="button" class="btn btn-green" id="empty-reset">Clear all filters</button>
       </section>
 
-    <section class="chip-row">
-      <a href="/catalog.html" class="chip active">All Products</a>
-      <a href="/catalog.html?category=leafy-greens" class="chip">🥬 Leafy Greens</a>
-      <a href="/catalog.html?category=root-vegetables" class="chip">🥕 Root Vegetables</a>
-      <a href="/catalog.html?category=tomatoes" class="chip">🍅 Fruit Vegetables</a>
-      <a href="/catalog.html?category=peppers" class="chip">🌶 Peppers</a>
-      <a href="/catalog.html?category=herbs" class="chip">🌿 Herbs</a>
-      <a href="/catalog.html?category=fruits" class="chip">🍎 Fruits</a>
-    </section>
+        <section class="chip-row" id="category-chips">
+          <button type="button" class="chip active" data-category="">All Products</button>
+          <button type="button" class="chip" data-category="Leafy Greens">🥬 Leafy Greens</button>
+          <button type="button" class="chip" data-category="Root Vegetables">🥕 Root Vegetables</button>
+          <button type="button" class="chip" data-category="Fruit Vegetables">🍅 Fruit Vegetables</button>
+          <button type="button" class="chip" data-category="Peppers">🌶 Peppers</button>
+          <button type="button" class="chip" data-category="Herbs">🌿 Herbs</button>
+          <button type="button" class="chip" data-category="Fruits">🍎 Fruits</button>
+        </section>
 
     <section class="product-grid" id="product-grid">
 
@@ -625,10 +625,10 @@
         <!-- Link columns -->
         <div class="footer-col">
           <h4>Shop</h4>
-          <a href="/catalog.html">All Products</a>
-          <a href="/catalog.html?category=leafy-greens">Leafy Greens</a>
-          <a href="/catalog.html?category=root-vegetables">Root Vegetables</a>
-          <a href="/catalog.html?category=fruits">Fruits</a>
+          <a href="/">All Products</a>
+          <a href="/?category=leafy-greens">Leafy Greens</a>
+          <a href="/?category=root-vegetables">Root Vegetables</a>
+          <a href="/?category=fruits">Fruits</a>
         </div>
 
         <div class="footer-col">
@@ -659,6 +659,120 @@
       </div>
     </footer>
 
+    <!-- Toast container -->
+    <div id="toast-container"></div>
+
+    <!-- ============================================
+        Quick-View Product Modal
+        ============================================ -->
+    <div class="product-modal-backdrop hidden" id="product-modal-backdrop">
+      <div class="product-modal" id="product-modal" role="dialog" aria-modal="true">
+
+        <button type="button" class="product-modal-close" id="product-modal-close" aria-label="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+
+        <div class="product-modal-body">
+
+          <!-- Image -->
+          <div class="product-modal-image">
+            <img id="pm-image"
+                src="https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?auto=format&fit=crop&w=800&q=80"
+                alt="Product" />
+            <div class="product-badges" id="pm-badges"></div>
+          </div>
+
+          <!-- Info -->
+          <div class="product-modal-info">
+
+            <span class="pm-category" id="pm-category">Leafy Greens</span>
+            <h2 class="pm-title" id="pm-title">Organic Broccoli 500g</h2>
+
+            <div class="pm-rating-row">
+              <span class="pm-stars" id="pm-stars">★★★★★</span>
+              <span class="pm-rating-text" id="pm-rating-text">4.8 · 142 reviews</span>
+            </div>
+
+            <!-- Merchant trust -->
+            <div class="merchant-card">
+              <div class="merchant-avatar">🚜</div>
+              <div class="merchant-body">
+                <div class="merchant-name">
+                  Sold by <strong id="pm-merchant">Green Valley Farm</strong>
+                  <span class="verified-badge" title="Verified">✓</span>
+                </div>
+                <div class="merchant-meta">
+                  <span>⭐ 4.9</span>
+                  <span>·</span>
+                  <span id="pm-location">📍 Bishoftu, Ethiopia</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Price per kg -->
+            <div class="pm-price-block">
+              <span class="pm-price-label">Price per kg</span>
+              <div class="pm-price-values">
+                <span class="pm-price" id="pm-price">120.00 ETB</span>
+                <span class="pm-compare" id="pm-compare" style="display:none;">150.00 ETB</span>
+              </div>
+            </div>
+
+            <!-- Quantity (kg) -->
+            <div class="pm-quantity">
+              <label class="pm-quantity-label">
+                Quantity
+                <span class="pm-quantity-hint">(kg · step 0.5)</span>
+              </label>
+
+              <div class="pm-quantity-row">
+                <div class="qty-stepper">
+                  <button type="button" class="qty-btn" id="pm-minus" aria-label="Decrease">−</button>
+                  <input type="number" class="qty-input" id="pm-input"
+                        value="1" min="0.5" max="99" step="0.5" inputmode="decimal" />
+                  <span class="qty-unit">kg</span>
+                  <button type="button" class="qty-btn" id="pm-plus" aria-label="Increase">+</button>
+                </div>
+
+                <div class="qty-presets">
+                  <button type="button" class="qty-preset" data-qty="0.5">½ kg</button>
+                  <button type="button" class="qty-preset active" data-qty="1">1 kg</button>
+                  <button type="button" class="qty-preset" data-qty="2">2 kg</button>
+                  <button type="button" class="qty-preset" data-qty="5">5 kg</button>
+                </div>
+              </div>
+
+              <div class="pm-total">
+                <span class="pm-total-label">Subtotal</span>
+                <span class="pm-total-value" id="pm-total">120.00 ETB</span>
+              </div>
+            </div>
+
+            <!-- Add to cart -->
+            <button type="button" class="btn-add-to-cart" id="pm-add-to-cart">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="9" cy="21" r="1"/>
+                <circle cx="20" cy="21" r="1"/>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+              </svg>
+              <span>Add to Cart</span>
+            </button>
+
+            <div class="pm-trust">
+              <span>🚚 Same-day</span>
+              <span>✅ Fresh</span>
+              <span>♻️ Zero-plastic</span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
   <script type="module" src="/js/shop/home.js"></script>
 </body>
 </html>
