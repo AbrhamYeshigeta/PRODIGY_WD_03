@@ -7,6 +7,19 @@ const password  = document.getElementById('password');
 const pwWrap    = document.getElementById('pw-wrap');
 const pwToggle  = document.getElementById('pw-toggle');
 
+async function redirectIfAlreadyLoggedIn() {
+  try {
+    const { user } = await API.get('/api/auth/me');
+    if (user) {
+      window.location.href = '/';
+    }
+  } catch {
+    // Not logged in yet — stay on the login screen.
+  }
+}
+
+redirectIfAlreadyLoggedIn();
+
 /* ============================================
    SHOW / HIDE PASSWORD TOGGLE
    ============================================ */
@@ -44,12 +57,18 @@ form.addEventListener('submit', async (e) => {
     const returnTo = sessionStorage.getItem('post_login_redirect');
     sessionStorage.removeItem('post_login_redirect');
 
-    if (returnTo) {
+    if (returnTo && returnTo !== '/' && returnTo !== '/index.html') {
       window.location.href = returnTo;
-    } else if (user.role === 'admin' || user.role === 'staff') {
-      window.location.href = '/admin/index.html';
     } else {
-      window.location.href = '/';
+      if (returnTo === '/' || returnTo === '/index.html') {
+        sessionStorage.setItem('shop_now_after_login', '1');
+      }
+
+      if (user.role === 'admin' || user.role === 'staff') {
+        window.location.href = '/admin/index.html';
+      } else {
+        window.location.href = '/';
+      }
     }
   } catch (err) {
     showMessage(msg, err.message, 'error');

@@ -12,6 +12,19 @@ const strength  = document.getElementById('pw-strength');
 const bars      = strength.querySelectorAll('.pw-bar');
 const label     = document.getElementById('pw-label');
 
+async function redirectIfAlreadyLoggedIn() {
+  try {
+    const { user } = await API.get('/api/auth/me');
+    if (user) {
+      window.location.href = '/';
+    }
+  } catch {
+    // Not logged in yet — stay on the register screen.
+  }
+}
+
+redirectIfAlreadyLoggedIn();
+
 /* ============================================
    SHOW / HIDE PASSWORD TOGGLE
    ============================================ */
@@ -124,6 +137,10 @@ form.addEventListener('submit', async (e) => {
       // 3. Redirect — return to the page the user came from, else landing page
       const returnTo = sessionStorage.getItem('post_login_redirect');
       sessionStorage.removeItem('post_login_redirect');
+
+      if (returnTo === '/' || returnTo === '/index.html') {
+        sessionStorage.setItem('shop_now_after_login', '1');
+      }
 
       showMessage(msg, 'Account created! Redirecting…', 'success');
       setTimeout(() => {

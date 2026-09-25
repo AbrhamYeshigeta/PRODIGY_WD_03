@@ -44,6 +44,22 @@ app.use(cookieParser());
 app.use(mongoSanitize());
 app.use(morgan('dev'));
 
+/* Landing page gate: protect storefront before static files are served */
+app.use((req, res, next) => {
+  const isStoreRoute = req.path === '/' || req.path === '/index.html';
+  const isAuthRoute = req.path === '/login.html' || req.path === '/register.html';
+
+  if (isStoreRoute && !req.cookies?.token) {
+    return res.redirect('/login.html');
+  }
+
+  if (isAuthRoute && req.cookies?.token) {
+    return res.redirect('/index.html');
+  }
+
+  next();
+});
+
 /* ============================================
    Static files — no caching during dev
    ============================================ */
@@ -56,9 +72,6 @@ app.use(
     },
   })
 );
-
-/* Redirect root to login page */
-app.get('/', (req, res) => res.redirect('/index.html'));
 
 /* ============================================
    Rate limiting
