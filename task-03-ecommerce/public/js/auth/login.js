@@ -40,7 +40,13 @@ form.addEventListener('submit', async (e) => {
       password: form.password.value,
     });
 
-    if (user.role === 'admin' || user.role === 'staff') {
+    // 👇 Return to the page the user came from (saved by requireLogin())
+    const returnTo = sessionStorage.getItem('post_login_redirect');
+    sessionStorage.removeItem('post_login_redirect');
+
+    if (returnTo) {
+      window.location.href = returnTo;
+    } else if (user.role === 'admin' || user.role === 'staff') {
       window.location.href = '/admin/index.html';
     } else {
       window.location.href = '/';

@@ -14,7 +14,6 @@ const label     = document.getElementById('pw-label');
 
 /* ============================================
    SHOW / HIDE PASSWORD TOGGLE
-   Simple class flip on the wrapper — CSS does the rest
    ============================================ */
 pwToggle.addEventListener('click', () => {
   const isVisible = pwWrap.classList.toggle('is-visible');
@@ -24,10 +23,9 @@ pwToggle.addEventListener('click', () => {
   pwToggle.setAttribute('aria-label', isVisible ? 'Hide password' : 'Show password');
   pwToggle.setAttribute('title',      isVisible ? 'Hide password' : 'Show password');
 
-  // Keep cursor at end after type change
   const end = password.value.length;
   password.focus();
-  try { password.setSelectionRange(end, end); } catch (e) { /* older browsers */ }
+  try { password.setSelectionRange(end, end); } catch (e) { /* ignore */ }
 
   console.log('[pw-toggle] password visible:', isVisible);
 });
@@ -100,7 +98,7 @@ password.addEventListener('input', () => {
 });
 
 /* ============================================
-   Submit
+   Submit — register then AUTO-LOGIN
    ============================================ */
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -109,14 +107,34 @@ form.addEventListener('submit', async (e) => {
   submitBtn.textContent = 'Creating account…';
 
   try {
+    // 1. Create the account
     await API.post('/api/auth/register', {
       username: form.username.value.trim(),
       email: form.email.value.trim(),
       password: form.password.value,
     });
 
-    showMessage(msg, 'Account created! Redirecting to sign in…', 'success');
-    setTimeout(() => (window.location.href = '/index.html'), 1200);
+    // 2. Auto-login with the same credentials
+    try {
+      await API.post('/api/auth/login', {
+        email: form.email.value.trim(),
+        password: form.password.value,
+      });
+
+      // 3. Redirect — return to the page the user came from, else landing page
+      const returnTo = sessionStorage.getItem('post_login_redirect');
+      sessionStorage.removeItem('post_login_redirect');
+
+      showMessage(msg, 'Account created! Redirecting…', 'success');
+      setTimeout(() => {
+        window.location.href = returnTo || '/';
+      }, 800);
+
+    } catch {
+      // Auto-login failed → send to manual login
+      showMessage(msg, 'Account created! Please sign in.', 'success');
+      setTimeout(() => { window.location.href = '/login.html'; }, 1200);
+    }
   } catch (err) {
     showMessage(msg, err.message, 'error');
     submitBtn.disabled = false;
