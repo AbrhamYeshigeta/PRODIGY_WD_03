@@ -39,6 +39,15 @@ function normalizeCustomer(customer = {}) {
   };
 }
 
+function getOrderTimestamp(value) {
+  const timestamp = Number(value);
+  if (!Number.isNaN(timestamp) && String(value).length > 0) {
+    return timestamp;
+  }
+  const parsed = new Date(value).getTime();
+  return Number.isNaN(parsed) ? Date.now() : parsed;
+}
+
 export const Orders = {
   create(cartItems, shippingAddress = {}, options = {}) {
     const subtotal = cartItems.reduce(
@@ -48,17 +57,19 @@ export const Orders = {
     const shipping = subtotal >= 50000 ? 0 : 5000;
     const total = subtotal + shipping;
     const customer = normalizeCustomer(options.customer || {});
+    const now = Date.now();
 
     const order = {
       id: generateOrderNumber(),
-      createdAt: Date.now(),
+      createdAt: new Date(now).toISOString(),
+      createdAtMs: now,
       items: cartItems.map((i) => ({ ...i })),
       subtotal,
       shipping,
       total,
       currency: 'ETB',
       status: 'pending_payment',
-      statusHistory: [{ status: 'pending_payment', at: Date.now() }],
+      statusHistory: [{ status: 'pending_payment', at: now }],
       shippingAddress,
       paymentMethod: options.paymentMethod || 'cash_on_delivery',
       customerNote: options.customerNote || '',
@@ -81,12 +92,14 @@ export const Orders = {
     const email = String(user.email || '').trim().toLowerCase();
     const id = String(user.id || '');
 
-    return read().filter((order) => {
-      const customer = order.customer || {};
-      const customerEmail = String(customer.email || order.customerEmail || '').trim().toLowerCase();
-      const customerId = String(customer.id || order.customerId || '');
-      return customerEmail === email || customerId === id || (!email && !id && order.customerName === user.username);
-    });
+    return read()
+      .filter((order) => {
+        const customer = order.customer || {};
+        const customerEmail = String(customer.email || order.customerEmail || '').trim().toLowerCase();
+        const customerId = String(customer.id || order.customerId || '');
+        return customerEmail === email || customerId === id || (!email && !id && order.customerName === user.username);
+      })
+      .sort((a, b) => getOrderTimestamp(b.createdAt || b.createdAtMs) - getOrderTimestamp(a.createdAt || a.createdAtMs));
   },
 
   updateStatus(id, status) {
