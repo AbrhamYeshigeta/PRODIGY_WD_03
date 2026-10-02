@@ -16,6 +16,7 @@ const state = {
   isAuthed: false,
   user: null,
 };
+window.prodigyStoreState = state;
 
 function saveAuthRedirect(path = window.location.pathname + window.location.search) {
   sessionStorage.setItem('post_login_redirect', path || '/');
@@ -49,6 +50,11 @@ async function initSession() {
     const { user } = await API.get('/api/auth/me');
     state.isAuthed = true;
     state.user = user;
+    sessionStorage.setItem('prodigy_active_user', JSON.stringify({
+      id: user._id || user.id || user.email,
+      username: user.username,
+      email: user.email,
+    }));
 
     // Show user info in header
     userName.textContent = user.username;
@@ -79,21 +85,20 @@ async function initSession() {
       try {
         await API.post('/api/auth/logout', {});
       } catch {}
+      sessionStorage.removeItem('prodigy_active_user');
+      Cart.refresh();
       window.location.href = '/';
     });
 
   } catch {
     state.isAuthed = false;
 
-    // Not logged in: clicking the chip goes to login
+    sessionStorage.removeItem('prodigy_active_user');
+
+    // Public landing page stays public. Login only happens when the user intentionally chooses it.
     userMenu.onclick = () => {
       goToLogin(window.location.pathname + window.location.search);
     };
-
-    if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
-      goToLogin('/');
-      return;
-    }
   }
 }
 
@@ -128,7 +133,7 @@ const SAMPLE_PRODUCTS = [
   { id: 'p-spinach', slug: 'baby-spinach', name: 'Baby Spinach 250g', category: 'Leafy Greens', price: 9500, ratingAvg: 4.9, ratingCount: 156, stock: 22, badge: 'new', merchant: 'Addis Greens Co-op', location: 'Addis Ababa', image: 'https://images.unsplash.com/photo-1576045057995-568f588f82fb?auto=format&fit=crop&w=800&q=80' },
   { id: 'p-lettuce', slug: 'romaine-lettuce', name: 'Romaine Lettuce Head', category: 'Leafy Greens', price: 6500, ratingAvg: 4.6, ratingCount: 88, stock: 40, merchant: 'Addis Greens Co-op', location: 'Addis Ababa', image: 'https://images.unsplash.com/photo-1622206151226-18ca2c9ab4a1?auto=format&fit=crop&w=800&q=80' },
   { id: 'p-kale', slug: 'fresh-kale', name: 'Fresh Kale Bunch', category: 'Leafy Greens', price: 8000, compareAtPrice: 9500, ratingAvg: 4.7, ratingCount: 73, stock: 30, badge: 'sale', merchant: 'Highland Roots', location: 'Holeta, Ethiopia', image: 'https://images.unsplash.com/photo-1524179091875-bf99a9a6af57?auto=format&fit=crop&w=800&q=80' },
-  { id: 'p-swiss-chard', slug: 'swiss-chard', name: 'Swiss Chard Bunch', category: 'Leafy Greens', price: 7000, ratingAvg: 4.5, ratingCount: 52, stock: 35, merchant: 'Highland Roots', location: 'Holeta, Ethiopia', image: 'https://images.unsplash.com/photo-1581775382776-bd1a4b3ee6ad?auto=format&fit=crop&w=800&q=80' },
+  { id: 'p-swiss-chard', slug: 'swiss-chard', name: 'Swiss Chard Bunch', category: 'Leafy Greens', price: 7000, ratingAvg: 4.5, ratingCount: 52, stock: 35, merchant: 'Highland Roots', location: 'Holeta, Ethiopia', image: '/img/Swiss%20Chard%20Bunch.jpeg' },
   { id: 'p-cabbage', slug: 'green-cabbage', name: 'Green Cabbage', category: 'Leafy Greens', price: 5500, ratingAvg: 4.6, ratingCount: 96, stock: 60, merchant: 'Rift Valley Farms', location: 'Ziway, Ethiopia', image: 'https://images.unsplash.com/photo-1594282486552-05b4d80fbb9f?auto=format&fit=crop&w=800&q=80' },
 
   /* ─────────── ROOT VEGETABLES ─────────── */
@@ -136,11 +141,11 @@ const SAMPLE_PRODUCTS = [
   { id: 'p-onions', slug: 'red-onions', name: 'Red Onions 1kg', category: 'Root Vegetables', price: 6000, ratingAvg: 4.4, ratingCount: 112, stock: 8, merchant: 'Merkato Fresh', location: 'Addis Ababa', image: 'https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?auto=format&fit=crop&w=800&q=80' },
   { id: 'p-white-onions', slug: 'white-onions', name: 'White Onions 1kg', category: 'Root Vegetables', price: 5800, ratingAvg: 4.3, ratingCount: 84, stock: 50, merchant: 'Merkato Fresh', location: 'Addis Ababa', image: 'https://images.unsplash.com/photo-1508747703725-719777637510?auto=format&fit=crop&w=800&q=80' },
   { id: 'p-potatoes', slug: 'red-potatoes', name: 'Red Potatoes 2kg', category: 'Root Vegetables', price: 9000, ratingAvg: 4.6, ratingCount: 210, stock: 90, merchant: 'Highland Roots', location: 'Holeta, Ethiopia', image: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=800&q=80' },
-  { id: 'p-sweet-potatoes', slug: 'sweet-potatoes', name: 'Sweet Potatoes 1kg', category: 'Root Vegetables', price: 8500, ratingAvg: 4.8, ratingCount: 132, stock: 45, badge: 'new', merchant: 'Highland Roots', location: 'Holeta, Ethiopia', image: 'https://images.unsplash.com/photo-1596097635121-14b63b7a0c19?auto=format&fit=crop&w=800&q=80' },
-  { id: 'p-beetroot', slug: 'beetroot', name: 'Fresh Beetroot (3 pcs)', category: 'Root Vegetables', price: 7500, ratingAvg: 4.5, ratingCount: 64, stock: 45, merchant: 'Highland Roots', location: 'Holeta, Ethiopia', image: 'https://images.unsplash.com/photo-1593105544727-e9d5eaab7768?auto=format&fit=crop&w=800&q=80' },
+  { id: 'p-sweet-potatoes', slug: 'sweet-potatoes', name: 'Sweet Potatoes 1kg', category: 'Root Vegetables', price: 8500, ratingAvg: 4.8, ratingCount: 132, stock: 45, badge: 'new', merchant: 'Highland Roots', location: 'Holeta, Ethiopia', image: '/img/Sweet%20Potatoes.jpeg' },
+  { id: 'p-beetroot', slug: 'beetroot', name: 'Fresh Beetroot (3 pcs)', category: 'Root Vegetables', price: 7500, ratingAvg: 4.5, ratingCount: 64, stock: 45, merchant: 'Highland Roots', location: 'Holeta, Ethiopia', image: '/img/Fresh%20Beetroot%20(3%20pcs).jpeg' },
   { id: 'p-garlic', slug: 'fresh-garlic', name: 'Fresh Garlic 250g', category: 'Root Vegetables', price: 4500, ratingAvg: 4.7, ratingCount: 168, stock: 70, merchant: 'Merkato Fresh', location: 'Addis Ababa', image: 'https://images.unsplash.com/photo-1540148426945-6cf22a6b2383?auto=format&fit=crop&w=800&q=80' },
   { id: 'p-ginger', slug: 'fresh-ginger', name: 'Fresh Ginger 250g', category: 'Root Vegetables', price: 5200, ratingAvg: 4.6, ratingCount: 91, stock: 60, merchant: 'Merkato Fresh', location: 'Addis Ababa', image: 'https://images.unsplash.com/photo-1615485500704-8e990f9900f7?auto=format&fit=crop&w=800&q=80' },
-  { id: 'p-cauliflower', slug: 'cauliflower', name: 'Cauliflower Head', category: 'Root Vegetables', price: 9500, ratingAvg: 4.5, ratingCount: 58, stock: 30, merchant: 'Sunrise Greenhouse', location: 'Debre Zeit, Ethiopia', image: 'https://images.unsplash.com/photo-1568584711271-6c929fb49b6c?auto=format&fit=crop&w=800&q=80' },
+  { id: 'p-cauliflower', slug: 'cauliflower', name: 'Cauliflower Head', category: 'Root Vegetables', price: 9500, ratingAvg: 4.5, ratingCount: 58, stock: 30, merchant: 'Sunrise Greenhouse', location: 'Debre Zeit, Ethiopia', image: '/img/Cauliflower%20Head.jpg' },
 
   /* ─────────── FRUIT VEGETABLES ─────────── */
   { id: 'p-tomatoes', slug: 'vine-tomatoes', name: 'Vine-Ripened Tomatoes 1kg', category: 'Fruit Vegetables', price: 8500, compareAtPrice: 10500, ratingAvg: 4.9, ratingCount: 218, stock: 60, badge: 'best', merchant: 'Rift Valley Farms', location: 'Ziway, Ethiopia', image: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=800&q=80' },
@@ -157,8 +162,8 @@ const SAMPLE_PRODUCTS = [
 
   /* ─────────── HERBS ─────────── */
   { id: 'p-cilantro', slug: 'fresh-cilantro', name: 'Fresh Cilantro Bunch', category: 'Herbs', price: 4500, ratingAvg: 4.6, ratingCount: 92, stock: 50, merchant: 'Herb Garden Co-op', location: 'Addis Ababa', image: 'https://images.unsplash.com/photo-1526318896980-cf78c088247c?auto=format&fit=crop&w=800&q=80' },
-  { id: 'p-parsley', slug: 'fresh-parsley', name: 'Fresh Parsley Bunch', category: 'Herbs', price: 4000, ratingAvg: 4.5, ratingCount: 67, stock: 45, merchant: 'Herb Garden Co-op', location: 'Addis Ababa', image: 'https://images.unsplash.com/photo-1592673416370-3e42da8e1a4e?auto=format&fit=crop&w=800&q=80' },
-  { id: 'p-mint', slug: 'fresh-mint', name: 'Fresh Mint Bunch', category: 'Herbs', price: 4000, compareAtPrice: 5000, ratingAvg: 4.7, ratingCount: 47, stock: 45, badge: 'sale', merchant: 'Herb Garden Co-op', location: 'Addis Ababa', image: 'https://images.unsplash.com/photo-1628557084295-ca76bc8322f9?auto=format&fit=crop&w=800&q=80' },
+  { id: 'p-parsley', slug: 'fresh-parsley', name: 'Fresh Parsley Bunch', category: 'Herbs', price: 4000, ratingAvg: 4.5, ratingCount: 67, stock: 45, merchant: 'Herb Garden Co-op', location: 'Addis Ababa', image: '/img/Fresh%20Parsley%20Bunch.avif' },
+  { id: 'p-mint', slug: 'fresh-mint', name: 'Fresh Mint Bunch', category: 'Herbs', price: 4000, compareAtPrice: 5000, ratingAvg: 4.7, ratingCount: 47, stock: 45, badge: 'sale', merchant: 'Herb Garden Co-op', location: 'Addis Ababa', image: '/img/Fresh%20Mint%20Bunch.jpg' },
   { id: 'p-rosemary', slug: 'fresh-rosemary', name: 'Fresh Rosemary Bunch', category: 'Herbs', price: 5500, ratingAvg: 4.8, ratingCount: 54, stock: 30, badge: 'new', merchant: 'Herb Garden Co-op', location: 'Addis Ababa', image: 'https://images.unsplash.com/photo-1515586000433-45406d8e6662?auto=format&fit=crop&w=800&q=80' },
   { id: 'p-basil', slug: 'fresh-basil', name: 'Fresh Basil Bunch', category: 'Herbs', price: 5000, ratingAvg: 4.6, ratingCount: 63, stock: 35, merchant: 'Herb Garden Co-op', location: 'Addis Ababa', image: 'https://images.unsplash.com/photo-1618375569909-3c8616cf7733?auto=format&fit=crop&w=800&q=80' },
 
@@ -174,7 +179,7 @@ const SAMPLE_PRODUCTS = [
   { id: 'p-strawberry', slug: 'fresh-strawberries', name: 'Fresh Strawberries 250g', category: 'Fruits', price: 11000, ratingAvg: 4.9, ratingCount: 187, stock: 30, badge: 'best', merchant: 'Highland Roots', location: 'Holeta, Ethiopia', image: 'https://images.unsplash.com/photo-1464965911861-746a04b4bca6?auto=format&fit=crop&w=800&q=80' },
   { id: 'p-pineapple', slug: 'whole-pineapple', name: 'Whole Pineapple', category: 'Fruits', price: 10500, ratingAvg: 4.7, ratingCount: 89, stock: 35, merchant: 'Arba Minch Tropicals', location: 'Arba Minch, Ethiopia', image: 'https://images.unsplash.com/photo-1589820296156-2454bb8a6ad1?auto=format&fit=crop&w=800&q=80' },
   { id: 'p-papaya', slug: 'ripe-papaya', name: 'Ripe Papaya', category: 'Fruits', price: 9500, ratingAvg: 4.6, ratingCount: 74, stock: 25, merchant: 'Arba Minch Tropicals', location: 'Arba Minch, Ethiopia', image: 'https://images.unsplash.com/photo-1517282009859-f000ec3b26fe?auto=format&fit=crop&w=800&q=80' },
-  { id: 'p-passion-fruit', slug: 'passion-fruits', name: 'Passion Fruits (Pack of 6)', category: 'Fruits', price: 12000, ratingAvg: 4.8, ratingCount: 68, stock: 40, merchant: 'Yirgalem Organics', location: 'Yirgalem, Ethiopia', image: 'https://images.unsplash.com/photo-1604495772376-9657f00335f1?auto=format&fit=crop&w=800&q=80' },
+  { id: 'p-passion-fruit', slug: 'passion-fruits', name: 'Passion Fruits (Pack of 6)', category: 'Fruits', price: 12000, ratingAvg: 4.8, ratingCount: 68, stock: 40, merchant: 'Yirgalem Organics', location: 'Yirgalem, Ethiopia', image: '/img/Passion%20Fruits%20(Pack%20of%206).jpeg' },
 ];
 
 /* ============================================
@@ -374,7 +379,7 @@ function wireProductInteractions() {
 
       const slug = getSlugFromCard(card);
       const product = allProducts.find((p) => p.slug === slug);
-      if (product) openProductModal(product);
+      if (product) openProductModal(product, resolveCardMerchant(card));
     });
   });
 
@@ -400,7 +405,7 @@ function wireProductInteractions() {
       const slug = getSlugFromCard(card);
       const product = allProducts.find((p) => p.slug === slug);
       if (product) {
-        setTimeout(() => openProductModal(product), 120);
+        setTimeout(() => openProductModal(product, resolveCardMerchant(card)), 120);
       }
     });
   });
@@ -672,33 +677,67 @@ const modal = {
 let currentProduct = null;
 let currentQty = 1;
 
-function openProductModal(product) {
+function getSelectedMerchantForProduct(product, merchantOverride = null) {
+  const merchant = merchantOverride || product.selectedMerchant || {
+    shopName: product.merchant || 'Prodigy Farms',
+    location: product.location || 'Addis Ababa',
+    price: product.price,
+  };
+
+  return {
+    shopName: merchant.shopName || merchant.name || merchant.merchantName || product.merchant || 'Prodigy Farms',
+    location: merchant.location || product.location || 'Addis Ababa',
+    price: Number(merchant.price ?? product.price ?? 0),
+  };
+}
+
+function resolveCardMerchant(card) {
+  if (card._selectedMerchant) return card._selectedMerchant;
+  if (!card.dataset.selectedMerchant) return null;
+
+  try {
+    return JSON.parse(card.dataset.selectedMerchant);
+  } catch {
+    return null;
+  }
+}
+
+function openProductModal(product, merchantOverride = null) {
   if (!modal.backdrop) return;
 
-  currentProduct = product;
+  const selectedMerchant = getSelectedMerchantForProduct(product, merchantOverride);
+  const selectedProduct = {
+    ...product,
+    merchant: selectedMerchant.shopName,
+    location: selectedMerchant.location,
+    price: selectedMerchant.price,
+    selectedMerchant,
+  };
+
+  currentProduct = selectedProduct;
   currentQty = 1;
 
-  modal.img.src = product.image;
-  modal.category.textContent = product.category;
-  modal.title.textContent = product.name;
-  modal.stars.textContent = starBar(product.ratingAvg || 5);
-  modal.ratingText.textContent = `${(product.ratingAvg || 5).toFixed(1)} · ${product.ratingCount || 0} reviews`;
-  modal.merchant.textContent = product.merchant || 'Prodigy Farms';
-  modal.location.textContent = '📍 ' + (product.location || 'Addis Ababa');
-  modal.price.textContent = formatPrice(product.price);
+  modal.img.src = selectedProduct.image;
+  modal.category.textContent = selectedProduct.category;
+  modal.title.textContent = selectedProduct.name;
+  modal.stars.textContent = starBar(selectedProduct.ratingAvg || 5);
+  modal.ratingText.textContent = `${(selectedProduct.ratingAvg || 5).toFixed(1)} · ${selectedProduct.ratingCount || 0} reviews`;
+  modal.merchant.textContent = selectedProduct.merchant || 'Prodigy Farms';
+  modal.location.textContent = '📍 ' + (selectedProduct.location || 'Addis Ababa');
+  modal.price.textContent = formatPrice(selectedProduct.price);
 
-  if (product.compareAtPrice && product.compareAtPrice > product.price) {
-    modal.compare.textContent = formatPrice(product.compareAtPrice);
+  if (selectedProduct.compareAtPrice && selectedProduct.compareAtPrice > selectedProduct.price) {
+    modal.compare.textContent = formatPrice(selectedProduct.compareAtPrice);
     modal.compare.style.display = '';
   } else {
     modal.compare.style.display = 'none';
   }
 
   const badges = [];
-  if (product.badge === 'best') badges.push('<span class="product-badge badge-best">Best Seller</span>');
-  if (product.badge === 'new')  badges.push('<span class="product-badge badge-new">New</span>');
-  if (product.badge === 'sale') badges.push('<span class="product-badge badge-sale">Sale</span>');
-  const d = discountPercent(product.price, product.compareAtPrice);
+  if (selectedProduct.badge === 'best') badges.push('<span class="product-badge badge-best">Best Seller</span>');
+  if (selectedProduct.badge === 'new')  badges.push('<span class="product-badge badge-new">New</span>');
+  if (selectedProduct.badge === 'sale') badges.push('<span class="product-badge badge-sale">Sale</span>');
+  const d = discountPercent(selectedProduct.price, selectedProduct.compareAtPrice);
   if (d) badges.push(`<span class="product-badge discount">-${d}%</span>`);
   modal.badges.innerHTML = badges.join('');
 
