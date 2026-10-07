@@ -1,0 +1,225 @@
+import { renderShell, guardSeller } from '/js/seller/shell.js';
+
+  const seller = guardSeller();
+  const page = renderShell({ active: 'dashboard' });
+
+  /* GET /api/sellers/me/stats later */
+  const stats = {
+    revenue: 85000, ordersNew: 8, offersActive: 42, rating: 4.7, ratingCount: 128,
+    fulfillment: 98,
+  };
+
+  /* Demo orders */
+  const recentOrders = [
+    { id:'ORD-042', buyer:'Sara Bekele',  product:'Red Potatoes 2kg', img:'🥔', qty:'2 qtl', total:'17,000', status:'paid' },
+    { id:'ORD-041', buyer:'Abebe Tesfaye',product:'Red Onions 1kg',   img:'🧅', qty:'1 qtl', total:'5,500',  status:'pending' },
+    { id:'ORD-040', buyer:'Hanna Girma',  product:'Fresh Carrots 1kg',img:'🥕', qty:'3 qtl', total:'12,000', status:'shipped' },
+    { id:'ORD-039', buyer:'Dawit Alemu',  product:'Tomatoes 1kg',     img:'🍅', qty:'2 qtl', total:'12,400', status:'delivered' },
+  ];
+
+  page.innerHTML = `
+    <!-- ░░ PAGE HEADER ░░ -->
+    <div class="ph">
+      <div>
+        <h1 class="welcome-line">Good morning, ${seller.businessName} 👋</h1>
+        <p>Here's how your store is doing today — <strong style="color:var(--brand)">Friday, Oct 3</strong></p>
+      </div>
+      <div class="actions">
+        <a class="btn btn-ghost" href="/seller/orders.html">🧾 View Orders</a>
+        <a class="btn btn-gold"  href="/seller/offers-new.html">➕ Add New Offer</a>
+      </div>
+    </div>
+
+    <!-- ░░ STAT ROW ░░ -->
+    <div class="stats">
+      <div class="stat">
+        <div class="stat__top">
+          <div class="stat__ico">💰</div>
+          <span class="stat__delta up">▲ 12%</span>
+        </div>
+        <div class="stat__label">Revenue today</div>
+        <div class="stat__value">${(stats.revenue/1000).toFixed(0)}k <small>ETB</small></div>
+        <div class="stat__foot">vs 76k yesterday</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat__top">
+          <div class="stat__ico blue">🧾</div>
+          <span class="stat__delta up">▲ 2</span>
+        </div>
+        <div class="stat__label">New orders</div>
+        <div class="stat__value">${stats.ordersNew}</div>
+        <div class="stat__foot">Awaiting your action</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat__top">
+          <div class="stat__ico gold">🏷️</div>
+          <span class="stat__delta flat">— 0</span>
+        </div>
+        <div class="stat__label">Active offers</div>
+        <div class="stat__value">${stats.offersActive}</div>
+        <div class="stat__foot">2 paused · 1 out of stock</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat__top">
+          <div class="stat__ico amber">⭐</div>
+          <span class="stat__delta up">${stats.fulfillment}%</span>
+        </div>
+        <div class="stat__label">Rating</div>
+        <div class="stat__value">${stats.rating}<small>(${stats.ratingCount})</small></div>
+        <div class="stat__foot">on-time fulfillment</div>
+      </div>
+    </div>
+
+    <!-- ░░ CATEGORY CHIPS ░░ -->
+    <div class="chips">
+      <button class="chip active"><span class="ico">📊</span> Overview</button>
+      <button class="chip">💰 Sales</button>
+      <button class="chip">📦 Inventory</button>
+      <button class="chip">👥 Customers</button>
+      <button class="chip">📈 Trends</button>
+    </div>
+
+    <!-- ░░ MAIN COLUMN: Recent Orders Table ░░ -->
+    <div class="card" style="grid-column: 1;">
+      <div class="card__head">
+        <div>
+          <h3>Recent orders</h3>
+          <span class="sub">Latest activity from your buyers</span>
+        </div>
+        <a class="link" href="/seller/orders.html">View all →</a>
+      </div>
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>Order</th>
+            <th>Product</th>
+            <th>Buyer</th>
+            <th>Qty</th>
+            <th>Total</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${recentOrders.map(o => `
+            <tr>
+              <td><strong style="color:var(--brand)">${o.id}</strong></td>
+              <td>
+                <div class="prod-cell">
+                  <div class="prod-thumb">${o.img}</div>
+                  <div>
+                    <div class="prod-name">${o.product}</div>
+                    <div class="prod-sub">Quintal unit</div>
+                  </div>
+                </div>
+              </td>
+              <td>${o.buyer}</td>
+              <td><strong>${o.qty}</strong></td>
+              <td><strong style="color:var(--brand)">${o.total} ETB</strong></td>
+              <td><span class="pill ${o.status}">${o.status}</span></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ░░ RIGHT RAIL ░░ -->
+    <aside class="panel">
+
+      <!-- Payout card -->
+      <div class="mini">
+        <div class="mini__head">
+          <h3>💳 Next Payout</h3>
+          <a class="link" href="/seller/payouts.html">Details</a>
+        </div>
+        <div style="font-family:var(--serif);font-size:30px;font-weight:700;color:var(--brand);letter-spacing:-.8px;line-height:1">
+          12,000 <span style="font-size:14px;color:var(--ink-3);font-weight:500">ETB</span>
+        </div>
+        <div class="muted" style="font-size:12px;margin-top:6px">Arrives Friday, Oct 10</div>
+        <div class="progress gold" style="margin-top:14px">
+          <span style="width:72%"></span>
+        </div>
+        <div class="muted" style="font-size:11.5px;margin-top:6px">
+          <strong style="color:var(--brand)">72%</strong> of 50k monthly target
+        </div>
+        <div style="display:flex;gap:8px;margin-top:16px;padding-top:14px;border-top:1px dashed var(--line);align-items:center">
+          <span style="font-size:11.5px;color:var(--ink-3)">CBE · ••7890</span>
+          <span class="pill active" style="margin-left:auto">✓ Active</span>
+        </div>
+      </div>
+
+      <!-- Low stock -->
+      <div class="mini">
+        <div class="mini__head">
+          <h3>⚠️ Low stock</h3>
+          <a class="link" href="/seller/offers.html">Manage</a>
+        </div>
+        <div class="row-item">
+          <div class="ico amber">🧅</div>
+          <div class="body">
+            <strong>Red Onions 1kg</strong>
+            <small>Only 1 qtl left</small>
+          </div>
+          <a class="btn btn-soft btn-sm" href="#">Restock</a>
+        </div>
+        <div class="row-item">
+          <div class="ico amber">🥬</div>
+          <div class="body">
+            <strong>Fresh Kale 1kg</strong>
+            <small>Only 3 qtl left</small>
+          </div>
+          <a class="btn btn-soft btn-sm" href="#">Restock</a>
+        </div>
+      </div>
+
+      <!-- Activity feed -->
+      <div class="mini">
+        <div class="mini__head">
+          <h3>🔔 Activity</h3>
+        </div>
+        <div class="feed">
+          <div class="feed-item">
+            <div class="dot-wrap green">✓</div>
+            <div class="body">
+              <p><strong>Sara B.</strong> paid for order <strong>ORD-042</strong></p>
+              <time>2 minutes ago</time>
+            </div>
+          </div>
+          <div class="feed-item">
+            <div class="dot-wrap blue">📦</div>
+            <div class="body">
+              <p>Order <strong>ORD-040</strong> was shipped to <strong>Hanna G.</strong></p>
+              <time>1 hour ago</time>
+            </div>
+          </div>
+          <div class="feed-item">
+            <div class="dot-wrap gold">⭐</div>
+            <div class="body">
+              <p><strong>Dawit A.</strong> left you a 5-star review</p>
+              <time>3 hours ago</time>
+            </div>
+          </div>
+          <div class="feed-item">
+            <div class="dot-wrap green">💰</div>
+            <div class="body">
+              <p>Payout of <strong>8,500 ETB</strong> sent to CBE</p>
+              <time>Yesterday</time>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- ░░ FOOTER BAR ░░ -->
+    <div class="foot-bar">
+      <div class="helper">
+        <div class="dot-btn"><span class="dot"></span> Verified seller</div>
+        <div class="dot-btn"><span class="dot" style="background:var(--gold)"></span> Chapa payouts enabled</div>
+        <div class="dot-btn"><span class="dot" style="background:var(--blue)"></span> Storefront live</div>
+      </div>
+      <a class="btn btn-gold" href="/seller/orders.html">Go to Orders →</a>
+    </div>
+  `;

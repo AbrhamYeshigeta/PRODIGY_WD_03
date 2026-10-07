@@ -5,11 +5,35 @@
    ============================================ */
 
 const STORAGE_KEY = 'prodigy_cart_v1';
+const USER_STORAGE_PREFIX = 'prodigy_cart_v1_for_';
 const listeners = new Set();
 
-function read() {
+function getCurrentUser() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = sessionStorage.getItem('prodigy_active_user');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || (!parsed.email && !parsed.username && !parsed.id)) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function getUserStorageKey() {
+  const user = getCurrentUser();
+  if (!user) return null;
+
+  const identifier = (user.email || user.username || user.id || 'guest').trim().toLowerCase();
+  return `${USER_STORAGE_PREFIX}${identifier.replace(/[^a-z0-9._-]+/g, '_')}`;
+}
+
+function read() {
+  const storageKey = getUserStorageKey();
+  if (!storageKey) return [];
+
+  try {
+    const raw = localStorage.getItem(storageKey);
     return raw ? JSON.parse(raw) : [];
   } catch {
     return [];
@@ -17,8 +41,15 @@ function read() {
 }
 
 function write(items) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+  const storageKey = getUserStorageKey();
+  if (!storageKey) {
+    listeners.forEach((fn) => fn([]));
+    return [];
+  }
+
+  localStorage.setItem(storageKey, JSON.stringify(items));
   listeners.forEach((fn) => fn(items));
+  return items;
 }
 
 function notify() {
@@ -36,6 +67,9 @@ export const Cart = {
      product: { id, name, slug, price, image, category, merchant }
      quantity: in kg (number, e.g. 1.5) */
   add(product, quantity) {
+    const storageKey = getUserStorageKey();
+    if (!storageKey) return [];
+
     const items = read();
     const existing = items.find((i) => i.id === product.id);
 
@@ -46,7 +80,7 @@ export const Cart = {
         id: product.id,
         slug: product.slug,
         name: product.name,
-        price: product.price,            // cents per kg
+        price: product.price,
         image: product.image,
         category: product.category,
         merchant: product.merchant || 'Prodigy Farms',
@@ -60,6 +94,9 @@ export const Cart = {
 
   /* Set exact quantity (0 removes) */
   setQuantity(productId, quantity) {
+    const storageKey = getUserStorageKey();
+    if (!storageKey) return [];
+
     let items = read();
     if (quantity <= 0) {
       items = items.filter((i) => i.id !== productId);
@@ -73,6 +110,9 @@ export const Cart = {
 
   /* Remove a single item */
   remove(productId) {
+    const storageKey = getUserStorageKey();
+    if (!storageKey) return [];
+
     const items = read().filter((i) => i.id !== productId);
     write(items);
     return items;
@@ -80,10 +120,13 @@ export const Cart = {
 
   /* Empty the cart */
   clear() {
-    write([]);
+    const storageKey = getUserStorageKey();
+    if (storageKey) localStorage.removeItem(storageKey);
+    listeners.forEach((fn) => fn([]));
+    return [];
   },
 
-  /* ⚡ Badge count = NUMBER OF DISTINCT PRODUCTS (not total kg) */
+  /* Badge count = number of distinct items for the active user */
   getCount() {
     return read().length;
   },
@@ -115,5 +158,5 @@ function updateHeaderBadge() {
 }
 
 document.addEventListener('DOMContentLoaded', updateHeaderBadge);
-window.addEventListener('storage', updateHeaderBadge);   // cross-tab sync
+window.addEventListener('storage', updateHeaderBadge);
 Cart.onChange(updateHeaderBadge);

@@ -129,10 +129,16 @@ form.addEventListener('submit', async (e) => {
 
     // 2. Auto-login with the same credentials
     try {
-      await API.post('/api/auth/login', {
+      const { user } = await API.post('/api/auth/login', {
         email: form.email.value.trim(),
         password: form.password.value,
       });
+
+      sessionStorage.setItem('prodigy_active_user', JSON.stringify({
+        id: user._id || user.id || user.email,
+        username: user.username,
+        email: user.email,
+      }));
 
       // 3. Redirect — return to the page the user came from, else landing page
       const returnTo = sessionStorage.getItem('post_login_redirect');

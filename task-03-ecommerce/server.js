@@ -44,12 +44,13 @@ app.use(cookieParser());
 app.use(mongoSanitize());
 app.use(morgan('dev'));
 
-/* Landing page gate: protect storefront before static files are served */
+/* Public storefront, gated actions: keep default landing page open while protecting cart and order pages */
 app.use((req, res, next) => {
-  const isStoreRoute = req.path === '/' || req.path === '/index.html';
+  const protectedPages = ['/cart.html', '/orders.html'];
   const isAuthRoute = req.path === '/login.html' || req.path === '/register.html';
+  const isProtectedPage = protectedPages.includes(req.path);
 
-  if (isStoreRoute && !req.cookies?.token) {
+  if (isProtectedPage && !req.cookies?.token) {
     return res.redirect('/login.html');
   }
 

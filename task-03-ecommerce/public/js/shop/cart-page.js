@@ -1,10 +1,13 @@
 import { API } from '../api.js';
 import { Cart } from '../cart.js';
 
+let currentUser = null;
+
 /* ---------- Session chip ---------- */
 (async function checkSession() {
   try {
     const { user } = await API.get('/api/auth/me');
+    currentUser = user;
     document.getElementById('user-name').textContent = user.username;
     document.getElementById('user-avatar').textContent = user.username[0];
     document.getElementById('user-menu').onclick = () => {
@@ -13,6 +16,7 @@ import { Cart } from '../cart.js';
         : '/orders.html';
     };
   } catch {
+    sessionStorage.setItem('post_login_redirect', '/cart.html');
     document.getElementById('user-menu').onclick = () => {
       window.location.href = '/login.html';
     };
@@ -31,6 +35,86 @@ function esc(s) {
   return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
   })[c]);
+}
+
+function showToast(message, type = 'success') {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+  const toast = document.createElement('div');
+  toast.className = `toast ${type === 'error' ? 'error' : ''}`;
+  toast.innerHTML = `<span>${type === 'success' ? '✓' : '⚠'}</span><span>${esc(message)}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+async function handleChapaPayment() {
+  const items = Cart.getAll();
+  if (items.length === 0) {
+    showToast('Your cart is empty.', 'error');
+    return;
+  }
+
+  let user = currentUser;
+  if (!user) {
+    try {
+      const response = await API.get('/api/auth/me');
+      user = response.user;
+      currentUser = user;
+    } catch {
+      sessionStorage.setItem('post_login_redirect', '/cart.html');
+      window.location.href = '/login.html';
+      return;
+    }
+  }
+
+  const subtotal = Cart.getSubtotal();
+  const shipping = subtotal >= 50000 ? 0 : 5000;
+  const total = subtotal + shipping;
+  const amount = Number((total / 100).toFixed(2));
+  const button = document.getElementById('pay-with-chapa');
+
+  if (!button) return;
+
+  button.disabled = true;
+  const originalText = button.textContent;
+  button.textContent = 'Opening Chapa...';
+
+  try {
+    const txRef = `PRODIGY-${Date.now()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+    const name = String(user.username || 'Customer');
+    const phone = String(user.phone || '0911111111').replace(/\D/g, '');
+    const normalizedPhone = phone.startsWith('251') ? `0${phone.slice(3)}` : phone.startsWith('0') ? phone : `0${phone}`;
+
+    const { checkout_url } = await API.post('/api/payments/initialize', {
+      tx_ref: txRef,
+      amount,
+      currency: 'ETB',
+      email: user.email || 'customer@prodigy.store',
+      first_name: name.split(' ')[0] || 'Customer',
+      last_name: name.split(' ').slice(1).join(' ') || 'Customer',
+      phone_number: normalizedPhone,
+      return_url: `${window.location.origin}/?payment=success&tx_ref=${encodeURIComponent(txRef)}`,
+      callback_url: `${window.location.origin}/api/payments/webhook`,
+      customization: {
+        title: 'Prodigy Store',
+        description: `Payment for ${items.length} item(s) in your cart`,
+      },
+      items: items.map((it) => ({
+        offerId: it.id,
+        sellerId: it.merchant || 'prodigy',
+        quantity: it.quantity,
+        price: it.price,
+      })),
+    });
+
+    if (!checkout_url) throw new Error('Chapa checkout link was not returned.');
+    window.location.href = checkout_url;
+  } catch (err) {
+    console.error('[cart] Chapa payment failed:', err);
+    showToast(err.message || 'Unable to connect to Chapa. Please try again.', 'error');
+    button.disabled = false;
+    button.textContent = originalText;
+  }
 }
 
 /* ---------- Render ---------- */
@@ -101,12 +185,16 @@ function render() {
       <div class="summary-row total">
         <span>Total</span><span>${formatPrice(total)}</span>
       </div>
-      <a href="/checkout.html" class="btn-checkout">
-        Proceed to Checkout →
-      </a>
+      <button type="button" class="btn-checkout" id="pay-with-chapa">
+        Proceed to checkout • ${formatPrice(total)}
+      </button>
       <button type="button" class="btn-clear-cart" id="clear-cart">Clear cart</button>
     </div>
   `;
+
+  document.getElementById('pay-with-chapa')?.addEventListener('click', () => {
+    window.location.href = '/checkout.html';
+  });
 
   /* Wire up quantity changes */
   itemsEl.querySelectorAll('[data-act]').forEach((el) => {

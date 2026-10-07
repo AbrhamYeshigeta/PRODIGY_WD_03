@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Customers · Etfruit Seller</title>
+  <link rel="stylesheet" href="/css/seller.css" />
+</head>
+<body>
+<script type="module">
+  import { renderShell, guardSeller } from '/js/seller/shell.js';
+
+  const seller = guardSeller();
+  const page = renderShell({ active: 'customers' });
+
+  /* Demo data (later: GET /api/sellers/me/customers) */
+  const customers = [
+    {
+      id: 'C-001', name: 'Sara Bekele', initials: 'SB', vip: true,
+      phone: '+251911223344', email: 'sara@test.com',
+      orders: 12, spent: 98000, lastOrder: '2 minutes ago',
+      segment: 'vip', address: 'Bole, Addis Ababa',
+    },
+    {
+      id: 'C-002', name: 'Merkato Fresh Co.', initials: 'MF', vip: true,
+      phone: '+251911556677', email: 'orders@merkato.et',
+      orders: 8, spent: 156000, lastOrder: '3 hours ago',
+      segment: 'vip', address: 'Merkato, Addis Ababa',
+    },
+    {
+      id: 'C-003', name: 'Abebe Tesfaye', initials: 'AT',
+      phone: '+251911234567', email: 'abebe@test.com',
+      orders: 6, spent: 42000, lastOrder: '18 minutes ago',
+      segment: 'regular', address: 'Megenagna, Addis Ababa',
+    },
+    {
+      id: 'C-004', name: 'Hanna Girma', initials: 'HG',
+      phone: '+251911345678', email: 'hanna@test.com',
+      orders: 5, spent: 61000, lastOrder: '2 hours ago',
+      segment: 'regular', address: 'CMC, Addis Ababa',
+    },
+    {
+      id: 'C-005', name: 'Dawit Alemu', initials: 'DA',
+      phone: '+251911456789', email: 'dawit@test.com',
+      orders: 3, spent: 24800, lastOrder: 'Yesterday',
+      segment: 'new', address: 'Kazanchis, Addis Ababa',
+    },
+    {
+      id: 'C-006', name: 'Tigist Haile', initials: 'TH',
+      phone: '+251911778899', email: 'tigist@test.com',
+      orders: 1, spent: 6200, lastOrder: '3 days ago',
+      segment: 'new', address: 'Sarbet, Addis Ababa',
+    },
+  ];
+
+  const fmt = (n) => n.toLocaleString('en-ET');
+
+  const segmentLabel = {
+    vip: 'VIP',
+    regular: 'REGULAR',
+    new: 'NEW',
+    risk: 'AT RISK',
+  };
+
+  /* Top customers for the panel */
+  const topCustomers = [...customers].sort((a, b) => b.spent - a.spent).slice(0, 4);
+
+  page.innerHTML = `
+    <div class="page-top">
+
+      <!-- Header -->
+      <div class="ph">
+        <div>
+          <h1 class="welcome-line">Customers</h1>
+          <p>Everyone who has ordered from your store · <strong style="color:var(--brand)">${customers.length} buyers</strong></p>
+        </div>
+        <div class="actions">
+          <button class="btn btn-ghost">⬇ Export CSV</button>
+          <button class="btn btn-ghost">💬 Send broadcast</button>
+        </div>
+      </div>
+
+      <!-- Stat cards -->
+      <div class="cust-stats">
+        <div class="cust-stat">
+          <div class="cs-ico">👥</div>
+          <div class="cs-body">
+            <div class="cs-val">${customers.length}</div>
+            <div class="cs-lbl">Total customers</div>
+          </div>
+        </div>
+        <div class="cust-stat">
+          <div class="cs-ico gold">👑</div>
+          <div class="cs-body">
+            <div class="cs-val">${customers.filter(c => c.segment === 'vip').length}</div>
+            <div class="cs-lbl">VIP buyers</div>
+          </div>
+        </div>
+        <div class="cust-stat">
+          <div class="cs-ico blue">🔁</div>
+          <div class="cs-body">
+            <div class="cs-val">68<small>%</small></div>
+            <div class="cs-lbl">Repeat rate</div>
+          </div>
+        </div>
+        <div class="cust-stat">
+          <div class="cs-ico amber">💰</div>
+          <div class="cs-body">
+            <div class="cs-val">${fmt(388000)}</div>
+            <div class="cs-lbl">Lifetime value</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="search-box sm">
+          <span class="s-icon">🔍</span>
+          <input placeholder="Search by name, phone, or email…" />
+          <button class="s-clear" type="button" data-clear>✕</button>
+        </div>
+        <select class="select-sm">
+          <option>All segments</option>
+          <option>VIP</option>
+          <option>Regular</option>
+          <option>New</option>
+        </select>
+        <select class="select-sm">
+          <option>Sort: Recent orders</option>
+          <option>Highest spend</option>
+          <option>Most orders</option>
+          <option>Name (A→Z)</option>
+        </select>
+        <div style="flex:1"></div>
+        <span style="font-size:12.5px;color:var(--ink-3)">
+          <strong style="color:var(--brand)">${customers.length}</strong> customers
+        </span>
+      </div>
+
+    </div>
+
+    <div class="page-body">
+
+      <!-- LEFT: Customers list -->
+      <div class="orders-list">
+        ${customers.map(c => `
+          <div class="customer-row">
+            <div class="cust-av ${c.vip ? 'vip' : ''}">${c.initials}</div>
+
+            <div class="cust-info">
+              <div class="name-line">
+                <span class="name">${c.name}</span>
+                <span class="seg-badge ${c.segment}">${segmentLabel[c.segment]}</span>
+              </div>
+              <div class="contact">
+                <span>📞 ${c.phone}</span>
+                <span>✉️ ${c.email}</span>
+              </div>
+              <div class="last-order">📍 ${c.address} · Last order ${c.lastOrder}</div>
+            </div>
+
+            <div class="cust-metrics">
+              <div class="cm">
+                <div class="cm-lbl">Orders</div>
+                <div class="cm-val">${c.orders}</div>
+              </div>
+              <div class="cm">
+                <div class="cm-lbl">Spent</div>
+                <div class="cm-val">${fmt(c.spent)}<small>ETB</small></div>
+              </div>
+            </div>
+
+            <div class="cust-actions">
+              <button class="btn btn-sm btn-ghost" title="Message">💬</button>
+              <button class="btn btn-sm btn-ghost" title="View orders">🧾</button>
+              <button class="btn btn-sm btn-ghost" style="padding:8px 12px">⋯</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+
+      <!-- RIGHT: Panel -->
+      <aside class="panel">
+
+        <!-- Top customers -->
+        <div class="mini">
+          <div class="mini__head">
+            <h3>Top buyers</h3>
+            <a class="link" href="#">See all</a>
+          </div>
+          <div class="notif-list">
+            ${topCustomers.map((c, i) => `
+              <div class="notif-item">
+                <div class="nico ${i === 0 ? 'gold' : i === 1 ? 'blue' : 'green'}" style="font-weight:700;font-size:12px">
+                  ${c.initials}
+                </div>
+                <div class="nbody">
+                  <p><strong>${c.name}</strong> · ${fmt(c.spent)} ETB</p>
+                  <time>${c.orders} orders</time>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- Segments -->
+        <div class="mini">
+          <div class="mini__head"><h3>Customer segments</h3></div>
+          <div class="row-item">
+            <div class="ico gold">👑</div>
+            <div class="body">
+              <strong>VIP buyers</strong>
+              <small>5+ orders · high value</small>
+            </div>
+            <span class="val">${customers.filter(c => c.segment === 'vip').length}</span>
+          </div>
+          <div class="row-item">
+            <div class="ico">🔁</div>
+            <div class="body">
+              <strong>Regular</strong>
+              <small>Repeat customers</small>
+            </div>
+            <span class="val">${customers.filter(c => c.segment === 'regular').length}</span>
+          </div>
+          <div class="row-item">
+            <div class="ico blue">✨</div>
+            <div class="body">
+              <strong>New</strong>
+              <small>First-time buyers</small>
+            </div>
+            <span class="val">${customers.filter(c => c.segment === 'new').length}</span>
+          </div>
+        </div>
+
+        <!-- Quick actions -->
+        <div class="mini">
+          <div class="mini__head"><h3>Quick actions</h3></div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <button class="btn btn-soft btn-block" style="justify-content:flex-start">💬 Message VIP buyers</button>
+            <button class="btn btn-soft btn-block" style="justify-content:flex-start">🎁 Send loyalty discount</button>
+            <button class="btn btn-soft btn-block" style="justify-content:flex-start">📊 Customer report</button>
+          </div>
+        </div>
+
+      </aside>
+
+    </div>
+
+    <div class="foot-bar" style="margin-top:22px">
+      <div class="helper">
+        <div class="dot-btn"><span class="dot"></span> Customer data live</div>
+        <div class="dot-btn"><span class="dot" style="background:var(--gold)"></span> Updated 2 minutes ago</div>
+      </div>
+      <span class="muted" style="font-size:12px">Total lifetime value: ${fmt(388000)} ETB</span>
+    </div>
+  `;
+
+  /* Search clear */
+  const box = page.querySelector('.search-box');
+  const input = box?.querySelector('input');
+  input?.addEventListener('input', () => {
+    box.classList.toggle('has-value', input.value.length > 0);
+  });
+  box?.querySelector('[data-clear]')?.addEventListener('click', () => {
+    input.value = '';
+    box.classList.remove('has-value');
+    input.focus();
+  });
+</script>
+</body>
+</html>

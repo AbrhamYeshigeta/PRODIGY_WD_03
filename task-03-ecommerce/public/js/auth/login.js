@@ -53,6 +53,12 @@ form.addEventListener('submit', async (e) => {
       password: form.password.value,
     });
 
+    sessionStorage.setItem('prodigy_active_user', JSON.stringify({
+      id: user._id || user.id || user.email,
+      username: user.username,
+      email: user.email,
+    }));
+
     // 👇 Return to the page the user came from (saved by requireLogin())
     const returnTo = sessionStorage.getItem('post_login_redirect');
     sessionStorage.removeItem('post_login_redirect');

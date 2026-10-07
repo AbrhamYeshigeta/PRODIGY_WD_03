@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Settings · Etfruit Seller</title>
+  <link rel="stylesheet" href="/css/seller.css" />
+</head>
+<body>
+<script type="module">
+  import { renderShell, guardSeller } from '/js/seller/shell.js';
+
+  const seller = guardSeller();
+  const page = renderShell({ active: 'settings' });
+
+  const profile = {
+    fullName: 'Sara Bekele',
+    phone: '+251911223344',
+    faydaId: '1234 5678 9012',
+    businessName: seller.businessName || 'Highland Roots',
+    businessType: 'Farm',
+    location: 'Holeta, Oromia',
+    tin: '1234567890',
+    bio: 'We grow organic vegetables in Holeta and supply Addis Ababa and nearby towns.',
+    bank: 'Commercial Bank of Ethiopia',
+    account: '•••• 7890',
+    holder: 'Highland Roots Ltd',
+    scale: 'wholesale',
+    scaleLabel: '📦 Quintal Seller',
+    email: 'highland@test.com',
+    verified: true,
+    memberSince: 'March 2024',
+  };
+
+  page.innerHTML = `
+    <div class="page-top">
+      <div class="ph">
+        <div>
+          <h1 class="welcome-line">Settings</h1>
+          <p>Manage your profile, business details and preferences</p>
+        </div>
+        <div class="actions">
+          <a class="btn btn-ghost" href="/seller/storefront.html">👁️ View storefront</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-body">
+      <div class="orders-list">
+
+        <!-- Settings tabs -->
+        <div class="settings-tabs">
+          <button class="stab active" data-tab="profile">👤 Profile</button>
+          <button class="stab" data-tab="business">🏢 Business</button>
+          <button class="stab" data-tab="bank">💳 Bank</button>
+          <button class="stab" data-tab="notifications">🔔 Notifications</button>
+          <button class="stab" data-tab="security">🔒 Security</button>
+        </div>
+
+        <!-- Profile tab -->
+        <div class="settings-panel active" data-panel="profile">
+          <div class="form-card">
+            <div class="form-section">
+              <h3>Personal information</h3>
+              <p class="sec-sub">Your identity is verified by Etfruit and can't be changed without re-verification.</p>
+
+              <div class="form-row">
+                <div class="side">
+                  <div class="ttl">Full name</div>
+                  <div class="desc">As it appears on your Fayda ID</div>
+                </div>
+                <div class="main-fields">
+                  <input class="input" value="${profile.fullName}" />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="side">
+                  <div class="ttl">Phone number</div>
+                  <div class="desc">We'll text order alerts here</div>
+                </div>
+                <div class="main-fields">
+                  <input class="input" value="${profile.phone}" />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="side">
+                  <div class="ttl">Email</div>
+                  <div class="desc">For receipts and payout notices</div>
+                </div>
+                <div class="main-fields">
+                  <input class="input" type="email" value="${profile.email}" />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="side">
+                  <div class="ttl">Fayda ID</div>
+                  <div class="desc">🔒 Locked — verified</div>
+                </div>
+                <div class="main-fields">
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <input class="input" value="${profile.faydaId}" readonly style="background:var(--bg-2);color:var(--ink-3)" />
+                    <span class="pill active">✓ Verified</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Business tab -->
+        <div class="settings-panel" data-panel="business">
+          <div class="form-card">
+            <div class="form-section">
+              <h3>Business details</h3>
+              <p class="sec-sub">These appear on your public storefront and to buyers.</p>
+
+              <div class="form-row">
+                <div class="side">
+                  <div class="ttl">Business name</div>
+                  <div class="desc">Shown on every offer and order</div>
+                </div>
+                <div class="main-fields">
+                  <input class="input" value="${profile.businessName}" />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="side">
+                  <div class="ttl">Business type</div>
+                  <div class="desc">Farm, wholesaler, retailer…</div>
+                </div>
+                <div class="main-fields">
+                  <select class="input">
+                    <option ${profile.businessType==='Farm'?'selected':''}>Farm</option>
+                    <option>Wholesaler</option>
+                    <option>Retailer</option>
+                    <option>Distributor</option>
+                    <option>Cooperative</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="side">
+                  <div class="ttl">Location</div>
+                  <div class="desc">City and region</div>
+                </div>
+                <div class="main-fields">
+                  <input class="input" value="${profile.location}" />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="side">
+                  <div class="ttl">TIN</div>
+                  <div class="desc">🔒 Locked — verified with Ministry of Revenues</div>
+                </div>
+                <div class="main-fields">
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <input class="input" value="${profile.tin}" readonly style="background:var(--bg-2);color:var(--ink-3)" />
+                    <span class="pill active">✓ Verified</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="side">
+                  <div class="ttl">Store description</div>
+                  <div class="desc">Short bio for your storefront</div>
+                </div>
+                <div class="main-fields">
+                  <textarea class="input" rows="3">${profile.bio}</textarea>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="side">
+                  <div class="ttl">Selling scale</div>
+                  <div class="desc">🔒 Contact support to change</div>
+                </div>
+                <div class="main-fields">
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <span class="scale-badge ${profile.scale} lg">${profile.scaleLabel}</span>
+                    <span class="pill paused">Locked</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bank tab -->
+        <div class="settings-panel" data-panel="bank">
+          <div class="form-card">
+            <div class="form-section">
+              <h3>Payout account</h3>
+              <p class="sec-sub">Where Chapa sends your earnings. Changes require verification.</p>
+
+              <div class="bank-card" style="margin-bottom:22px">
+                <div class="bank-logo">🏦</div>
+                <div class="info">
+                  <strong>${profile.bank}</strong>
+                  <div class="acct">${profile.account}</div>
+                  <div class="holder">${profile.holder}</div>
+                </div>
+                <div class="badges">
+                  <span class="pill active">✓ Active</span>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="side">
+                  <div class="ttl">Bank name</div>
+                  <div class="desc">Where we deposit earnings</div>
+                </div>
+                <div class="main-fields">
+                  <select class="input">
+                    <option selected>Commercial Bank of Ethiopia</option>
+                    <option>Awash Bank</option>
+                    <option>Dashen Bank</option>
+                    <option>Bank of Abyssinia</option>
+                    <option>Telebirr</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="side">
+                  <div class="ttl">Account number</div>
+                  <div class="desc">Change requires re-verification</div>
+                </div>
+                <div class="main-fields">
+                  <input class="input" placeholder="Enter new account number" />
+                  <div class="help" style="font-size:11.5px;color:var(--ink-3)">
+                    Changing bank details pauses payouts for 48h while we verify.
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="side">
+                  <div class="ttl">Account holder</div>
+                  <div class="desc">Must match the business name</div>
+                </div>
+                <div class="main-fields">
+                  <input class="input" value="${profile.holder}" />
+                </div>
+              </div>
+
+              <div class="trust-note" style="display:flex;gap:10px;background:var(--brand-tint);border:1px solid rgba(13,61,46,.15);padding:14px 16px;border-radius:var(--r-md);margin-top:12px">
+                <span style="font-size:16px">🔒</span>
+                <div style="font-size:12.5px;line-height:1.6;color:var(--brand)">
+                  We use <strong>Chapa</strong> to send your money automatically. Your bank info is encrypted and only used for payouts. Never shared.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notifications tab -->
+        <div class="settings-panel" data-panel="notifications">
+          <div class="form-card">
+            <div class="form-section">
+              <h3>Notification preferences</h3>
+              <p class="sec-sub">Choose what you want to be notified about.</p>
+
+              <div class="toggle-row">
+                <div class="tinfo">
+                  <strong>📱 SMS — New orders</strong>
+                  <small>Get a text whenever a buyer places an order</small>
+                </div>
+                <button class="toggle-switch on" data-toggle></button>
+              </div>
+              <div class="toggle-row">
+                <div class="tinfo">
+                  <strong>📧 Email — Daily summary</strong>
+                  <small>A morning digest of orders and revenue</small>
+                </div>
+                <button class="toggle-switch on" data-toggle></button>
+              </div>
+              <div class="toggle-row">
+                <div class="tinfo">
+                  <strong>💰 Email — Payout sent</strong>
+                  <small>Confirmation each time Chapa deposits money</small>
+                </div>
+                <button class="toggle-switch on" data-toggle></button>
+              </div>
+              <div class="toggle-row">
+                <div class="tinfo">
+                  <strong>⚠️ SMS — Low stock alerts</strong>
+                  <small>When any offer drops below 20% of its peak stock</small>
+                </div>
+                <button class="toggle-switch" data-toggle></button>
+              </div>
+              <div class="toggle-row">
+                <div class="tinfo">
+                  <strong>⭐ Email — New reviews</strong>
+                  <small>When a buyer leaves feedback</small>
+                </div>
+                <button class="toggle-switch on" data-toggle></button>
+              </div>
+              <div class="toggle-row">
+                <div class="tinfo">
+                  <strong>📣 Product tips & news</strong>
+                  <small>Occasional Etfruit product updates</small>
+                </div>
+                <button class="toggle-switch" data-toggle></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Security tab -->
+        <div class="settings-panel" data-panel="security">
+          <div class="form-card">
+            <div class="form-section">
+              <h3>Password & security</h3>
+              <p class="sec-sub">Keep your seller account safe.</p>
+
+              <div class="form-row">
+                <div class="side">
+                  <div class="ttl">Current password</div>
+                  <div class="desc">Required to make changes</div>
+                </div>
+                <div class="main-fields">
+                  <input class="input" type="password" placeholder="••••••••" />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="side">
+                  <div class="ttl">New password</div>
+                  <div class="desc">At least 8 characters</div>
+                </div>
+                <div class="main-fields">
+                  <input class="input" type="password" placeholder="••••••••" />
+                  <input class="input" type="password" placeholder="Confirm new password" />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="side">
+                  <div class="ttl">Two-factor auth</div>
+                  <div class="desc">Extra security for payouts</div>
+                </div>
+                <div class="main-fields">
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <span class="pill active">✓ Enabled via SMS</span>
+                    <button class="btn btn-sm btn-ghost">Manage</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="side">
+                  <div class="ttl">Active sessions</div>
+                  <div class="desc">Where you're logged in</div>
+                </div>
+                <div class="main-fields">
+                  <div class="row-item" style="padding:10px 0;border-bottom:1px dashed var(--line)">
+                    <div class="ico blue">💻</div>
+                    <div class="body">
+                      <strong>Chrome · Addis Ababa</strong>
+                      <small>Current session · active now</small>
+                    </div>
+                    <span class="pill active">This device</span>
+                  </div>
+                  <div class="row-item" style="padding:10px 0">
+                    <div class="ico">📱</div>
+                    <div class="body">
+                      <strong>Safari · Addis Ababa</strong>
+                      <small>Last seen 2 days ago</small>
+                    </div>
+                    <button class="btn btn-sm btn-danger">Sign out</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Danger zone -->
+          <div class="danger-zone" style="margin-top:20px">
+            <div class="dinfo">
+              <strong>⚠️ Deactivate account</strong>
+              <small>Your offers will be hidden and payouts paused. You can reactivate anytime within 90 days.</small>
+            </div>
+            <button class="btn btn-danger">Deactivate account</button>
+          </div>
+        </div>
+
+        <!-- Save bar -->
+        <div class="save-bar">
+          <div class="info">Changes are saved to your account instantly. <strong>Some fields require re-verification.</strong></div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-ghost">Cancel</button>
+            <button class="btn btn-gold">Save changes</button>
+          </div>
+        </div>
+
+      </div>
+
+      <aside class="panel">
+
+        <div class="mini">
+          <div class="mini__head"><h3>Account status</h3></div>
+          <div class="row-item">
+            <div class="ico green">✓</div>
+            <div class="body">
+              <strong>Verified seller</strong>
+              <small>Since ${profile.memberSince}</small>
+            </div>
+          </div>
+          <div class="row-item">
+            <div class="ico blue">💳</div>
+            <div class="body">
+              <strong>Chapa active</strong>
+              <small>Payouts running smoothly</small>
+            </div>
+          </div>
+          <div class="row-item">
+            <div class="ico gold">📦</div>
+            <div class="body">
+              <strong>${profile.scaleLabel}</strong>
+              <small>Locked selling scale</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="mini">
+          <div class="mini__head"><h3>💡 Need help?</h3></div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <button class="btn btn-soft btn-block" style="justify-content:flex-start">💬 Chat with support</button>
+            <button class="btn btn-soft btn-block" style="justify-content:flex-start">📖 Seller handbook</button>
+            <button class="btn btn-soft btn-block" style="justify-content:flex-start">🎥 Video tutorials</button>
+          </div>
+        </div>
+
+        <div class="mini">
+          <div class="mini__head"><h3>Danger zone</h3></div>
+          <p style="font-size:12.5px;color:var(--ink-3);line-height:1.55;margin:0">
+            Deactivating pauses your storefront and payouts. You can come back within 90 days.
+          </p>
+        </div>
+
+      </aside>
+    </div>
+
+    <div class="foot-bar" style="margin-top:22px">
+      <div class="helper">
+        <div class="dot-btn"><span class="dot"></span> Auto-saved</div>
+        <div class="dot-btn"><span class="dot" style="background:var(--gold)"></span> Two-factor enabled</div>
+      </div>
+      <span class="muted" style="font-size:12px">Member since ${profile.memberSince}</span>
+    </div>
+  `;
+
+  /* ── Tab switching ── */
+  const tabs = page.querySelectorAll('.stab');
+  const panels = page.querySelectorAll('.settings-panel');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const target = tab.dataset.tab;
+      tabs.forEach(t => t.classList.toggle('active', t === tab));
+      panels.forEach(p => p.classList.toggle('active', p.dataset.panel === target));
+    });
+  });
+
+  /* ── Toggle switches ── */
+  page.querySelectorAll('.toggle-switch').forEach(t => {
+    t.addEventListener('click', () => t.classList.toggle('on'));
+  });
+</script>
+</body>
+</html>

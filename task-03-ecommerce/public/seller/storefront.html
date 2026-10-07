@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Storefront · Etfruit Seller</title>
+  <link rel="stylesheet" href="/css/seller.css" />
+</head>
+<body>
+<script type="module">
+  import { renderShell, guardSeller } from '/js/seller/shell.js';
+
+  const seller = guardSeller();
+  const page = renderShell({ active: 'storefront' });
+
+  const storefront = {
+    name: seller.businessName || 'Highland Roots',
+    type: 'Farm',
+    location: 'Holeta, Oromia',
+    since: '2024',
+    bio: 'We grow organic vegetables in Holeta and supply Addis Ababa and nearby towns. Everything harvested the same day it ships.',
+    verified: true,
+    rating: 4.7,
+    ratingCount: 128,
+    fulfillment: 98,
+    responseTime: '~2h',
+    orders: 234,
+    scale: 'wholesale',
+    scaleLabel: '📦 Quintal Seller',
+    unit: 'qtl',
+  };
+
+  const offers = [
+    { name: 'Red Potatoes 2kg',   img: '🥔', tag: 'Root Veg',  price: 8500, eq: 85, stock: 12 },
+    { name: 'Red Onions 1kg',     img: '🧅', tag: 'Root Veg',  price: 5500, eq: 55, stock: 1 },
+    { name: 'Fresh Carrots 1kg',  img: '🥕', tag: 'Root Veg',  price: 4000, eq: 40, stock: 8 },
+    { name: 'Tomatoes 1kg',       img: '🍅', tag: 'Fruit Veg', price: 6200, eq: 62, stock: 15 },
+    { name: 'Green Peppers 1kg',  img: '🫑', tag: 'Peppers',   price: 7800, eq: 78, stock: 6 },
+    { name: 'Fresh Kale 1kg',     img: '🥬', tag: 'Leafy',     price: 3500, eq: 35, stock: 8 },
+  ];
+
+  const reviews = [
+    { name: 'Sara Bekele', initials: 'SB', stars: 5, when: '2 days ago',
+      text: 'Very fresh vegetables, delivered on time. Highland Roots is now my regular supplier.' },
+    { name: 'Merkato Fresh Co.', initials: 'MF', stars: 5, when: '1 week ago',
+      text: 'Consistent quality and fair pricing on bulk quintals. Recommend for restaurants.' },
+    { name: 'Abebe Tesfaye', initials: 'AT', stars: 4, when: '2 weeks ago',
+      text: 'Good produce, slightly slower shipping than expected but worth the wait.' },
+  ];
+
+  const fmt = (n) => n.toLocaleString('en-ET');
+
+  page.innerHTML = `
+    <div class="page-top">
+      <div class="ph">
+        <div>
+          <h1 class="welcome-line">Storefront</h1>
+          <p>This is what buyers see when they visit your public profile.</p>
+        </div>
+        <div class="actions">
+          <button class="btn btn-ghost">🔗 Copy link</button>
+          <a class="btn btn-gold" href="#">👁️ Preview as buyer</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-body">
+
+      <!-- LEFT column -->
+      <div class="orders-list">
+
+        <!-- Store hero -->
+        <div class="store-hero">
+          <div class="inner">
+            <div class="avatar-lg">🚜</div>
+            <div class="info">
+              <h1>
+                ${storefront.name}
+                ${storefront.verified ? '<span class="verified">✓ Verified</span>' : ''}
+              </h1>
+              <div class="meta">
+                <span><strong>${storefront.type}</strong></span>
+                <span>📍 ${storefront.location}</span>
+                <span>Since <strong>${storefront.since}</strong></span>
+              </div>
+              <p class="bio">${storefront.bio}</p>
+            </div>
+            <div class="actions">
+              <button class="btn btn-gold">💬 Message seller</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Store stats -->
+        <div class="store-stats">
+          <div class="cell">
+            <div class="ico">⭐</div>
+            <div class="val">${storefront.rating}</div>
+            <div class="lbl">Rating (${storefront.ratingCount})</div>
+          </div>
+          <div class="cell">
+            <div class="ico">⚡</div>
+            <div class="val">${storefront.fulfillment}%</div>
+            <div class="lbl">On-time</div>
+          </div>
+          <div class="cell">
+            <div class="ico">💬</div>
+            <div class="val">${storefront.responseTime}</div>
+            <div class="lbl">Response time</div>
+          </div>
+          <div class="cell">
+            <div class="ico">📦</div>
+            <div class="val">${storefront.orders}</div>
+            <div class="lbl">Orders completed</div>
+          </div>
+        </div>
+
+        <!-- Offers section -->
+        <div class="sec-head">
+          <h2>Their offers (${offers.length})</h2>
+          <a class="link" href="/seller/offers.html">Manage offers →</a>
+        </div>
+        <div class="store-offers">
+          ${offers.map(o => `
+            <div class="store-offer">
+              <div class="img">
+                <span class="tag">${o.tag}</span>
+                ${o.img}
+              </div>
+              <div class="body">
+                <div class="name">${o.name}</div>
+                <div class="meta-row">
+                  <div>
+                    <div class="price">${fmt(o.price)} ETB / qtl</div>
+                    <div class="eq">≈ ${o.eq} ETB / kg</div>
+                  </div>
+                  <div class="stock">
+                    ${o.stock} ${storefront.unit} left
+                  </div>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+
+        <!-- Reviews -->
+        <div class="sec-head" style="margin-top:24px">
+          <h2>What buyers say</h2>
+        </div>
+        <div class="card" style="padding:6px 22px">
+          ${reviews.map(r => `
+            <div class="review">
+              <div class="avatar">${r.initials}</div>
+              <div class="body">
+                <div class="head">
+                  <strong>${r.name}</strong>
+                  <span class="stars">${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)}</span>
+                  <time>${r.when}</time>
+                </div>
+                <p>${r.text}</p>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+
+      </div>
+
+      <!-- RIGHT panel -->
+      <aside class="panel">
+
+        <div class="mini">
+          <div class="mini__head"><h3>Scale & identity</h3></div>
+          <div class="row-item">
+            <div class="ico gold">📦</div>
+            <div class="body">
+              <strong>${storefront.scaleLabel}</strong>
+              <small>Prices in quintals · min 1 qtl</small>
+            </div>
+          </div>
+          <div class="row-item">
+            <div class="ico">🏢</div>
+            <div class="body">
+              <strong>${storefront.type}</strong>
+              <small>Registered business</small>
+            </div>
+          </div>
+          <div class="row-item">
+            <div class="ico blue">📍</div>
+            <div class="body">
+              <strong>${storefront.location}</strong>
+              <small>Delivery: Addis + Oromia</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="mini">
+          <div class="mini__head"><h3>Trust signals</h3></div>
+          <div class="notif-list">
+            <div class="notif-item">
+              <div class="nico green">✓</div>
+              <div class="nbody"><p><strong>Fayda + TIN verified</strong> by Etfruit</p></div>
+            </div>
+            <div class="notif-item">
+              <div class="nico green">✓</div>
+              <div class="nbody"><p><strong>Chapa payouts</strong> active · subaccount live</p></div>
+            </div>
+            <div class="notif-item">
+              <div class="nico gold">⭐</div>
+              <div class="nbody"><p><strong>Top rated</strong> in Root Vegetables this month</p></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mini">
+          <div class="mini__head"><h3>Share your store</h3></div>
+          <p style="font-size:12.5px;color:var(--ink-3);line-height:1.55;margin:0 0 12px">
+            Send this link to buyers, WhatsApp groups, or print it on your packaging.
+          </p>
+          <div class="search-box sm" style="margin-bottom:10px">
+            <span class="s-icon">🔗</span>
+            <input readonly value="etfruit.com/s/highland-roots" />
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-soft btn-sm" style="flex:1">📋 Copy</button>
+            <button class="btn btn-soft btn-sm" style="flex:1">💬 WhatsApp</button>
+          </div>
+        </div>
+
+      </aside>
+    </div>
+
+    <div class="foot-bar" style="margin-top:22px">
+      <div class="helper">
+        <div class="dot-btn"><span class="dot"></span> Storefront live</div>
+        <div class="dot-btn"><span class="dot" style="background:var(--gold)"></span> ${storefront.orders} orders served</div>
+      </div>
+      <span class="muted" style="font-size:12px">Last updated 2 minutes ago</span>
+    </div>
+  `;
+</script>
+</body>
+</html>

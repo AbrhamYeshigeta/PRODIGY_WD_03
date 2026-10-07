@@ -109,7 +109,6 @@
           </div>
         </div>
 
-        <button class="mobile-hamburger" id="mobile-menu-btn" aria-label="Menu">☰</button>
       </div>
     </div>
   </header>
@@ -500,11 +499,47 @@
               <span>✅ Fresh</span>
               <span>♻️ Zero-plastic</span>
             </div>
-
+            
           </div>
         </div>
       </div>
     </div>
+
+    <!-- ============================================
+     Merchants Modal — shows all sellers for one product
+     ============================================ -->
+<div class="merchants-backdrop hidden" id="merchants-backdrop">
+  <div class="merchants-modal" role="dialog" aria-modal="true" aria-labelledby="merchants-title">
+
+    <button type="button" class="merchants-close" id="merchants-close" aria-label="Close">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+
+    <!-- Header -->
+    <div class="merchants-header">
+      <div class="merchants-header-top">
+        <span class="merchants-eyebrow">🏪 Sellers for this product</span>
+        <span class="merchants-count" id="merchants-count">3 merchants</span>
+      </div>
+      <h2 class="merchants-title" id="merchants-title">Red Potatoes 2kg</h2>
+      <p class="merchants-sub">Compare prices, trust scores and stock. Tap a merchant to see full details.</p>
+    </div>
+
+    <!-- Merchant list (JS injects) -->
+    <div class="merchants-list" id="merchants-list"></div>
+
+    <!-- Footer hint -->
+    <div class="merchants-foot">
+      <span>🛡️ All verified merchants are checked by Etfruit before going live</span>
+    </div>
+
+  </div>
+</div>
   <script type="module" src="/js/shop/home.js"></script>
+  <script type="module" src="/js/shop/merchants-modal.js"></script>
 </body>
 </html>
