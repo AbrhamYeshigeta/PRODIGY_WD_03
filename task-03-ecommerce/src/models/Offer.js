@@ -1,8 +1,15 @@
 // src/models/Offer.js
 const mongoose = require('mongoose');
-const { SELLER_SCALES, OFFER_STATUS } = require('../config/constants');
+const { OFFER_STATUS } = require('../config/constants');
 
-const KG_FACTOR = { kg: 1, quintal: 100, ton: 1000 };
+const KG_FACTOR = { 
+  kg: 1, 
+  piece: 1, 
+  bunch: 1, 
+  pack: 1, 
+  quintal: 100, 
+  ton: 1000 
+};
 
 const offerSchema = new mongoose.Schema({
   product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true, index: true },
@@ -17,7 +24,10 @@ const offerSchema = new mongoose.Schema({
   pricePerUnit: { type: Number, required: true, min: 0 },   // in cents
   pricePerKg:   { type: Number, required: true, min: 0, index: true }, // computed
 
-  comparePricePerUnit: { type: Number, min: 0 },  // optional strikethrough
+  // NEW: Used only for piece, bunch, or pack
+  estimatedWeightKg: { type: Number, min: 0 }, 
+
+  comparePricePerUnit: { type: Number, min: 0 },
 
   stock:    { type: Number, required: true, min: 0 },
   minOrder: { type: Number, default: 1, min: 1 },
@@ -41,12 +51,17 @@ const offerSchema = new mongoose.Schema({
 
 /* Compute pricePerKg on every save */
 offerSchema.pre('save', function (next) {
-  const factor = KG_FACTOR[this.unit] || 1;
-  this.pricePerKg = Math.round(this.pricePerUnit / factor);
+  if (['piece', 'bunch', 'pack'].includes(this.unit) && this.estimatedWeightKg > 0) {
+    // If selling by piece/bunch/pack and weight is provided
+    this.pricePerKg = Math.round(this.pricePerUnit / this.estimatedWeightKg);
+  } else {
+    // Normal math for kg, quintal, ton
+    const factor = KG_FACTOR[this.unit] || 1;
+    this.pricePerKg = Math.round(this.pricePerUnit / factor);
+  }
   next();
 });
 
-/* Indexes for the buyer offers page */
 offerSchema.index({ product: 1, status: 1, pricePerKg: 1 });
 offerSchema.index({ seller: 1, status: 1, createdAt: -1 });
 
