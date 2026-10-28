@@ -2657,3 +2657,438 @@ select.input {
   margin-top: 4px;
   font-weight: 500;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   TOPBAR USER AVATAR & DROPDOWN
+   ═══════════════════════════════════════════════════════════════════ */
+
+.user-menu-wrap {
+  position: relative;
+}
+
+.avatar-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--brand);
+  color: var(--gold);
+  font-size: 14px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: .15s;
+  font-family: inherit;
+}
+.avatar-btn:hover {
+  border-color: var(--gold);
+  transform: scale(1.05);
+}
+
+/* The Dropdown Menu */
+.user-dropdown {
+  position: absolute;
+  top: 50px;
+  right: 0;
+  width: 240px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 8px;
+  z-index: 100;
+  animation: dropIn .2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes dropIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.user-dropdown.hidden {
+  display: none;
+}
+
+.ud-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+}
+.ud-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--brand-tint);
+  color: var(--brand);
+  font-weight: 700;
+  font-size: 15px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.ud-info {
+  min-width: 0;
+  flex: 1;
+}
+.ud-info strong {
+  display: block;
+  font-size: 13.5px;
+  color: var(--brand);
+  font-family: var(--serif);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ud-info small {
+  display: block;
+  font-size: 11.5px;
+  color: var(--ink-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+.ud-divider {
+  height: 1px;
+  background: var(--line);
+  margin: 6px 0;
+}
+
+.ud-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-2);
+  text-decoration: none;
+  transition: .15s;
+  cursor: pointer;
+}
+.ud-item:hover {
+  background: var(--bg-2);
+  color: var(--brand);
+}
+.ud-logout {
+  color: var(--red-600);
+}
+.ud-logout:hover {
+  background: var(--red-50);
+  color: var(--red-600);
+}
+
+
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   DARK MODE (NIGHT MODE) THEME - V2 (PROFESSIONAL OVERRIDE)
+   ═══════════════════════════════════════════════════════════════════ */
+
+body.dark-mode {
+  --bg:           #121212;   /* Main background */
+  --bg-2:         #1e1e1e;   /* Sidebar / secondary background */
+  --card:         #242424;   /* Card background */
+  
+  --border:       #333333;   
+  --border-2:     #3a3a3a;
+  --line:         #2e2e2e;   
+
+  --ink:          #f5f5f5;   /* White headings */
+  --ink-2:        #d1d5db;   /* Light grey body */
+  --ink-3:        #9ca3af;   /* Muted grey */
+  --ink-4:        #6b7280;   
+
+  --brand-tint:   #1a3329;
+  --gold-tint:    #332d16;
+  --blue-tint:    #1e293b;
+  --amber-tint:   #2d2516;
+  --red-tint:     #2d1717;
+  --green-tint:   #1a2e1d;
+}
+
+/* --- 1. FORCE DARK BACKGROUNDS ON ALL CARDS & CONTAINERS --- */
+body.dark-mode .shell,
+body.dark-mode .tb,
+body.dark-mode .stat,
+body.dark-mode .kpi,
+body.dark-mode .cust-stat,
+body.dark-mode .card,
+body.dark-mode .mini,
+body.dark-mode .order-card,
+body.dark-mode .user-dropdown,
+body.dark-mode .empty-state,
+body.dark-mode .form-card,
+body.dark-mode .payout-stat,
+body.dark-mode .store-stats,
+body.dark-mode .store-offer,
+body.dark-mode .toolbar .search-sm,
+body.dark-mode .select-sm,
+body.dark-mode .settings-tabs,
+body.dark-mode .tabs,
+body.dark-mode .chart-card,
+body.dark-mode .mini__head {
+  background-color: var(--card) !important;
+  border-color: var(--border) !important;
+}
+
+/* --- 2. FIX CHIPS & TABS --- */
+body.dark-mode .chip {
+  background-color: var(--card) !important;
+  border-color: var(--border) !important;
+  color: var(--ink-2) !important;
+}
+body.dark-mode .chip:hover { border-color: var(--brand) !important; color: var(--brand) !important; }
+body.dark-mode .chip.active {
+  background-color: var(--brand) !important;
+  border-color: var(--brand) !important;
+  color: #ffffff !important;
+}
+body.dark-mode .chip .count { background: var(--bg-2) !important; color: var(--ink-3) !important; }
+body.dark-mode .chip.active .count { background: rgba(255,255,255,0.2) !important; color: #fff !important; }
+
+/* --- 3. FIX INPUTS, SEARCH & DROPDOWNS --- */
+body.dark-mode .input, 
+body.dark-mode .form-section .input,
+body.dark-mode .search-box input,
+body.dark-mode .toolbar .search-sm input,
+body.dark-mode .search-sm {
+  background-color: var(--bg-2) !important;
+  color: var(--ink) !important;
+  border-color: var(--border) !important;
+}
+body.dark-mode .input:focus,
+body.dark-mode .search-box:focus-within,
+body.dark-mode .search-sm:focus-within {
+  border-color: var(--brand) !important;
+  box-shadow: 0 0 0 3px rgba(34,197,94,.15) !important;
+}
+body.dark-mode .input[readonly] {
+  background-color: var(--card) !important;
+  color: var(--ink-4) !important;
+}
+/* Fix dropdown arrows (they were dark on dark) */
+body.dark-mode select.input {
+  background-image: linear-gradient(45deg, transparent 50%, var(--ink-3) 50%), linear-gradient(135deg, var(--ink-3) 50%, transparent 50%) !important;
+}
+
+/* --- 4. FIX ANALYTICS CHARTS --- */
+body.dark-mode .bar-chart::before {
+  background-image: linear-gradient(to top, var(--border) 1px, transparent 1px) !important;
+}
+body.dark-mode .ring-item .ring-track { stroke: var(--bg-2) !important; }
+body.dark-mode .heat-cell[data-level="0"] { background: var(--bg-2) !important; }
+
+/* --- 5. FIX TABLES --- */
+body.dark-mode .tbl th { background-color: var(--bg-2) !important; color: var(--ink-3) !important; border-bottom-color: var(--border) !important; }
+body.dark-mode .tbl tbody tr { border-bottom-color: var(--border) !important; }
+body.dark-mode .tbl tbody tr:hover { background-color: var(--bg-2) !important; }
+body.dark-mode .tbl td { color: var(--ink-2) !important; }
+
+/* --- 6. FIX NOTIFICATIONS & ALERTS --- */
+body.dark-mode .notif-banner { 
+  background: linear-gradient(135deg, #2d2516, #1e1e1e) !important; 
+  border-color: rgba(245,197,24,.3) !important; 
+}
+body.dark-mode .notif-banner .body { color: var(--ink) !important; }
+body.dark-mode .notif-banner .time { color: var(--ink-3) !important; }
+
+/* --- 7. FIX TEXT COLORS EVERYWHERE --- */
+body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, body.dark-mode h4,
+body.dark-mode .welcome-line, .stat__value, .stat__label, .kpi-val, .kpi-lbl, .cs-val, .cs-lbl,
+body.dark-mode .sb__link, body.dark-mode .order-card__id, body.dark-mode .sec-head h2,
+body.dark-mode .form-section h3, body.dark-mode .buyer-strip .item strong {
+  color: var(--ink) !important;
+}
+
+body.dark-mode .stat__foot, body.dark-mode .kpi-foot, body.dark-mode .sub, body.dark-mode p, 
+body.dark-mode .muted, body.dark-mode .order-card .product-line .info .qty, 
+body.dark-mode .order-card .buyer-strip, body.dark-mode .tb .search input::placeholder,
+body.dark-mode .empty-state p, body.dark-mode .empty-state h3 {
+  color: var(--ink-3) !important;
+}
+body.dark-mode .empty-state h3 { color: var(--ink) !important; }
+
+/* --- 8. SPECIFIC COMPONENT FIXES --- */
+/* Sidebar */
+body.dark-mode .main { background-color: var(--bg) !important; }
+body.dark-mode .sb { background-color: var(--bg-2) !important; border-right-color: var(--border) !important; }
+body.dark-mode .sb__link:hover { background-color: var(--border) !important; }
+body.dark-mode .sb__link.active { background-color: var(--brand) !important; color: #fff !important; }
+body.dark-mode .sb__brand .logo, body.dark-mode .sb__user { background-color: var(--card) !important; }
+
+/* Topbar */
+body.dark-mode .tb .search { background-color: var(--bg-2) !important; }
+body.dark-mode .tb .iconbtn { background-color: var(--bg-2) !important; color: var(--ink) !important; }
+body.dark-mode .tb .iconbtn:hover { background-color: var(--border) !important; }
+body.dark-mode .avatar-btn { border-color: var(--border) !important; }
+
+/* User Dropdown */
+body.dark-mode .user-dropdown .ud-item { color: var(--ink) !important; }
+body.dark-mode .user-dropdown .ud-item:hover { background-color: var(--bg-2) !important; }
+body.dark-mode .user-dropdown .ud-header .ud-info strong { color: var(--ink) !important; }
+body.dark-mode .user-dropdown .ud-header .ud-info small { color: var(--ink-3) !important; }
+body.dark-mode .ud-divider { background-color: var(--border) !important; }
+body.dark-mode .ud-avatar { background-color: var(--bg-2) !important; color: var(--ink) !important; }
+
+/* Add Offer Page Specifics */
+body.dark-mode .price-preview { background: #1a3329 !important; border-color: rgba(13,61,46,.5) !important; }
+body.dark-mode .price-preview .main, body.dark-mode .price-preview .eq { color: #f5f5f5 !important; }
+body.dark-mode .upload-box { background: var(--bg-2) !important; border-color: var(--border) !important; color: var(--ink-2) !important; }
+body.dark-mode .buyer-strip { background-color: var(--bg-2) !important; border-color: var(--border) !important; }
+
+/* Storefront Specifics */
+body.dark-mode .store-hero { background: linear-gradient(120deg, #0d3d2e, #071f17) !important; }
+body.dark-mode .review { border-bottom-color: var(--border) !important; }
+
+/* Settings & Bank Card */
+body.dark-mode .bank-card { background: linear-gradient(135deg, #2a2418, var(--card)) !important; border-color: rgba(245,197,24,.2) !important; }
+body.dark-mode .bank-card .info .acct, body.dark-mode .bank-card .info .holder { color: var(--ink-2) !important; }
+body.dark-mode .payout-stat.highlight { background: linear-gradient(135deg, #0d3d2e, #071f17) !important; }
+body.dark-mode .danger-zone { background-color: #2d1717 !important; border-color: #7f1d1d !important; }
+
+/* Footer */
+body.dark-mode .foot-bar { border-top-color: var(--border) !important; }
+
+
+
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   DARK MODE FIX V3 - SEARCH BARS & UNIT PICKER BUTTONS
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* --- 1. FIX SEARCH BARS (Icon boxes and Shortcuts) --- */
+body.dark-mode .search-box,
+body.dark-mode .search-sm {
+  background-color: var(--bg-2) !important;
+  border-color: var(--border) !important;
+}
+
+body.dark-mode .search-box input,
+body.dark-mode .search-sm input {
+  color: var(--ink) !important;
+  background: transparent !important;
+}
+
+body.dark-mode .search-box input::placeholder,
+body.dark-mode .search-sm input::placeholder {
+  color: var(--ink-4) !important;
+}
+
+/* Fix the white box around the Magnifying Glass */
+body.dark-mode .search-box .s-icon,
+body.dark-mode .search-sm .s-icon {
+  background-color: transparent !important;
+  color: var(--ink-3) !important;
+}
+
+/* Fix the white box around the ⌘K shortcut */
+body.dark-mode .search-box .s-kbd {
+  background-color: var(--card) !important;
+  color: var(--ink-3) !important;
+  border-color: var(--border) !important;
+}
+
+/* --- 2. FIX UNIT PICKER (kg / qtl / ton) --- */
+body.dark-mode .unit-picker {
+  background: var(--bg-2) !important;
+  border-color: var(--border) !important;
+}
+
+body.dark-mode .unit-picker .up-label {
+  color: var(--ink-3) !important;
+}
+
+body.dark-mode .unit-picker .up-tab {
+  color: var(--ink-3) !important;
+  background: transparent !important;
+}
+
+body.dark-mode .unit-picker .up-tab:hover {
+  background: var(--border) !important;
+  color: var(--ink) !important;
+}
+
+body.dark-mode .unit-picker .up-tab.active {
+  background: var(--brand) !important;
+  color: #ffffff !important;
+}
+
+/* --- 3. FIX WHITE BUTTONS (Back to Offers, Export CSV) --- */
+body.dark-mode .btn-ghost,
+body.dark-mode .btn-soft {
+  background-color: var(--bg-2) !important;
+  color: var(--ink) !important;
+  border-color: var(--border) !important;
+}
+
+body.dark-mode .btn-ghost:hover,
+body.dark-mode .btn-soft:hover {
+  background-color: var(--border) !important;
+  color: var(--brand-light) !important;
+}
+
+
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   DARK MODE FIX V4 - TEXT CONTRAST (GREEN TO WHITE)
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* 1. Fix the Sidebar Brand and User Name (was dark green) */
+body.dark-mode .sb__brand .wordmark,
+body.dark-mode .sb__user strong {
+  color: var(--ink) !important;
+}
+
+/* 2. Fix Settings Page Labels and Values */
+body.dark-mode .form-row .side .ttl,
+body.dark-mode .ud-info strong,
+body.dark-mode .form-section h3,
+body.dark-mode .form-section .input {
+  color: var(--ink) !important;
+}
+/* Settings right panel (Verified seller, Quintal Seller) */
+body.dark-mode .panel .row-item .body strong,
+body.dark-mode .mini .row-item .body strong {
+  color: var(--ink) !important;
+}
+
+/* 3. Fix the Buyer Preview (Add Offer Page) */
+body.dark-mode #previewName {
+  color: var(--ink) !important;
+}
+body.dark-mode #previewCat {
+  color: var(--ink-3) !important; /* Light grey for category */
+}
+body.dark-mode #previewEq {
+  color: var(--ink-2) !important;
+}
+
+/* 4. Fix "0 active offers", "0 views", "0 buyers" (Green numbers/words) */
+body.dark-mode .ph p strong,
+body.dark-mode .panel .row-item .body strong,
+body.dark-mode .cust-info .name,
+body.dark-mode .empty-state h3 {
+  color: var(--ink) !important;
+}
+
+/* 5. Fix any other stubborn dark green text inside cards */
+body.dark-mode .stat__value,
+body.dark-mode .kpi-val,
+body.dark-mode .cs-val,
+body.dark-mode .order-card .product-line .info .name,
+body.dark-mode .payout-stat .val,
+body.dark-mode .store-offer .name {
+  color: var(--ink) !important;
+}
+
+/* 6. Make the green brand accents slightly lighter so they pop in dark mode */
+body.dark-mode .sec-head .link,
+body.dark-mode .card__head .link,
+body.dark-mode .welcome-line em {
+  color: #4ade80 !important; /* Tailwind green-400 (bright green) */
+}
