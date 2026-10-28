@@ -13,23 +13,33 @@
   const seller = guardSeller();
   const page = renderShell({ active: 'storefront' });
 
-  // ZERO STATE for a new merchant
+  // Use REAL registered data
   const storefront = {
-    name: seller.businessName || 'Merchant Name',
-    type: 'Farm',
-    location: 'Ethiopia',
-    since: new Date().getFullYear().toString(),
-    bio: 'Welcome to my store! I will be adding fresh produce soon.',
+    name: seller.businessName || 'My Store',
+    type: seller.businessType || 'Farm',
+    location: seller.city || 'Ethiopia',
+    since: new Date(seller.createdAt || Date.now()).getFullYear().toString(),
+    bio: seller.bio || 'Welcome to my store! I will be adding fresh produce soon.',
     verified: seller.verificationStatus === 'verified',
-    rating: '—',
-    ratingCount: 0,
-    fulfillment: '—',
-    responseTime: '—',
-    orders: 0,
-    scaleLabel: '🌾 Kilo Seller',
+    rating: seller.rating || '—',
+    ratingCount: seller.ratingCount || 0,
+    fulfillment: seller.fulfillmentRate ? `${seller.fulfillmentRate}%` : '—',
+    responseTime: seller.avgResponseMinutes ? `~${seller.avgResponseMinutes}m` : '—',
+    orders: seller.ordersCompleted || 0,
+    scaleLabel: seller.scale === 'retail' ? '🌾 Kilo Seller' : seller.scale === 'bulk' ? '🏭 Ton Seller' : '📦 Quintal Seller',
   };
 
-  const offers = []; // Empty
+  // Fetch real offers
+  let offers = [];
+  try {
+    const res = await fetch('/api/sellers/me/offers', { credentials: 'include' });
+    if (res.ok) {
+      const json = await res.json();
+      offers = json.data || [];
+    }
+  } catch (err) { }
+
+  const fmt = (n) => n.toLocaleString('en-ET');
 
   page.innerHTML = `
     <div class="page-top">
@@ -38,16 +48,11 @@
           <h1 class="welcome-line">Storefront Preview</h1>
           <p>This is what buyers will see when they visit your public profile.</p>
         </div>
-        <div class="actions">
-          <button class="btn btn-ghost">🔗 Copy link</button>
-        </div>
       </div>
     </div>
 
     <div class="page-body">
       <div class="orders-list">
-
-        <!-- Store hero -->
         <div class="store-hero">
           <div class="inner">
             <div class="avatar-lg">🚜</div>
@@ -57,7 +62,7 @@
                 ${storefront.verified ? '<span class="verified">✓ Verified</span>' : '<span class="verified" style="background:var(--amber-tint);color:var(--amber);">⏳ Pending</span>'}
               </h1>
               <div class="meta">
-                <span><strong>${storefront.type}</strong></span>
+                <span><strong style="text-transform:capitalize;">${storefront.type}</strong></span>
                 <span>📍 ${storefront.location}</span>
                 <span>Since <strong>${storefront.since}</strong></span>
               </div>
@@ -66,38 +71,53 @@
           </div>
         </div>
 
-        <!-- Store stats (Zeroed) -->
         <div class="store-stats">
-          <div class="cell"><div class="ico">⭐</div><div class="val">${storefront.rating}</div><div class="lbl">Rating (0)</div></div>
+          <div class="cell"><div class="ico">⭐</div><div class="val">${storefront.rating}</div><div class="lbl">Rating (${storefront.ratingCount})</div></div>
           <div class="cell"><div class="ico">⚡</div><div class="val">${storefront.fulfillment}</div><div class="lbl">On-time</div></div>
           <div class="cell"><div class="ico">💬</div><div class="val">${storefront.responseTime}</div><div class="lbl">Response time</div></div>
           <div class="cell"><div class="ico">📦</div><div class="val">${storefront.orders}</div><div class="lbl">Orders completed</div></div>
         </div>
 
-        <!-- Offers section (Empty) -->
         <div class="sec-head" style="margin-top:24px">
-          <h2>Their offers (0)</h2>
+          <h2>Their offers (${offers.length})</h2>
           <a class="link" href="/seller/offers.html">Manage offers →</a>
         </div>
-        <div class="empty-state" style="padding: 40px 20px; border: 1px solid var(--border); background: #fff;">
-          <div class="es-icon">📦</div>
-          <h3>No offers yet</h3>
-          <p>This merchant hasn't added any products yet. Check back soon!</p>
-        </div>
+        
+        ${offers.length === 0 ? `
+          <div class="empty-state" style="padding: 40px 20px; border: 1px solid var(--border); background: #fff;">
+            <div class="es-icon">📦</div>
+            <h3>No offers yet</h3>
+            <p>Your storefront is empty. Add your first product so buyers can find you.</p>
+            <a href="/seller/offers-new.html" class="btn btn-gold" style="margin-top:16px;">➕ Add Offer</a>
+          </div>
+        ` : `
+          <div class="store-offers">
+            ${offers.map(o => `
+              <div class="store-offer">
+                <div class="img"><span class="tag">${o.product?.category || 'Item'}</span>📦</div>
+                <div class="body">
+                  <div class="name">${o.product?.name || 'Product'}</div>
+                  <div class="meta-row">
+                    <div>
+                      <div class="price">${fmt(o.pricePerUnit)} ETB / ${o.unit}</div>
+                      <div class="eq">≈ ${o.pricePerKg} ETB / kg</div>
+                    </div>
+                    <div class="stock">${o.stock} ${o.unit} left</div>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `}
 
-        <!-- Reviews (Empty) -->
-        <div class="sec-head" style="margin-top:24px">
-          <h2>What buyers say</h2>
-        </div>
+        <div class="sec-head" style="margin-top:24px"><h2>What buyers say</h2></div>
         <div class="empty-state" style="padding: 40px 20px; border: 1px solid var(--border); background: #fff;">
           <div class="es-icon">⭐</div>
           <h3>No reviews yet</h3>
           <p>When buyers receive your products, their reviews will appear here.</p>
         </div>
-
       </div>
 
-      <!-- RIGHT panel -->
       <aside class="panel">
         <div class="mini">
           <div class="mini__head"><h3>Trust signals</h3></div>
