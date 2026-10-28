@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sell on Etfruit · Grow Your Farm Business</title>
+  <!-- We load the exact same CSS as the landing page -->
+  <link rel="stylesheet" href="/css/design.css" />
+  <link rel="stylesheet" href="/css/storefront.css" />
+  <!-- A tiny bit of page-specific CSS for the steps -->
+  <style>
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 40px;
+    }
+    .step-card {
+      text-align: center;
+      padding: 32px 24px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      box-shadow: var(--shadow-xs);
+    }
+    .step-num {
+      width: 48px; height: 48px;
+      background: var(--green); color: #f2b705;
+      font-size: 1.4rem; font-weight: 800;
+      border-radius: 50%; display: grid; place-items: center;
+      margin: 0 auto 20px;
+    }
+    @media (max-width: 768px) {
+      .steps-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1. Announcement Bar (Exact match) -->
+  <div class="announce">
+    🚚 Free delivery on orders over 500 ETB · Same-day in Addis Ababa
+  </div>
+
+  <!-- 2. Utility Strip (Exact match) -->
+  <div class="utility-strip">
+    <div class="utility-inner">
+      <nav class="utility-links">
+        <a href="/">Shop All</a>
+        <a href="/sell.html" style="color: var(--green); font-weight: 700;">Sell on Etfruit</a>
+        <a href="/support.html">Support</a>
+      </nav>
+      <div class="utility-meta">
+        <span class="utility-phone">+251 911 223 344</span>
+        <span class="utility-divider"></span>
+        <a href="/login.html" class="utility-lang">Sign In</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Main Header (Exact match) -->
+  <header class="site-header">
+    <div class="site-header-inner">
+      <a href="/" class="site-logo">
+        <img src="/img/logo.png" alt="Etfruit logo" class="site-logo-img" />
+      </a>
+      <div class="site-actions" style="margin-left: auto;">
+        <a href="/" class="btn btn-amber">Go to Store</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="store-main">
+    
+    <!-- 4. Hero Banner (Reusing the exact same classes from index.html) -->
+    <section class="hero-banner" style="margin-bottom: 40px;">
+      <div class="hero-banner-text">
+        <span class="hero-eyebrow">🌾 GROW YOUR FARM BUSINESS</span>
+        <h1>Sell your fresh produce to <em>thousands of buyers</em> in Addis.</h1>
+        <p>Join Ethiopia's fastest-growing agricultural marketplace. No middlemen. No listing fees. Direct weekly payouts to your bank via Chapa.</p>
+        <a href="#" class="btn btn-amber btn-lg" id="startApplyBtn">Start Your Application →</a>
+      </div>
+      <!-- We leave the visual empty or add a placeholder illustration -->
+      <div class="hero-banner-visual" style="display: flex; align-items: center; justify-content: center; font-size: 8rem; opacity: 0.8;">
+        🚜
+      </div>
+    </section>
+
+    <!-- 5. Value Propositions (Reusing .value-row) -->
+    <section class="value-row" style="margin-bottom: 64px;">
+      <div class="value-item">
+        <div class="value-icon">💰</div>
+        <div><strong>Keep More Profit</strong><span>Sell directly. Keep 90% of revenue.</span></div>
+      </div>
+      <div class="value-item">
+        <div class="value-icon">💳</div>
+        <div><strong>Automated Payouts</strong><span>Direct to CBE/Awash every Friday.</span></div>
+      </div>
+      <div class="value-item">
+        <div class="value-icon">⭐</div>
+        <div><strong>Build Trust</strong><span>Get a Verified badge to attract buyers.</span></div>
+      </div>
+    </section>
+
+    <!-- 6. How it Works (Custom step layout) -->
+    <section style="max-width: 1000px; margin: 0 auto 80px; text-align: center;">
+      <h2 style="font-family: var(--font-display); font-size: 2rem; color: var(--green-dark); margin-bottom: 16px;">Start selling in 3 simple steps</h2>
+      <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto;">We verify all sellers to keep the marketplace safe. The process takes less than 24 hours.</p>
+      
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <h3 style="color: var(--green-dark); font-size: 1.1rem; margin-bottom: 8px;">Apply Online</h3>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">Fill out your business info. Have your Fayda ID, TIN, and Business License ready.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <h3 style="color: var(--green-dark); font-size: 1.1rem; margin-bottom: 8px;">Get Verified</h3>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">Our team reviews your documents within 24 hours to give you your Verified badge.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <h3 style="color: var(--green-dark); font-size: 1.1rem; margin-bottom: 8px;">Start Selling</h3>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">Publish your offers in kg, quintals, or tons. Receive orders and get paid weekly.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. Newsletter (Reusing the exact same block from index.html) -->
+    <section class="newsletter" style="margin-bottom: 0;">
+      <div class="newsletter-inner">
+        <div class="newsletter-copy">
+          <div class="newsletter-icon">🌱</div>
+          <div>
+            <h2>Ready to grow your business?</h2>
+            <p>Join 240+ Ethiopian farms and wholesalers already selling on Etfruit.</p>
+          </div>
+        </div>
+        <a href="#" class="btn btn-amber" id="startApplyBtnBottom" style="padding: 14px 28px; font-size: 1rem; height: 48px; display: inline-flex; align-items: center;">Start Application</a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 8. Footer (Exact match) -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a href="/" class="site-logo">
+          <span class="site-logo-mark">🥬</span>
+          <span class="site-logo-text">Etfruit</span>
+        </a>
+        <p class="footer-tag">Fresh vegetables, fruits, and herbs — hand-picked from local farms and delivered the same day.</p>
+      </div>
+      <div class="footer-col">
+        <h4>For Merchants</h4>
+        <a href="/sell.html">Become a Seller</a>
+        <a href="#">Seller Handbook</a>
+        <a href="#">Payout Schedule</a>
+      </div>
+      <div class="footer-col">
+        <h4>Account</h4>
+        <a href="/orders.html">My Orders</a>
+        <a href="/login.html">Sign in</a>
+        <a href="/register.html">Register</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 Etfruit · Built by Abrham Yeshigeta</p>
+    </div>
+  </footer>
+
+  <!-- 9. The Real JS Logic -->
+  <script>
+  // We use an event listener to wait until the HTML is loaded
+  document.addEventListener('DOMContentLoaded', () => {
+    
+    const handleStartApplication =  (e) => {
+      if (e) e.preventDefault(); // Stop the page from jumping to the top
+      // Send them directly to the dedicated Merchant Application page
+      window.location.href = '/seller/apply.html';
+    };
+
+
+     
+    // Attach the function to BOTH buttons
+    const topBtn = document.getElementById('startApplyBtn');
+    const bottomBtn = document.getElementById('startApplyBtnBottom');
+
+    if (topBtn) topBtn.addEventListener('click', handleStartApplication);
+    if (bottomBtn) bottomBtn.addEventListener('click', handleStartApplication);
+  });
+</script>
+  
+</body>
+</html>

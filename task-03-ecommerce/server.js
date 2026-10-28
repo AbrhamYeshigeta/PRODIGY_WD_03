@@ -1,19 +1,18 @@
-import 'dotenv/config';
-import express from 'express';
-import helmet from 'helmet';
-import cors from 'cors';
-import morgan from 'morgan';
-import cookieParser from 'cookie-parser';
-import rateLimit from 'express-rate-limit';
-import mongoSanitize from 'express-mongo-sanitize';
-import path from 'path';
-import { fileURLToPath } from 'url';
+require('dotenv').config();
+const express = require('express');
+const helmet = require('helmet');
+const cors = require('cors');
+const morgan = require('morgan');
+const cookieParser = require('cookie-parser');
+const rateLimit = require('express-rate-limit');
+const mongoSanitize = require('express-mongo-sanitize');
+const path = require('path');
 
-import { connectDB } from './src/config/db.js';
-import authRoutes from './src/routes/authRoutes.js';
-import { notFound, errorHandler } from './src/middleware/error.js';
+const { connectDB } = require('./src/config/db.js');
+const authRoutes = require('./src/routes/authRoutes.js');
+const sellerRoutes = require('./src/routes/sellerRoutes.js');
+const { notFound, errorHandler } = require('./src/middleware/error.js');
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 
 /* ============================================
@@ -85,6 +84,7 @@ app.use('/api/auth/register', authLimiter);
    Routes
    ============================================ */
 app.use('/api/auth', authRoutes);
+app.use('/api/sellers', sellerRoutes);
 
 /* Placeholder routes — return empty data until Block 2 ships the real models */
 app.get('/api/products', (req, res) => {

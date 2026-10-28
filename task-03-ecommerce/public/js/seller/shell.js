@@ -83,7 +83,26 @@ export function renderShell({ active = 'dashboard' }) {
   return page;
 }
 
-export function guardSeller() {
-  const s = JSON.parse(localStorage.getItem('etfruit.seller') || 'null');
-  return s || { businessName: 'Highland Roots', scale: 'wholesale', verificationStatus: 'verified' };
+export async function guardSeller() {
+  try {
+    // 1. Ask the backend who is logged in and get their real data
+    const res = await fetch('/api/sellers/me', { credentials: 'include' });
+    
+    if (!res.ok) {
+      // If they are not a seller or not logged in, kick them to login
+      window.location.href = '/login.html';
+      return null;
+    }
+    
+    const json = await res.json();
+    const seller = json.data; // The real data from MongoDB
+    
+    // 2. Save it to local storage so the page loads fast
+    localStorage.setItem('etfruit.seller', JSON.stringify(seller));
+    return seller;
+    
+  } catch (err) {
+    window.location.href = '/login.html';
+    return null;
+  }
 }

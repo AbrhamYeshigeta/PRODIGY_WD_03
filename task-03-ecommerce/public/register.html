@@ -14,8 +14,9 @@
          <img src="/img/logo.png" alt="Prodigy Store logo" class="auth-logo-img" />
       </a>
 
-      <h1 class="auth-title">Create your account</h1>
-      <p class="auth-sub">Join us and start shopping fresh house vegetables.</p>
+      <!-- Added IDs here for Merchant Chameleon effect -->
+      <h1 class="auth-title" id="page-title">Create your account</h1>
+      <p class="auth-sub" id="page-subtitle">Join us and start shopping fresh house vegetables.</p>
 
       <form id="register-form" class="auth-form" novalidate>
         <div>
@@ -31,7 +32,6 @@
                  placeholder="you@example.com" autocomplete="email" />
         </div>
 
-        <!-- Password field + live feedback -->
         <div class="pw-field">
         <label for="password">Password</label>
 
@@ -42,14 +42,12 @@
 
             <button type="button" class="pw-toggle" id="pw-toggle"
                     aria-label="Show password" title="Show password">
-            <!-- Eye open icon — shown when password is HIDDEN -->
             <svg class="icon-show" width="20" height="20" viewBox="0 0 24 24"
                 fill="none" stroke="currentColor" stroke-width="2"
                 stroke-linecap="round" stroke-linejoin="round">
                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                 <circle cx="12" cy="12" r="3" />
             </svg>
-            <!-- Eye slashed icon — shown when password is VISIBLE -->
             <svg class="icon-hide" width="20" height="20" viewBox="0 0 24 24"
                 fill="none" stroke="currentColor" stroke-width="2"
                 stroke-linecap="round" stroke-linejoin="round">
@@ -88,11 +86,74 @@
 
       <p class="auth-footer">
         Already have an account?
-        <a href="/login.html">Sign in</a>
+        <!-- Added ID to change link dynamically -->
+        <a href="/login.html" id="login-link">Sign in</a>
       </p>
     </div>
   </main>
 
-  <script type="module" src="/js/auth/register.js"></script>
+  <!-- Replaced the src script with inline logic -->
+  <script type="module">
+    import { api } from '/js/api.js';
+
+    // 1. Check URL for redirect parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirectUrl = urlParams.get('redirect');
+
+    // 2. Change UI text if it's a merchant
+    if (redirectUrl && redirectUrl.includes('seller')) {
+      document.title = "Merchant Registration · Prodigy Store";
+      document.getElementById('page-title').textContent = "Become a Merchant";
+      document.getElementById('page-subtitle').textContent = "Step 1: Create your base account to begin your application.";
+    }
+
+    // 3. Pass the redirect parameter to the Login link
+    const loginLink = document.getElementById('login-link');
+    if (loginLink && redirectUrl) {
+      loginLink.href = `/login.html?redirect=${redirectUrl}`;
+    }
+
+    // 4. Handle Form Submission
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('username').value; // using username as name
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const btn = document.getElementById('submit-btn');
+      const msg = document.getElementById('msg');
+      
+      btn.disabled = true;
+      btn.textContent = 'Creating account...';
+      msg.textContent = '';
+
+      try {
+        await api.post('/auth/register', { name, email, password });
+        
+        // SMART REDIRECT
+        if (redirectUrl) {
+          window.location.href = redirectUrl; // Send to /seller/apply.html
+        } else {
+          window.location.href = '/'; // Normal customer goes to landing page
+        }
+      } catch (err) {
+        msg.textContent = err.response?.data?.message || 'Registration failed. Try a different email.';
+        msg.style.color = 'red';
+        btn.disabled = false;
+        btn.textContent = 'Create account';
+      }
+    });
+
+    // --- UI LOGIC (Password Toggle & Strength) ---
+    const pwToggle = document.getElementById('pw-toggle');
+    const pwInput = document.getElementById('password');
+    if (pwToggle && pwInput) {
+      pwToggle.addEventListener('click', () => {
+        const type = pwInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        pwInput.setAttribute('type', type);
+        pwToggle.classList.toggle('show');
+      });
+    }
+    // (Note: You can keep your existing password strength JS logic here if you had it)
+  </script>
 </body>
 </html>

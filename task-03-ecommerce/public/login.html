@@ -14,8 +14,9 @@
        <img src="/img/logo.png" alt="Prodigy Store logo" class="auth-logo-img" />
       </a>
 
-      <h1 class="auth-title">Welcome back</h1>
-      <p class="auth-sub">Sign in to continue shopping.</p>
+      <!-- Added IDs here so JS can change the text -->
+      <h1 class="auth-title" id="page-title">Welcome back</h1>
+      <p class="auth-sub" id="page-subtitle">Sign in to continue shopping.</p>
 
       <form id="login-form" class="auth-form" novalidate>
         <div>
@@ -58,11 +59,75 @@
 
       <p class="auth-footer">
         New to Prodigy Store?
-        <a href="/register.html">Create an account</a>
+        <!-- Added ID to change link dynamically -->
+        <a href="/register.html" id="register-link">Create an account</a>
       </p>
     </div>
   </main>
 
-  <script type="module" src="/js/auth/login.js"></script>
+  <!-- Replaced the src script with an inline module so you have the full logic -->
+  <script type="module">
+    import { api } from '/js/api.js';
+
+    // 1. Check URL for redirect parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirectUrl = urlParams.get('redirect');
+
+    // 2. Change UI text if it's a merchant
+    if (redirectUrl && redirectUrl.includes('seller')) {
+      document.title = "Merchant Portal · Prodigy Store";
+      document.getElementById('page-title').textContent = "Merchant Portal";
+      document.getElementById('page-subtitle').textContent = "Sign in to manage your shop or continue your application.";
+    }
+
+    // 3. Pass the redirect parameter to the Register link
+    const registerLink = document.getElementById('register-link');
+    if (registerLink && redirectUrl) {
+      registerLink.href = `/register.html?redirect=${redirectUrl}`;
+    }
+
+    // 4. Handle Form Submission
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const btn = document.getElementById('submit-btn');
+      const msg = document.getElementById('msg');
+      
+      btn.disabled = true;
+      btn.textContent = 'Signing in...';
+      msg.textContent = '';
+
+      try {
+        const res = await api.post('/auth/login', { email, password });
+        
+        // SMART REDIRECT
+        if (redirectUrl) {
+          window.location.href = redirectUrl; // Send to /seller/apply.html
+        } else {
+          // Normal role-based redirect
+          if (res.data.user.role === 'seller') window.location.href = '/seller/dashboard.html';
+          else if (res.data.user.role === 'admin') window.location.href = '/admin/index.html';
+          else window.location.href = '/';
+        }
+      } catch (err) {
+        msg.textContent = 'Invalid email or password';
+        msg.style.color = 'red';
+        btn.disabled = false;
+        btn.textContent = 'Sign in';
+      }
+    });
+
+    // Existing UI Logic for Password Toggle
+    const pwToggle = document.getElementById('pw-toggle');
+    const pwInput = document.getElementById('password');
+    if (pwToggle && pwInput) {
+      pwToggle.addEventListener('click', () => {
+        const type = pwInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        pwInput.setAttribute('type', type);
+        pwToggle.classList.toggle('show');
+      });
+    }
+  </script>
 </body>
 </html>

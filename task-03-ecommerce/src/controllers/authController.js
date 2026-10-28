@@ -1,11 +1,11 @@
-import User from '../models/User.js';
-import { signToken, cookieOptions } from '../utils/token.js';
+const User = require('../models/User.js');
+const { signToken, cookieOptions } = require('../utils/token.js');
 
 /* ============================================
    REGISTER — POST /api/auth/register
    Creates a new user with role: 'customer'
    ============================================ */
-export const register = async (req, res, next) => {
+const register = async (req, res, next) => {
   try {
     const { username, email, password } = req.body;
 
@@ -38,13 +38,12 @@ export const register = async (req, res, next) => {
    LOGIN — POST /api/auth/login
    Returns JWT in httpOnly cookie
    ============================================ */
-export const login = async (req, res, next) => {
+const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email }).select('+password');
 
-    // Same generic message for both "not found" and "wrong password"
     if (!user || !(await user.comparePassword(password))) {
       return res.status(401).json({
         success: false,
@@ -78,7 +77,7 @@ export const login = async (req, res, next) => {
    LOGOUT — POST /api/auth/logout
    Clears the token cookie
    ============================================ */
-export const logout = (req, res) => {
+const logout = (req, res) => {
   res.clearCookie('token', { ...cookieOptions, maxAge: 0 });
   res.json({ success: true, message: 'Logged out successfully' });
 };
@@ -87,7 +86,7 @@ export const logout = (req, res) => {
    GET ME — GET /api/auth/me (protected)
    Returns the current user's profile
    ============================================ */
-export const getMe = async (req, res) => {
+const getMe = async (req, res) => {
   res.json({
     success: true,
     user: {
@@ -101,3 +100,5 @@ export const getMe = async (req, res) => {
     },
   });
 };
+
+module.exports = { register, login, logout, getMe };

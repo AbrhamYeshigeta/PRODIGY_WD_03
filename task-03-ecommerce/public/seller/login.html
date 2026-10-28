@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Merchant Portal · Etfruit</title>
+  <link rel="stylesheet" href="/css/seller.css" />
+  <style>
+    body { display: grid; place-items: center; min-height: 100vh; padding: 20px; background: var(--bg); }
+    .auth-card { width: 100%; max-width: 420px; background: #fff; border-radius: var(--r-xl); box-shadow: var(--shadow-lg); overflow: hidden; }
+    .auth-header { padding: 32px 32px 24px; text-align: center; border-bottom: 1px dashed var(--border); background: linear-gradient(180deg, #f0fdf4 0%, #fff 100%); }
+    .auth-header h1 { font-family: var(--serif); font-size: 24px; color: var(--brand); margin: 0 0 6px; }
+    .auth-header p { color: var(--ink-3); font-size: 13.5px; margin: 0; }
+    .auth-body { padding: 28px 32px 32px; }
+    .auth-footer { text-align: center; font-size: 13px; color: var(--ink-3); margin-top: 20px; }
+    .auth-footer a { color: var(--brand); font-weight: 700; text-decoration: none; }
+  </style>
+</head>
+<body>
+
+  <div class="auth-card">
+    <div class="auth-header">
+      <div style="font-family: var(--serif); font-size: 22px; font-weight: 700; color: var(--brand); margin-bottom: 20px; display: flex; justify-content: center; align-items: center; gap: 8px;">
+        🦬 Etfruit
+      </div>
+      <h1>Merchant Portal</h1>
+      <p>Sign in to manage your shop and orders.</p>
+    </div>
+
+    <div class="auth-body">
+      <form id="merchantLoginForm">
+        <div class="field">
+          <label>Email address</label>
+          <input class="input" type="email" id="email" required placeholder="you@example.com" />
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input class="input" type="password" id="password" required placeholder="••••••••" />
+        </div>
+        
+        <button type="submit" class="btn-hero" style="width: 100%; margin-top: 10px;">
+          <span>Sign In to Dashboard →</span>
+        </button>
+      </form>
+
+      <div class="auth-footer" style="margin-top: 20px;">
+        Don't have a merchant account? <a href="/seller/apply.html">Apply here</a>
+      </div>
+      <div class="auth-footer" style="margin-top: 10px; border-top: 1px dashed var(--border); padding-top: 15px;">
+        Looking to buy? <a href="/login.html">Customer Login</a>
+      </div>
+    </div>
+  </div>
+
+    <script>
+    document.getElementById('merchantLoginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const btn = e.target.querySelector('button');
+      
+      btn.disabled = true;
+      btn.innerHTML = '<span>Verifying...</span>';
+
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+          credentials: 'include'
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || 'Invalid email or password');
+        }
+
+        // 🔥 THE FIX: Safely extract the user object no matter how the backend formats it
+        const user = data.data?.user || data.user || data.data || data;
+
+        if (!user) {
+            throw new Error("Login failed: No user data returned from server.");
+        }
+
+        // PROTOCOL: Ensure they are actually a merchant
+        if (user.role !== 'seller' && user.role !== 'admin') {
+           throw new Error("This account is a Customer account. Please use the normal Login page.");
+        }
+
+        // If everything is good, go to dashboard!
+        window.location.href = '/seller/dashboard.html';
+        
+      } catch (err) {
+        alert(err.message);
+        btn.disabled = false;
+        btn.innerHTML = '<span>Sign In to Dashboard →</span>';
+      }
+    });
+  </script>
+
+</body>
+</html>

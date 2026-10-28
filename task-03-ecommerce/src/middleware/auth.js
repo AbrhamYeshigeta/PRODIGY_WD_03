@@ -1,7 +1,7 @@
-import { verifyToken } from '../utils/token.js';
-import User from '../models/User.js';
+const { verifyToken } = require('../utils/token.js');
+const User = require('../models/User.js');
 
-export const protect = async (req, res, next) => {
+const protect = async (req, res, next) => {
   try {
     let token;
 
@@ -29,7 +29,7 @@ export const protect = async (req, res, next) => {
   }
 };
 
-export const authorize = (...roles) => (req, res, next) => {
+const authorize = (...roles) => (req, res, next) => {
   if (!req.user || !roles.includes(req.user.role)) {
     return res.status(403).json({
       success: false,
@@ -38,3 +38,5 @@ export const authorize = (...roles) => (req, res, next) => {
   }
   next();
 };
+
+module.exports = { protect, authorize };

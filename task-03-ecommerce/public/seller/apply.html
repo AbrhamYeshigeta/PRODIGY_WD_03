@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Merchant Application · Etfruit</title>
+  <link rel="stylesheet" href="/css/seller.css" />
+  <style>
+    /* ═══ THIS IS THE MAGIC CSS THAT FIXES THE LAYOUT ═══ */
+    .onboard-shell { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+    
+    /* This grid creates the two columns: Form (1fr) and Panel (340px) */
+    .onboard-grid { 
+      display: grid; 
+      grid-template-columns: 1fr 340px; 
+      gap: 24px; 
+      align-items: start; 
+    }
+    
+    @media (max-width: 900px) { 
+      .onboard-grid { grid-template-columns: 1fr; } 
+    }
+    
+    .section-head { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px dashed var(--border); }
+    .section-num { width: 32px; height: 32px; border-radius: 50%; background: var(--brand); color: var(--gold); display: grid; place-items: center; font-weight: 800; font-size: 15px; flex-shrink: 0; }
+    .section-title { font-family: var(--serif); font-size: 18px; font-weight: 700; color: var(--brand); margin: 0; }
+    
+    /* Professional Upload Box Styling */
+    .upload-box { 
+      display: flex; align-items: center; gap: 16px; padding: 20px; 
+      border: 2px dashed #cbd5e1; border-radius: 12px; 
+      background: #f8fafc; cursor: pointer; transition: all 0.2s ease;
+    }
+    .upload-box:hover { border-color: var(--brand); background: #f0fdf4; }
+    .upload-box.uploaded { border-color: #16a34a; background: #f0fdf4; }
+    .upload-icon { font-size: 28px; }
+    .upload-text-container { display: flex; flex-direction: column; gap: 4px; }
+    .upload-title { font-size: 14px; font-weight: 600; color: var(--ink); }
+    .upload-subtext { font-size: 12px; color: var(--ink-3); }
+  </style>
+</head>
+<body style="background: var(--bg);">
+
+<div class="onboard-shell">
+  
+  <!-- Page Header -->
+  <div style="text-align: center; margin-bottom: 32px;">
+    <h1 style="font-family: var(--serif); font-size: 32px; color: var(--brand); margin-bottom: 8px;">Merchant Application</h1>
+    <p style="color: var(--ink-3); font-size: 15px;">Join Etfruit's verified marketplace. We review all applications within 24 hours.</p>
+  </div>
+
+   <!-- Link for existing merchants -->
+  <div style="text-align: center; margin-bottom: 24px; font-size: 14px; color: var(--ink-3);" id="login-upgrade-link">
+    Already have a merchant account? 
+    <a href="/seller/login.html" style="color: var(--brand); font-weight: 700; text-decoration: underline;">Sign in to your Dashboard</a>
+  </div>
+
+  <!-- The Two-Column Grid -->
+  <div class="onboard-grid">
+    
+    <!-- LEFT COLUMN: FORM -->
+    <form id="merchantForm" class="form-card" style="padding: 32px;">
+      
+      <!-- SECTION 1: ACCOUNT INFO -->
+      <div id="auth-section">
+        <div class="section-head">
+          <div class="section-num">1</div>
+          <h2 class="section-title">Create your Merchant Account</h2>
+        </div>
+        <p class="sec-sub" style="margin-bottom: 20px;">This is how you will log in to manage your shop and view your payouts.</p>
+
+        <div class="grid-2">
+          <div class="field">
+            <label>Full Name <span class="req">*</span></label>
+            <input class="input" type="text" id="fullName" placeholder="Sara Bekele" required />
+          </div>
+          <div class="field">
+            <label>Email Address <span class="req">*</span></label>
+            <input class="input" type="email" id="email" placeholder="you@example.com" required />
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label>Phone Number <span class="req">*</span></label>
+            <input class="input" type="tel" id="phone" placeholder="+251 911 223 344" required />
+          </div>
+          <div class="field">
+            <label>City / Region <span class="req">*</span></label>
+            <input class="input" type="text" id="city" placeholder="Addis Ababa" required />
+          </div>
+        </div>
+        
+        <div class="field" id="password-field">
+          <label>Create Password <span class="req">*</span></label>
+          <input class="input" type="password" id="password" placeholder="At least 8 characters" required minlength="8" />
+        </div>
+      </div>
+
+      <div style="height: 32px;"></div>
+
+      <!-- SECTION 2: LEGAL & BUSINESS -->
+      <div>
+        <div class="section-head">
+          <div class="section-num">2</div>
+          <h2 class="section-title">Legal Identity</h2>
+        </div>
+        <p class="sec-sub" style="margin-bottom: 20px;">To get the <strong>Verified Badge</strong>, we must verify your business legally.</p>
+
+        <div class="grid-2">
+          <div class="field">
+            <label>Business / Farm Name <span class="req">*</span></label>
+            <input class="input" type="text" id="businessName" placeholder="Highland Roots" required />
+          </div>
+          <div class="field">
+            <label>Business Type <span class="req">*</span></label>
+            <select class="input" id="businessType" required>
+              <option value="">Select...</option>
+              <option value="farm">Farm / Producer</option>
+              <option value="wholesaler">Wholesaler</option>
+              <option value="retailer">Retailer</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label>Fayda ID (National ID) <span class="req">*</span></label>
+            <input class="input" type="text" id="faydaId" placeholder="12-digit Fayda ID" required />
+          </div>
+          <div class="field">
+            <label>Business TIN <span class="req">*</span></label>
+            <input class="input" type="text" id="tin" placeholder="10-digit Tax ID" required />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Upload Business License (PDF/JPG) <span class="req">*</span></label>
+          <label class="upload-box" id="license-box">
+            <div class="upload-icon" id="license-icon">📄</div>
+            <div class="upload-text-container">
+              <span class="upload-title" id="license-text">Click to attach your Ministry of Trade License</span>
+              <span class="upload-subtext" id="license-subtext">PDF, JPG, or PNG. Max 5MB.</span>
+            </div>
+            <input type="file" id="license" accept=".pdf,.jpg,.jpeg,.png" required hidden />
+          </label>
+        </div>
+      </div>
+
+      <div style="height: 32px;"></div>
+
+      <!-- SECTION 3: PAYOUTS -->
+      <div>
+        <div class="section-head">
+          <div class="section-num">3</div>
+          <h2 class="section-title">Payout Account</h2>
+        </div>
+        <p class="sec-sub" style="margin-bottom: 20px;">Where should we send your earnings? Payouts happen every Friday.</p>
+
+        <div class="grid-2">
+          <div class="field">
+            <label>Bank Name <span class="req">*</span></label>
+            <select class="input" id="bankName" required>
+              <option value="cbe">Commercial Bank of Ethiopia (CBE)</option>
+              <option value="awash">Awash Bank</option>
+              <option value="dashen">Dashen Bank</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Account Number <span class="req">*</span></label>
+            <input class="input" type="text" id="accountNumber" placeholder="Enter bank account" required />
+          </div>
+        </div>
+        <div class="field">
+          <label>Account Holder Name <span class="req">*</span></label>
+          <input class="input" type="text" id="holderName" placeholder="Must match Business Name" required />
+        </div>
+
+        <div class="trust-note" style="margin-bottom: 24px;">
+          <span class="ico">🔒</span>
+          <span>Your bank details are secured by <strong>Chapa</strong>. Etfruit never sees your bank passwords.</span>
+        </div>
+      </div>
+
+      <!-- SUBMIT -->
+      <button type="submit" class="btn-hero" style="width: 100%;" id="submitBtn">
+        <span>Submit Application for Review →</span>
+      </button>
+
+    </form>
+
+    <!-- RIGHT COLUMN: TRUST PANEL -->
+    <aside class="panel">
+      <div class="mini">
+        <div class="mini__head"><h3>Why apply?</h3></div>
+        <div class="notif-list">
+          <div class="notif-item">
+            <div class="nico green">✓</div>
+            <div class="nbody"><p><strong>Verified Badge.</strong> Buyers trust verified merchants 3x more.</p></div>
+          </div>
+          <div class="notif-item">
+            <div class="nico blue">💳</div>
+            <div class="nbody"><p><strong>Automated Payouts.</strong> Get paid directly to your bank every Friday.</p></div>
+          </div>
+          <div class="notif-item">
+            <div class="nico gold">📈</div>
+            <div class="nbody"><p><strong>Reach.</strong> Sell to thousands of buyers in Addis Ababa.</p></div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    
+    let isLoggedIn = false;
+    let currentUser = null;
+    
+    const licenseInput = document.getElementById('license');
+    const licenseBox = document.getElementById('license-box');
+    const licenseIcon = document.getElementById('license-icon');
+    const licenseText = document.getElementById('license-text');
+    const licenseSubtext = document.getElementById('license-subtext');
+
+    // ==========================================
+    // 1. BULLETPROOF FILE UPLOAD UI
+    // ==========================================
+    licenseInput.addEventListener('change', function() {
+      if (this.files && this.files.length > 0) {
+        const file = this.files[0];
+        
+        // Change UI to "Uploaded" state (Green)
+        licenseBox.classList.add('uploaded');
+        licenseIcon.textContent = '✅';
+        licenseText.innerHTML = `<strong style="color: #15803d;">${file.name}</strong>`;
+        licenseSubtext.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB · Click to change`;
+      }
+    });
+
+    // ==========================================
+    // 2. CHECK LOGIN & TRANSFORM FORM
+    // ==========================================
+    try {
+      const res = await fetch('/api/auth/me', { credentials: 'include' });
+      if (res.ok) {
+        const json = await res.json();
+        currentUser = json.data?.user || json.user || json.data || json;
+        isLoggedIn = true;
+      }
+    } catch (err) {
+      // Not logged in, proceed normally
+    }
+
+    // If they are already a Seller, kick them to the dashboard
+    if (isLoggedIn && currentUser.role === 'seller') {
+      alert("You are already a registered merchant!");
+      window.location.href = '/seller/dashboard.html';
+      return;
+    }
+
+    // If they are a Customer, transform the form (Hide Password, Pre-fill Data)
+    if (isLoggedIn && currentUser.role === 'customer') {
+      document.getElementById('password-field').style.display = 'none';
+      document.querySelector('#auth-section .section-title').textContent = "Upgrade Your Account";
+      document.querySelector('#auth-section .sec-sub').textContent = `You are logged in as ${currentUser.email}. Fill out the business details below to become a merchant.`;
+      document.getElementById('login-upgrade-link').style.display = 'none';
+      
+      const nameInput = document.getElementById('fullName');
+      const emailInput = document.getElementById('email');
+      
+      if (nameInput) { nameInput.value = currentUser.name || ''; nameInput.readOnly = true; nameInput.style.background = '#f1f5f9'; }
+      if (emailInput) { emailInput.value = currentUser.email || ''; emailInput.readOnly = true; emailInput.style.background = '#f1f5f9'; }
+    }
+
+    // ==========================================
+    // 3. HANDLE FORM SUBMISSION
+    // ==========================================
+    document.getElementById('merchantForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      // Validate file is attached before submitting
+      if (!licenseInput.files.length) {
+        alert('Please attach your Business License before submitting.');
+        return;
+      }
+
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span>Processing Application...</span>';
+
+      try {
+        // STEP A: If NOT logged in, create the base user account and immediately log them in
+        if (!isLoggedIn) {
+          const emailValue = document.getElementById('email').value;
+          const passwordValue = document.getElementById('password').value;
+          const generatedUsername = emailValue.split('@')[0] + Math.floor(Math.random() * 1000);
+
+          const accountData = {
+            username: generatedUsername,
+            email: emailValue,
+            password: passwordValue
+          };
+
+          const regRes = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(accountData),
+            credentials: 'include'
+          });
+
+          if (!regRes.ok) {
+            const errData = await regRes.json();
+            throw new Error(errData.message || 'Registration failed. Email might be in use.');
+          }
+
+          const loginRes = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: emailValue, password: passwordValue }),
+            credentials: 'include'
+          });
+
+          if (!loginRes.ok) {
+            const errData = await loginRes.json();
+            throw new Error(errData.message || 'Login after registration failed.');
+          }
+
+          const loginJson = await loginRes.json();
+          currentUser = loginJson.user || loginJson.data || loginJson;
+          isLoggedIn = true;
+        }
+
+        // STEP B: Build FormData (Required for file uploads)
+        const formData = new FormData();
+        formData.append('businessName', document.getElementById('businessName').value);
+        formData.append('businessType', document.getElementById('businessType').value);
+        formData.append('faydaId', document.getElementById('faydaId').value);
+        formData.append('tin', document.getElementById('tin').value);
+        formData.append('bankName', document.getElementById('bankName').value);
+        formData.append('accountNumber', document.getElementById('accountNumber').value);
+        formData.append('holderName', document.getElementById('holderName').value);
+        
+        // ADDED PHONE AND CITY TO FORMDATA
+        formData.append('phone', document.getElementById('phone').value);
+        formData.append('city', document.getElementById('city').value);
+
+        // Append the file
+        formData.append('license', licenseInput.files[0]); 
+
+        // STEP C: Submit Seller Application
+        const applyRes = await fetch('/api/sellers/apply', {
+          method: 'POST',
+          credentials: 'include',
+          body: formData // NO 'Content-Type' header!
+        });
+
+        if (applyRes.ok) {
+          // SUCCESS! Redirect to dashboard
+          window.location.href = '/seller/dashboard.html';
+        } else {
+          const errorData = await applyRes.json();
+          throw new Error(errorData.message || 'Application failed. Please check your details.');
+        }
+
+      } catch (err) {
+        // Show exact error
+        alert(err.message || 'Something went wrong. Please try again.');
+        btn.disabled = false;
+        btn.innerHTML = '<span>Submit Application for Review →</span>';
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

@@ -20,6 +20,35 @@ async function redirectIfAlreadyLoggedIn() {
 
 redirectIfAlreadyLoggedIn();
 
+// Inside your login submit handler:
+async function handleLogin(e) {
+  e.preventDefault();
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+
+  try {
+    const { user } = await API.post('/api/auth/login', { email, password });
+
+    // 1. Read the URL for a redirect parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirectUrl = urlParams.get('redirect');
+
+    // 2. Route the user
+    if (redirectUrl) {
+      window.location.href = redirectUrl;
+    } else if (user.role === 'seller') {
+      window.location.href = '/seller/dashboard.html';
+    } else if (user.role === 'admin' || user.role === 'staff') {
+      window.location.href = '/admin/index.html';
+    } else {
+      window.location.href = '/';
+    }
+  } catch (err) {
+    // Show error message
+    alert("Invalid email or password");
+  }
+}
+
 /* ============================================
    SHOW / HIDE PASSWORD TOGGLE
    ============================================ */
@@ -82,3 +111,4 @@ form.addEventListener('submit', async (e) => {
     submitBtn.textContent = 'Sign in';
   }
 });
+
