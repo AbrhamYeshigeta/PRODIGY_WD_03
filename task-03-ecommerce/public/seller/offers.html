@@ -5,99 +5,286 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>My Offers · Etfruit Seller</title>
   <link rel="stylesheet" href="/css/seller.css" />
+  <style>
+    .offer-card { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 0.9fr); gap: 20px; align-items: center; padding: 18px; border: 1px solid var(--border); border-radius: 12px; background: #fff; }
+    .offer-product { display: flex; align-items: center; gap: 14px; min-width: 0; }
+    .offer-product img { width: 72px; height: 72px; flex: 0 0 72px; object-fit: cover; border-radius: 10px; background: var(--bg-2); }
+    .offer-product h3 { margin: 0 0 5px; font-size: 15px; }
+    .offer-product p { margin: 0; color: var(--ink-3); font-size: 12px; }
+    .offer-status { display: inline-flex; margin-top: 8px; padding: 4px 8px; border-radius: 20px; background: var(--bg-2); color: var(--ink-3); font-size: 11px; font-weight: 700; text-transform: capitalize; }
+    .offer-status.active { color: #17613d; background: #e7f4ec; }
+    .offer-status.draft { color: #805c0a; background: #fff4d6; }
+    .offer-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .offer-controls label { display: grid; gap: 5px; color: var(--ink-3); font-size: 11px; }
+    .offer-controls input { width: 100%; min-width: 0; }
+    .offer-actions { display: flex; grid-column: 1 / -1; gap: 8px; justify-content: flex-end; }
+    .offers-message { margin: 0 0 12px; color: #a53d2d; font-size: 13px; }
+    .offer-gate { margin-bottom: 16px; border: 1px solid #e8c66a; border-left: 4px solid #d5a914; border-radius: 10px; background: #fff9e8; color: #594813; padding: 12px 16px; font-size: 13px; }
+    .offer-gate strong { display: block; margin-bottom: 3px; }
+    @media (max-width: 760px) { .offer-card { grid-template-columns: 1fr; } .offer-actions { justify-content: stretch; } .offer-actions .btn { flex: 1; } }
+  </style>
 </head>
 <body>
 <script type="module">
   import { renderShell, guardSeller } from '/js/seller/shell.js';
 
-  const seller = guardSeller();
+  let seller = guardSeller();
+  try {
+    const profileResponse = await fetch('/api/sellers/me', { credentials: 'include' });
+    if (profileResponse.ok) {
+      seller = (await profileResponse.json()).data;
+      localStorage.setItem('etfruit.seller', JSON.stringify(seller));
+    }
+  } catch { /* Use the cached seller profile while offline. */ }
+  const canPublish = seller?.verificationStatus === 'verified';
   const page = renderShell({ active: 'offers' });
-
-  // ZERO STATE: Empty offers array
-  const offers = [];
+  const COUNT_UNITS = new Set(['bunch', 'pack', 'piece']);
+  const escapeHTML = (value = '') => String(value).replace(/[&<>"']/g, (char) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[char]));
+  const formatETB = (cents) => `${(Number(cents || 0) / 100).toLocaleString('en-ET', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ETB`;
+  let offers = [];
+  let activeCategory = 'all';
 
   page.innerHTML = `
     <div class="page-top">
       <div class="ph">
         <div>
           <h1 class="welcome-line">My Offers</h1>
-          <p>Prices shown per <strong style="color:var(--brand)">quintal</strong> · buyers always see the ETB/kg equivalent</p>
+          <p>Manage prices and stock using the selling unit selected for each offer.</p>
         </div>
         <div class="actions">
           <a class="btn btn-gold" href="/seller/offers-new.html">➕ Add New Offer</a>
         </div>
       </div>
 
-      <!-- Category chips (Zeroed out) -->
-      <div class="chips">
-        <button class="chip active"><span class="ico">🏷️</span> All Offers <span class="count">0</span></button>
-        <button class="chip"><span class="ico">🌱</span> Leafy Greens <span class="count">0</span></button>
-        <button class="chip"><span class="ico">🥕</span> Root Vegetables <span class="count">0</span></button>
-        <button class="chip"><span class="ico">🍅</span> Fruit Vegetables <span class="count">0</span></button>
-        <button class="chip"><span class="ico">🫑</span> Peppers <span class="count">0</span></button>
-      </div>
+      <div class="chips" id="category-chips"></div>
 
       <div class="toolbar">
-        <div class="search-sm" style="opacity: 0.5;">
+        <div class="search-sm">
           <span style="color:var(--ink-4)">🔍</span>
-          <input placeholder="Search offers by product name…" disabled />
+          <input id="offer-search" placeholder="Search your products…" />
         </div>
-        <select class="select-sm" disabled style="opacity: 0.5;">
-          <option>All statuses</option>
+        <select class="select-sm" id="status-filter" aria-label="Filter by offer status">
+          <option value="all">All statuses</option>
+          <option value="active">Active</option>
+          <option value="paused">Paused</option>
+          <option value="draft">Drafts</option>
+          <option value="out_of_stock">Out of stock</option>
         </select>
         <div style="flex:1"></div>
-        <span style="font-size:12.5px;color:var(--ink-3)">
-          <strong style="color:var(--brand)">0</strong> active offers
-        </span>
+        <span id="active-count" style="font-size:12.5px;color:var(--ink-3)"></span>
       </div>
     </div>
 
+    ${canPublish ? '' : '<div class="offer-gate" role="status"><strong>Your seller account is not verified yet.</strong>Your offers remain private drafts until your account is verified. Once approved, publish them here to show them to customers.</div>'}
+
     <div class="page-body">
       <div class="orders-list">
-        <!-- EMPTY STATE -->
-        <div class="empty-state" style="padding: 60px 20px; border: 1px solid var(--border); background: #fff;">
-          <div class="es-icon">🏷️</div>
-          <h3>No offers created yet</h3>
-          <p>Your catalog is empty. Add your first product to start selling. Offers with photos sell 40% faster!</p>
-          <div class="es-actions" style="margin-top: 24px;">
-            <a class="btn btn-gold" href="/seller/offers-new.html">➕ Create Your First Offer</a>
-          </div>
-        </div>
+        <p class="offers-message" id="offers-message" role="status" aria-live="polite"></p>
+        <div id="offers-list" style="display:grid;gap:12px;"></div>
       </div>
 
       <aside class="panel">
         <div class="mini">
-          <div class="mini__head"><h3>Catalog performance</h3></div>
+          <div class="mini__head"><h3>Inventory summary</h3></div>
           <div class="row-item">
             <div class="ico">📦</div>
-            <div class="body"><strong>0 active offers</strong><small>Across 0 categories</small></div>
+            <div class="body"><strong id="summary-active">0 active offers</strong><small>Currently visible to buyers</small></div>
           </div>
           <div class="row-item">
-            <div class="ico gold">👁️</div>
-            <div class="body"><strong>0 views</strong><small>Last 30 days</small></div>
+            <div class="ico gold">🌿</div>
+            <div class="body"><strong id="summary-categories">0 categories</strong><small>Across your catalog</small></div>
           </div>
           <div class="row-item">
-            <div class="ico blue">🛒</div>
-            <div class="body"><strong>0 sold</strong><small>0 quintals total</small></div>
-          </div>
-        </div>
-
-        <div class="mini">
-          <div class="mini__head"><h3>💡 Tips to sell more</h3></div>
-          <div class="notif-list">
-            <div class="notif-item">
-              <div class="nico gold">📸</div>
-              <div class="nbody"><p>Offers with <strong>4+ photos</strong> sell 40% faster</p></div>
-            </div>
-            <div class="notif-item">
-              <div class="nico green">⚡</div>
-              <div class="nbody"><p>Sellers with <strong>same-day handling</strong> get 2× orders</p></div>
-            </div>
+            <div class="ico blue">📊</div>
+            <div class="body"><strong id="summary-stock">No inventory</strong><small>Available quantity by selling unit</small></div>
           </div>
         </div>
       </aside>
     </div>
   `;
+
+  const list = document.getElementById('offers-list');
+  const message = document.getElementById('offers-message');
+  const search = document.getElementById('offer-search');
+  const statusFilter = document.getElementById('status-filter');
+  const categoryChips = document.getElementById('category-chips');
+
+  function offerStatus(offer) {
+    if (offer.status === 'draft') return 'draft';
+    return Number(offer.stock) <= 0 ? 'out_of_stock' : offer.status;
+  }
+
+  function renderCategories() {
+    const categories = [...new Set(offers.map((offer) => offer.product?.category).filter(Boolean))].sort();
+    categoryChips.innerHTML = [
+      `<button class="chip ${activeCategory === 'all' ? 'active' : ''}" type="button" data-category="all">All <span class="count">${offers.length}</span></button>`,
+      ...categories.map((category) => {
+        const count = offers.filter((offer) => offer.product?.category === category).length;
+        return `<button class="chip ${activeCategory === category ? 'active' : ''}" type="button" data-category="${escapeHTML(category)}">${escapeHTML(category)} <span class="count">${count}</span></button>`;
+      }),
+    ].join('');
+  }
+
+  function renderOffers() {
+    renderCategories();
+    const query = search.value.trim().toLowerCase();
+    const status = statusFilter.value;
+    const visible = offers.filter((offer) => {
+      const matchesQuery = `${offer.product?.name || ''} ${offer.product?.category || ''}`.toLowerCase().includes(query);
+      return matchesQuery
+        && (activeCategory === 'all' || offer.product?.category === activeCategory)
+        && (status === 'all' || offerStatus(offer) === status);
+    });
+    const activeCount = offers.filter((offer) => offer.status === 'active' && Number(offer.stock) > 0).length;
+    const categories = new Set(offers.map((offer) => offer.product?.category).filter(Boolean));
+    const inventoryByUnit = offers.reduce((totals, offer) => {
+      totals[offer.unit] = (totals[offer.unit] || 0) + Math.max(0, Number(offer.stock) || 0);
+      return totals;
+    }, {});
+    document.getElementById('active-count').innerHTML = `<strong style="color:var(--brand)">${activeCount}</strong> active offers`;
+    document.getElementById('summary-active').textContent = `${activeCount} active ${activeCount === 1 ? 'offer' : 'offers'}`;
+    document.getElementById('summary-categories').textContent = `${categories.size} ${categories.size === 1 ? 'category' : 'categories'}`;
+    document.getElementById('summary-stock').textContent = Object.entries(inventoryByUnit).length
+      ? Object.entries(inventoryByUnit).map(([offerUnit, quantity]) => `${quantity.toLocaleString()} ${offerUnit}`).join(' · ')
+      : 'No inventory';
+
+    if (!visible.length) {
+      const hasOffers = offers.length > 0;
+      list.innerHTML = `<div class="empty-state" style="padding:48px 20px;border:1px solid var(--border);background:#fff;">
+        <div class="es-icon">🏷️</div>
+        <h3>${hasOffers ? 'No matching offers' : 'No offers created yet'}</h3>
+        <p>${hasOffers ? 'Try another search or filter.' : 'Add a catalog product to publish your first offer.'}</p>
+        ${hasOffers ? '' : '<div class="es-actions" style="margin-top:20px;"><a class="btn btn-gold" href="/seller/offers-new.html">➕ Create your first offer</a></div>'}
+      </div>`;
+      return;
+    }
+
+    list.innerHTML = visible.map((offer) => {
+      const product = offer.product || {};
+      const currentStatus = offerStatus(offer);
+      const statusText = currentStatus.replace('_', ' ');
+      const needsWeight = COUNT_UNITS.has(offer.unit);
+      const actionLabel = offer.status === 'active' ? 'Pause' : offer.status === 'draft' ? 'Publish' : 'Resume';
+      const actionDisabled = !canPublish ? 'disabled title="Available after verification"' : '';
+      const image = product.image ? escapeHTML(product.image) : '/img/placeholder.png';
+      return `<article class="offer-card" data-offer-id="${escapeHTML(offer.id)}">
+        <div class="offer-product">
+          <img src="${image}" alt="${escapeHTML(product.name || 'Product')}" loading="lazy" />
+          <div>
+            <h3>${escapeHTML(product.name || 'Catalog product')}</h3>
+            <p>${escapeHTML(product.category || 'Product')} · ${formatETB(offer.pricePerUnit)} / ${escapeHTML(offer.unit)}</p>
+            ${needsWeight ? `<p>Estimated ${Number(offer.estimatedWeightKg || 0).toLocaleString()} kg / ${escapeHTML(offer.unit)}</p>` : ''}
+            <span class="offer-status ${currentStatus === 'active' ? 'active' : currentStatus === 'draft' ? 'draft' : ''}">${escapeHTML(statusText)}</span>
+          </div>
+        </div>
+        <form class="offer-controls" data-edit-form>
+          <label>Price (ETB / ${escapeHTML(offer.unit)})<input class="input" name="pricePerUnit" type="number" min="0.01" step="0.01" value="${(Number(offer.pricePerUnit) / 100).toFixed(2)}" required /></label>
+          <label>Stock (${escapeHTML(offer.unit)})<input class="input" name="stock" type="number" min="0" step="1" value="${Number(offer.stock)}" required /></label>
+          ${needsWeight ? `<label>Estimated kg / ${escapeHTML(offer.unit)}<input class="input" name="estimatedWeightKg" type="number" min="0.01" max="1000" step="0.01" value="${Number(offer.estimatedWeightKg || 0) || ''}" required /></label>` : ''}
+          <div class="offer-actions">
+            <button class="btn btn-soft btn-sm" type="submit">Save changes</button>
+            <button class="btn btn-ghost btn-sm" type="button" data-action="toggle" ${actionDisabled}>${!canPublish ? 'Awaiting verification' : actionLabel}</button>
+            <button class="btn btn-ghost btn-sm" type="button" data-action="delete" aria-label="Delete ${escapeHTML(product.name || 'offer')}">Delete</button>
+          </div>
+        </form>
+      </article>`;
+    }).join('');
+  }
+
+  async function request(url, options = {}) {
+    const response = await fetch(url, {
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+      ...options,
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.message || `Request failed (${response.status})`);
+    return result;
+  }
+
+  search.addEventListener('input', renderOffers);
+  statusFilter.addEventListener('change', renderOffers);
+  categoryChips.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-category]');
+    if (!button) return;
+    activeCategory = button.dataset.category;
+    renderOffers();
+  });
+
+  list.addEventListener('submit', async (event) => {
+    const form = event.target.closest('[data-edit-form]');
+    if (!form) return;
+    event.preventDefault();
+    const offerCard = form.closest('[data-offer-id]');
+    const values = new FormData(form);
+    const pricePerUnit = Number(values.get('pricePerUnit'));
+    const stock = Number(values.get('stock'));
+    const estimatedWeightKg = Number(values.get('estimatedWeightKg'));
+    const button = form.querySelector('[type="submit"]');
+    const offer = offers.find((item) => item.id === offerCard.dataset.offerId);
+    if (!Number.isFinite(pricePerUnit) || pricePerUnit <= 0 || !Number.isInteger(stock) || stock < 0
+      || (COUNT_UNITS.has(offer.unit) && (!Number.isFinite(estimatedWeightKg) || estimatedWeightKg <= 0))) {
+      message.textContent = 'Enter a positive price and whole-number stock of zero or more.';
+      return;
+    }
+    button.disabled = true;
+    try {
+      const result = await request(`/api/offers/${encodeURIComponent(offerCard.dataset.offerId)}`, {
+        method: 'PATCH',
+        body: JSON.stringify({
+          pricePerUnit,
+          stock,
+          ...(COUNT_UNITS.has(offer.unit) ? { estimatedWeightKg } : {}),
+        }),
+      });
+      Object.assign(offer, result.data);
+      message.textContent = 'Offer updated.';
+      renderOffers();
+    } catch (error) {
+      message.textContent = error.message;
+      button.disabled = false;
+    }
+  });
+
+  list.addEventListener('click', async (event) => {
+    const button = event.target.closest('[data-action]');
+    if (!button) return;
+    const card = button.closest('[data-offer-id]');
+    const offerId = card?.dataset.offerId;
+    if (!offerId) return;
+    try {
+      button.disabled = true;
+      if (button.dataset.action === 'delete') {
+        if (!window.confirm('Delete this offer? This cannot be undone.')) {
+          button.disabled = false;
+          return;
+        }
+        await request(`/api/offers/${encodeURIComponent(offerId)}`, { method: 'DELETE' });
+        offers = offers.filter((offer) => offer.id !== offerId);
+        message.textContent = 'Offer deleted.';
+      } else {
+        const result = await request(`/api/offers/${encodeURIComponent(offerId)}/pause`, { method: 'PATCH' });
+        const offer = offers.find((item) => item.id === offerId);
+        offer.status = result.data.status;
+        message.textContent = offer.status === 'active' ? 'Offer resumed.' : 'Offer paused.';
+      }
+      renderOffers();
+    } catch (error) {
+      message.textContent = error.message;
+      button.disabled = false;
+    }
+  });
+
+  try {
+    const result = await request('/api/sellers/me/offers');
+    offers = result.data || [];
+    renderOffers();
+  } catch (error) {
+    message.textContent = error.message;
+    list.innerHTML = `<div class="empty-state" role="alert" style="padding:40px 20px;border:1px solid var(--border);background:#fff;"><h3>Offers could not be loaded</h3><p>${escapeHTML(error.message)}</p></div>`;
+  }
 </script>
 </body>
 </html>

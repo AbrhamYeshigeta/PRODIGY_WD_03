@@ -1,162 +1,219 @@
-/* ============================================
-   Cart — localStorage-backed
-   Works across pages, survives reloads.
-   Badge shows NUMBER OF PRODUCTS, not total kg.
-   ============================================ */
-
-const STORAGE_KEY = 'prodigy_cart_v1';
-const USER_STORAGE_PREFIX = 'prodigy_cart_v1_for_';
-const listeners = new Set();
-
-function getCurrentUser() {
-  try {
-    const raw = sessionStorage.getItem('prodigy_active_user');
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    if (!parsed || (!parsed.email && !parsed.username && !parsed.id)) return null;
-    return parsed;
-  } catch {
-    return null;
-  }
-}
-
-function getUserStorageKey() {
-  const user = getCurrentUser();
-  if (!user) return null;
-
-  const identifier = (user.email || user.username || user.id || 'guest').trim().toLowerCase();
-  return `${USER_STORAGE_PREFIX}${identifier.replace(/[^a-z0-9._-]+/g, '_')}`;
-}
-
-function read() {
-  const storageKey = getUserStorageKey();
-  if (!storageKey) return [];
-
-  try {
-    const raw = localStorage.getItem(storageKey);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
-
-function write(items) {
-  const storageKey = getUserStorageKey();
-  if (!storageKey) {
-    listeners.forEach((fn) => fn([]));
-    return [];
-  }
-
-  localStorage.setItem(storageKey, JSON.stringify(items));
-  listeners.forEach((fn) => fn(items));
-  return items;
-}
-
-function notify() {
-  const items = read();
-  listeners.forEach((fn) => fn(items));
-}
+// public/js/cart.js
 
 export const Cart = {
-  /* Get all items */
+  // We store the cart data in memory so we don't have to fetch it on every single interaction
+  currentCart: { items: [], total: 0 },
+  listeners: new Set(),
+
   getAll() {
-    return read();
+    return (this.currentCart.items || []).map((item) => ({
+      id: item.id,
+      offerId: item.offer.id,
+      quantity: item.quantity,
+      price: item.offer.pricePerUnit,
+      image: item.offer.product.image,
+      name: item.offer.product.name,
+      slug: item.offer.product.slug,
+      category: item.offer.product.category,
+      merchant: item.offer.seller?.businessName || 'Etfruit seller',
+      unit: item.offer.unit,
+      stock: item.offer.stock,
+      estimatedWeightKg: item.offer.estimatedWeightKg,
+    }));
   },
 
-  /* Add item or increment if already present
-     product: { id, name, slug, price, image, category, merchant }
-     quantity: in kg (number, e.g. 1.5) */
-  add(product, quantity) {
-    const storageKey = getUserStorageKey();
-    if (!storageKey) return [];
-
-    const items = read();
-    const existing = items.find((i) => i.id === product.id);
-
-    if (existing) {
-      existing.quantity = Math.round((existing.quantity + quantity) * 10) / 10;
-    } else {
-      items.push({
-        id: product.id,
-        slug: product.slug,
-        name: product.name,
-        price: product.price,
-        image: product.image,
-        category: product.category,
-        merchant: product.merchant || 'Prodigy Farms',
-        quantity: Math.round(quantity * 10) / 10,
-        addedAt: Date.now(),
-      });
-    }
-    write(items);
-    return items;
-  },
-
-  /* Set exact quantity (0 removes) */
-  setQuantity(productId, quantity) {
-    const storageKey = getUserStorageKey();
-    if (!storageKey) return [];
-
-    let items = read();
-    if (quantity <= 0) {
-      items = items.filter((i) => i.id !== productId);
-    } else {
-      const item = items.find((i) => i.id === productId);
-      if (item) item.quantity = Math.round(quantity * 10) / 10;
-    }
-    write(items);
-    return items;
-  },
-
-  /* Remove a single item */
-  remove(productId) {
-    const storageKey = getUserStorageKey();
-    if (!storageKey) return [];
-
-    const items = read().filter((i) => i.id !== productId);
-    write(items);
-    return items;
-  },
-
-  /* Empty the cart */
-  clear() {
-    const storageKey = getUserStorageKey();
-    if (storageKey) localStorage.removeItem(storageKey);
-    listeners.forEach((fn) => fn([]));
-    return [];
-  },
-
-  /* Badge count = number of distinct items for the active user */
-  getCount() {
-    return read().length;
-  },
-
-  /* Subtotal in cents */
   getSubtotal() {
-    return read().reduce((sum, i) => sum + i.price * i.quantity, 0);
+    return Number(this.currentCart.total || 0);
   },
 
-  /* Subscribe to changes — returns unsubscribe fn */
-  onChange(fn) {
-    listeners.add(fn);
-    return () => listeners.delete(fn);
+  onChange(listener) {
+    this.listeners.add(listener);
+    return () => this.listeners.delete(listener);
   },
 
-  /* Force a notify (call after page load) */
-  refresh() {
-    notify();
+  notifyChange() {
+    this.listeners.forEach((listener) => listener(this.getAll()));
   },
+
+  /* ============================================
+     Fetch the cart from PostgreSQL via Prisma
+     ============================================ */
+  async fetchCart() {
+    try {
+      const res = await fetch('/api/cart', { credentials: 'include' });
+      
+      // If the user is not logged in (401), just return empty
+      if (res.status === 401) {
+        this.currentCart = { items: [], total: 0 };
+        this.updateHeaderBadge();
+        this.notifyChange();
+        return this.currentCart;
+      }
+
+      const json = await res.json();
+      if (json.success) {
+        this.currentCart = json.data;
+        this.updateHeaderBadge();
+        this.notifyChange();
+
+        // If we are on the cart page, render the items
+        if (window.location.pathname.includes('cart.html')) {
+          this.renderCartPage();
+        }
+      }
+      return this.currentCart;
+    } catch (err) {
+      console.error("[Cart] Failed to fetch from DB:", err);
+      return { items: [], total: 0 };
+    }
+  },
+
+  /* ============================================
+     Update the red badge in the header
+     ============================================ */
+  updateHeaderBadge() {
+    const badge = document.getElementById('cart-count');
+    if (badge) {
+      // Count total quantity (e.g., 2kg + 3kg = 5)
+      // Or just count distinct items: this.currentCart.items.length
+      // Let's count distinct items for the badge
+      badge.textContent = this.currentCart.items.length;
+    }
+  },
+
+  /* ============================================
+     Render the Cart Page (if on cart.html)
+     ============================================ */
+  renderCartPage() {
+    const container = document.getElementById('cart-items-list');
+    const subtotalEl = document.getElementById('cart-subtotal');
+    const shippingEl = document.getElementById('cart-shipping');
+    const totalEl = document.getElementById('cart-total');
+    
+    if (!container) return;
+
+    if (this.currentCart.items.length === 0) {
+      container.innerHTML = `
+        <div class="empty-cart" style="text-align:center; padding: 40px;">
+          <h3>Your cart is empty</h3>
+          <p>Looks like you haven't added any fresh produce yet.</p>
+          <a href="/" class="btn-checkout" style="display:inline-block; margin-top:20px; width:auto;">Start Shopping</a>
+        </div>
+      `;
+      if (subtotalEl) subtotalEl.textContent = '0.00 ETB';
+      if (shippingEl) shippingEl.textContent = '0.00 ETB';
+      if (totalEl) totalEl.textContent = '0.00 ETB';
+      return;
+    }
+
+    // Render the actual items
+    container.innerHTML = this.currentCart.items.map(item => {
+      const offer = item.offer;
+      const product = offer.product;
+      const seller = offer.seller;
+      
+      // Convert cents to ETB
+      const price = (offer.pricePerUnit / 100).toFixed(2);
+      const lineTotal = ((offer.pricePerUnit * item.quantity) / 100).toFixed(2);
+
+      return `
+        <div class="cart-row">
+          <div class="cart-row-img">
+            <img src="${product.image || '/img/placeholder.png'}" alt="${product.name}" />
+          </div>
+          <div class="cart-row-info">
+            <div class="cart-row-cat">${product.category}</div>
+            <a href="/product.html?slug=${product.slug}" class="cart-row-name">${product.name}</a>
+            <div class="cart-row-merchant">Sold by ${seller.businessName}</div>
+          </div>
+          
+          <div class="cart-row-qty">
+            <div class="qty-stepper" style="border: 1px solid var(--border); border-radius: 999px; display: inline-flex; align-items: center;">
+              <button class="qty-btn" onclick="window.Cart.updateQty('${item.id}', ${item.quantity - 1})" style="padding: 5px 10px;">−</button>
+              <span style="padding: 0 10px; font-weight: bold;">${item.quantity}</span>
+              <button class="qty-btn" onclick="window.Cart.updateQty('${item.id}', ${item.quantity + 1})" style="padding: 5px 10px;">+</button>
+            </div>
+            <span class="qty-unit" style="font-size:12px; color:var(--text-muted); margin-left:5px;">${offer.unit}</span>
+          </div>
+          
+          <div class="cart-row-total">
+            ${lineTotal} ETB
+          </div>
+          
+          <button class="cart-row-remove" onclick="window.Cart.removeItem('${item.id}')" aria-label="Remove">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      `;
+    }).join('');
+
+    // Update Totals
+    const subtotal = (this.currentCart.total / 100).toFixed(2);
+    const shipping = 50.00; // Flat 50 ETB delivery
+    const total = (Number(subtotal) + shipping).toFixed(2);
+
+    if (subtotalEl) subtotalEl.textContent = `${subtotal} ETB`;
+    if (shippingEl) shippingEl.textContent = `${shipping.toFixed(2)} ETB`;
+    if (totalEl) totalEl.textContent = `${total} ETB`;
+  },
+
+  /* ============================================
+     Actions (Update, Remove)
+     ============================================ */
+  async updateQty(cartItemId, newQty) {
+    if (newQty < 1) {
+      return this.removeItem(cartItemId);
+    }
+    
+    try {
+      // Requires a PATCH route in your backend
+      await fetch(`/api/cart/update/${cartItemId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quantity: newQty }),
+        credentials: 'include'
+      });
+      this.fetchCart(); // Refresh data from DB
+    } catch (err) {
+      console.error("Failed to update quantity", err);
+    }
+  },
+
+  setQuantity(cartItemId, quantity) {
+    return this.updateQty(cartItemId, quantity);
+  },
+
+  async remove(cartItemId) {
+    return this.removeItem(cartItemId);
+  },
+
+  async clear() {
+    await Promise.all((this.currentCart.items || []).map((item) => fetch(`/api/cart/remove/${encodeURIComponent(item.id)}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    })));
+    return this.fetchCart();
+  },
+
+  async removeItem(cartItemId) {
+    try {
+      await fetch(`/api/cart/remove/${cartItemId}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+      this.fetchCart(); // Refresh data from DB
+    } catch (err) {
+      console.error("Failed to remove item", err);
+    }
+  }
 };
 
-/* ============================================
-   Auto-update header cart badge on every page
-   ============================================ */
-function updateHeaderBadge() {
-  const badge = document.getElementById('cart-count');
-  if (!badge) return;
-  badge.textContent = Cart.getCount();
-}
+// Make it globally accessible so inline HTML onclick handlers can call it
+window.Cart = Cart;
 
-document.addEventListener('DOMContentLoaded', updateHeaderBadge);
-window.addEventListener('storage', updateHeaderBadge);
-Cart.onChange(updateHeaderBadge);
+/* ============================================
+   Auto-initialize on Page Load
+   ============================================ */
+document.addEventListener('DOMContentLoaded', () => {
+  Cart.fetchCart();
+});

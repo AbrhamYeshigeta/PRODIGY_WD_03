@@ -1,88 +1,97 @@
 // src/controllers/orderController.js
+const prisma = require('../config/prisma');
 const asyncHandler = require('../utils/asyncHandler');
-const ApiError     = require('../utils/ApiError');
-const Order        = require('../models/Order');
-const Offer        = require('../models/Offer');
-const Cart         = require('../models/Cart');
-const generateOrderId = require('../utils/generateOrderId');
-const { ORDER_STATUS, PAYMENT_METHODS } = require('../config/constants');
-const { toCents } = require('../utils/money');
+const ApiError = require('../utils/ApiError');
+const { format: fmtMoney } = require('../utils/money');
 
-/* ── POST /api/orders ── create from cart */
-exports.create = asyncHandler(async (req, res) => {
-  const { shippingAddress, paymentMethod, note } = req.body;
+/* ── POST /api/orders/checkout ── */
+exports.createOrder = asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+  const { shippingAddress, paymentMethod } = req.body;
 
-  const cart = await Cart.findOne({ user: req.user._id }).populate('items.offer');
-  if (!cart || !cart.items.length) throw ApiError.badRequest('Cart is empty');
-
-  const items = [];
-  let subtotal = 0;
-
-  for (const line of cart.items) {
-    const offer = line.offer;
-    if (!offer || offer.status !== 'active') {
-      throw ApiError.badRequest(`Offer no longer available`);
+  // 1. Get the user's cart and all related offer/product data
+  const cart = await prisma.cart.findUnique({
+    where: { userId },
+    include: {
+      items: {
+        include: {
+          offer: true
+        }
+      }
     }
-    if (offer.stock < line.quantity) {
-      throw ApiError.badRequest(`Insufficient stock for offer ${offer._id}`);
-    }
-    const lineTotal = offer.pricePerUnit * line.quantity;
-    subtotal += lineTotal;
+  });
 
-    items.push({
-      offer: offer._id,
-      seller: offer.seller,
-      product: offer.product,
-      unit: offer.unit,
-      quantity: line.quantity,
-      pricePerUnit: offer.pricePerUnit,
-      lineTotal,
-    });
+  if (!cart || cart.items.length === 0) {
+    throw ApiError.badRequest('Your cart is empty');
   }
 
-  const shipping = 5000; // 50.00 ETB flat — later: computed per seller
-  const total = subtotal + shipping;
+  // 2. Calculate totals and verify stock
+  let subtotal = 0;
+  for (const item of cart.items) {
+    if (item.offer.stock < item.quantity) {
+      throw ApiError.badRequest(`Insufficient stock for ${item.offer.id}`);
+    }
+    subtotal += item.offer.pricePerUnit * item.quantity;
+  }
+  const shipping = 5000; // 50.00 ETB
+  const totalAmount = subtotal + shipping;
 
-  const order = await Order.create({
-    orderId: generateOrderId(),
-    user: req.user._id,
-    items,
-    shippingAddress,
-    subtotal,
-    shipping,
-    total,
-    paymentMethod,
-    note,
-    status: ORDER_STATUS.PENDING_PAYMENT,
+  // 3. Execute the order creation in a Transaction
+  const order = await prisma.$transaction(async (tx) => {
+    // A. Create the Order
+    const newOrder = await tx.order.create({
+      data: {
+        userId,
+        subtotal,
+        shipping,
+        totalAmount,
+        shippingAddress: JSON.stringify(shippingAddress),
+        paymentMethod,
+        status: 'pending_payment',
+        items: {
+          create: cart.items.map(item => ({
+            offerId: item.offerId,
+            quantity: item.quantity,
+            priceAtPurchase: item.offer.pricePerUnit
+          }))
+        }
+      }
+    });
+
+    // B. Deduct stock from the Offers
+    for (const item of cart.items) {
+      await tx.offer.update({
+        where: { id: item.offerId },
+        data: { stock: { decrement: item.quantity } }
+      });
+    }
+
+    // C. Clear the user's cart
+    await tx.cartItem.deleteMany({
+      where: { cartId: cart.id }
+    });
+
+    return newOrder;
   });
 
   res.status(201).json({ success: true, data: order });
 });
 
-/* ── GET /api/orders ── my orders as buyer */
+/* ── GET /api/orders ── (Buyer's order history) ── */
 exports.listMine = asyncHandler(async (req, res) => {
-  const orders = await Order.find({ user: req.user._id })
-    .sort({ createdAt: -1 })
-    .limit(100);
+  const orders = await prisma.order.findMany({
+    where: { userId: req.user.id },
+    include: {
+      items: {
+        include: {
+          offer: {
+            include: { product: true, seller: { select: { businessName: true } } }
+          }
+        }
+      }
+    },
+    orderBy: { createdAt: 'desc' }
+  });
+
   res.json({ success: true, data: orders });
-});
-
-/* ── GET /api/sellers/me/orders ── orders containing my offers */
-exports.listSellerOrders = asyncHandler(async (req, res) => {
-  const orders = await Order.find({ 'items.seller': req.seller._id })
-    .populate('user', 'name phone')
-    .sort({ createdAt: -1 })
-    .limit(100);
-  res.json({ success: true, data: orders });
-});
-
-/* ── PATCH /api/orders/:id/status ── advance pipeline */
-exports.updateStatus = asyncHandler(async (req, res) => {
-  const { status } = req.body;
-  const order = await Order.findOne({ orderId: req.params.id, 'items.seller': req.seller._id });
-  if (!order) throw ApiError.notFound('Order not found');
-
-  order.status = status;
-  await order.save();
-  res.json({ success: true, data: order });
 });

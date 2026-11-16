@@ -6,6 +6,10 @@
   <title>Create account · Prodigy Store</title>
   <link rel="stylesheet" href="/css/design.css" />
   <link rel="stylesheet" href="/css/auth.css" />
+  <style>
+    .field-error { color: #dc2626; font-size: 12px; margin-top: 4px; display: none; }
+    .input-error { border-color: #dc2626 !important; }
+  </style>
 </head>
 <body>
   <main class="auth-shell">
@@ -14,16 +18,20 @@
          <img src="/img/logo.png" alt="Prodigy Store logo" class="auth-logo-img" />
       </a>
 
-      <!-- Added IDs here for Merchant Chameleon effect -->
       <h1 class="auth-title" id="page-title">Create your account</h1>
       <p class="auth-sub" id="page-subtitle">Join us and start shopping fresh house vegetables.</p>
 
       <form id="register-form" class="auth-form" novalidate>
         <div>
+          <label for="full-name">Full Name</label>
+          <input type="text" id="full-name" name="full-name" required
+         placeholder="e.g. Sara Bekele" autocomplete="name" />
           <label for="username">Username</label>
           <input type="text" id="username" name="username" required
                  minlength="3" maxlength="30" placeholder="pick a username"
                  autocomplete="username" />
+          <!-- NEW: Inline error message for username -->
+          <p class="field-error" id="username-error">This username is already taken. Please try another.</p>
         </div>
 
         <div>
@@ -33,48 +41,22 @@
         </div>
 
         <div class="pw-field">
-        <label for="password">Password</label>
-
-        <div class="pw-wrap" id="pw-wrap">
-            <input type="password" id="password" name="password" required
-                placeholder="Create a strong password"
-                autocomplete="new-password" />
-
-            <button type="button" class="pw-toggle" id="pw-toggle"
-                    aria-label="Show password" title="Show password">
-            <svg class="icon-show" width="20" height="20" viewBox="0 0 24 24"
-                fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                <circle cx="12" cy="12" r="3" />
-            </svg>
-            <svg class="icon-hide" width="20" height="20" viewBox="0 0 24 24"
-                fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
-                <line x1="1" y1="1" x2="23" y2="23" />
-            </svg>
-            </button>
-        </div>
-
-        <div class="pw-strength" id="pw-strength" aria-hidden="true">
-            <div class="pw-bars">
-            <span class="pw-bar"></span>
-            <span class="pw-bar"></span>
-            <span class="pw-bar"></span>
-            <span class="pw-bar"></span>
-            </div>
-            <span class="pw-label" id="pw-label"></span>
-        </div>
-
-        <p class="pw-hint" id="pw-hint" aria-live="polite">
-            Use
-            <span data-rule="length">8+ characters</span>,
-            <span data-rule="upper">uppercase letter</span>,
-            <span data-rule="lower">lowercase letter</span>,
-            <span data-rule="number">numbers</span>,
-            and <span data-rule="special">special characters</span>.
-        </p>
+          <label for="password">Password</label>
+          <div class="pw-wrap" id="pw-wrap">
+              <input type="password" id="password" name="password" required
+                  placeholder="Create a strong password"
+                  autocomplete="new-password" />
+              <button type="button" class="pw-toggle" id="pw-toggle" aria-label="Show password">
+                <svg class="icon-show" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                </svg>
+                <svg class="icon-hide" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                    <line x1="1" y1="1" x2="23" y2="23" />
+                </svg>
+              </button>
+          </div>
         </div>
 
         <button type="submit" class="btn btn-green btn-full" id="submit-btn">
@@ -86,74 +68,95 @@
 
       <p class="auth-footer">
         Already have an account?
-        <!-- Added ID to change link dynamically -->
         <a href="/login.html" id="login-link">Sign in</a>
       </p>
     </div>
   </main>
 
-  <!-- Replaced the src script with inline logic -->
-  <script type="module">
-    import { api } from '/js/api.js';
-
-    // 1. Check URL for redirect parameter
+  <script>
+    // 1. Check URL for redirect parameter (Merchant flow)
     const urlParams = new URLSearchParams(window.location.search);
     const redirectUrl = urlParams.get('redirect');
 
-    // 2. Change UI text if it's a merchant
     if (redirectUrl && redirectUrl.includes('seller')) {
       document.title = "Merchant Registration · Prodigy Store";
       document.getElementById('page-title').textContent = "Become a Merchant";
       document.getElementById('page-subtitle').textContent = "Step 1: Create your base account to begin your application.";
     }
 
-    // 3. Pass the redirect parameter to the Login link
     const loginLink = document.getElementById('login-link');
     if (loginLink && redirectUrl) {
       loginLink.href = `/login.html?redirect=${redirectUrl}`;
     }
 
-    // 4. Handle Form Submission
-    document.getElementById('register-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const name = document.getElementById('username').value; // using username as name
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const btn = document.getElementById('submit-btn');
-      const msg = document.getElementById('msg');
-      
-      btn.disabled = true;
-      btn.textContent = 'Creating account...';
-      msg.textContent = '';
+    // 2. Handle Form Submission
+     document.getElementById('register-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  // Grab the values safely
+  const name = document.getElementById('full-name').value;
+  const username = document.getElementById('username').value;
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  
+  const btn = document.getElementById('submit-btn');
+  const msg = document.getElementById('msg');
+  
+  btn.disabled = true;
+  btn.textContent = 'Creating account...';
+  msg.textContent = '';
 
-      try {
-        await api.post('/auth/register', { name, email, password });
-        
-        // SMART REDIRECT
-        if (redirectUrl) {
-          window.location.href = redirectUrl; // Send to /seller/apply.html
-        } else {
-          window.location.href = '/'; // Normal customer goes to landing page
-        }
-      } catch (err) {
-        msg.textContent = err.response?.data?.message || 'Registration failed. Try a different email.';
-        msg.style.color = 'red';
-        btn.disabled = false;
-        btn.textContent = 'Create account';
-      }
+  try {
+    const response = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, username, email, password }) 
     });
 
-    // --- UI LOGIC (Password Toggle & Strength) ---
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Registration failed');
+    }
+
+    // Redirect on success
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirectUrl = urlParams.get('redirect');
+
+    if (redirectUrl) {
+      window.location.href = redirectUrl;
+    } else {
+      window.location.href = '/';
+    }
+
+  } catch (err) {
+    msg.textContent = err.message;
+    msg.style.color = 'red';
+    btn.disabled = false;
+    btn.textContent = 'Create account';
+  }
+});
+
+    // 3. Password Toggle UI
     const pwToggle = document.getElementById('pw-toggle');
     const pwInput = document.getElementById('password');
     if (pwToggle && pwInput) {
       pwToggle.addEventListener('click', () => {
         const type = pwInput.getAttribute('type') === 'password' ? 'text' : 'password';
         pwInput.setAttribute('type', type);
-        pwToggle.classList.toggle('show');
+        
+        // Toggle icons
+        const showIcon = pwToggle.querySelector('.icon-show');
+        const hideIcon = pwToggle.querySelector('.icon-hide');
+        if (type === 'text') {
+          showIcon.style.display = 'none';
+          hideIcon.style.display = 'block';
+        } else {
+          showIcon.style.display = 'block';
+          hideIcon.style.display = 'none';
+        }
       });
     }
-    // (Note: You can keep your existing password strength JS logic here if you had it)
   </script>
 </body>
 </html>

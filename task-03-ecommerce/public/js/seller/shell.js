@@ -15,7 +15,6 @@ export function renderShell({ active = 'dashboard' }) {
   const nav = [
     { section: 'Menu' },
     { key:'dashboard',  href:'/seller/dashboard.html',  ico:'🏠', label:'Dashboard' },
-    { key:'orders',     href:'/seller/orders.html',     ico:'🧾', label:'Orders', id: 'nav-orders' },
     { section: 'Catalog' },
     { key:'offers',     href:'/seller/offers.html',     ico:'🏷️', label:'My Offers' },
     { key:'offers-new', href:'/seller/offers-new.html', ico:'➕', label:'Add Offer' },
@@ -132,9 +131,13 @@ export function renderShell({ active = 'dashboard' }) {
   });
 
   // --- DYNAMIC BADGE LOGIC ---
-  if (active !== 'apply' && active !== 'pending' && active !== 'login') {
+  if (seller.verificationStatus === 'verified') {
     fetch('/api/sellers/me/stats', { credentials: 'include' })
-      .then(res => res.json())
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || `Seller stats could not be loaded (${res.status})`);
+        return data;
+      })
       .then(data => {
         const newOrders = data.data?.ordersNew || 0;
         if (newOrders > 0) {
@@ -144,7 +147,7 @@ export function renderShell({ active = 'dashboard' }) {
           }
         }
       })
-      .catch(() => {});
+      .catch((error) => console.error('Failed to load seller navigation stats', error));
   }
 
   // --- AVATAR DROPDOWN LOGIC ---

@@ -19,8 +19,18 @@ const passwordRule = body('password')
   .matches(/[a-z]/).withMessage('Password needs a lowercase letter')
   .matches(/\d/).withMessage('Password needs a number');
 
+const normalizeRegistrationName = (req, res, next) => {
+  const submittedName = req.body?.name ?? req.body?.username;
+  if (typeof submittedName === 'string') {
+    req.body.name = submittedName.trim();
+  }
+  next();
+};
+
 router.post('/register',
-  [body('username').trim().isLength({ min: 3, max: 30 }).withMessage('Username must be 3-30 characters'),
+  normalizeRegistrationName,
+  [body('name').isString().withMessage('Full name is required').bail()
+    .isLength({ min: 2, max: 80 }).withMessage('Full name must be 2-80 characters'),
    body('email').isEmail().withMessage('Valid email required').normalizeEmail(),
    passwordRule],
   validate, register);

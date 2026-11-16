@@ -1,6 +1,6 @@
 // src/middleware/authorize.js
 const ApiError = require('../utils/ApiError');
-const Seller  = require('../models/Seller');
+const prisma   = require('../config/prisma'); // ADDED PRISMA IMPORT
 const { ROLES, SELLER_STATUS } = require('../config/constants');
 
 /* Any authenticated user with one of the given roles */
@@ -16,11 +16,15 @@ function requireRole(...roles) {
 async function requireVerifiedSeller(req, _res, next) {
   try {
     if (!req.user) return next(ApiError.unauthorized());
-    const seller = await Seller.findOne({ user: req.user._id });
+    
+    // Fetch from Prisma using the User ID
+    const seller = await prisma.seller.findUnique({ where: { userId: req.user.id } });
+    
     if (!seller) return next(ApiError.forbidden('Not a seller'));
     if (seller.verificationStatus !== SELLER_STATUS.VERIFIED) {
       return next(ApiError.forbidden('Seller not verified yet'));
     }
+    
     req.seller = seller;
     next();
   } catch (err) {
@@ -32,8 +36,12 @@ async function requireVerifiedSeller(req, _res, next) {
 async function attachSeller(req, _res, next) {
   try {
     if (!req.user) return next(ApiError.unauthorized());
-    const seller = await Seller.findOne({ user: req.user._id });
+    
+    // Fetch from Prisma using the User ID
+    const seller = await prisma.seller.findUnique({ where: { userId: req.user.id } });
+    
     if (!seller) return next(ApiError.forbidden('Not a seller'));
+    
     req.seller = seller;
     next();
   } catch (err) {

@@ -17,37 +17,94 @@
     .product-result-copy small { font-size: 11.5px; color: var(--ink-3); }
     .product-result-arrow { font-size: 11px; color: var(--ink-3); font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; flex-shrink: 0; }
     .product-empty { border: 1px dashed var(--border); background: rgba(13,61,46,0.02); color: var(--ink-3); border-radius: 12px; padding: 14px 16px; font-size: 12.5px; }
+    .offer-gate { margin: 0 0 16px; border: 1px solid #e8c66a; border-left: 4px solid #d5a914; border-radius: 10px; background: #fff9e8; color: #594813; padding: 13px 16px; font-size: 13px; }
+    .offer-gate strong { display: block; margin-bottom: 3px; }
+    .offer-gate.verified { border-color: #b7d9c2; border-left-color: #27804d; background: #eff8f1; color: #20583a; }
+    .preview-meta { display: grid; gap: 7px; margin-top: 12px; color: var(--ink-3); font-size: 11.5px; text-align: left; }
+    .preview-meta span { display: flex; justify-content: space-between; gap: 12px; }
+    .preview-meta strong { color: var(--ink); text-align: right; }
+    .offer-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .offer-back { flex: 0 0 auto; }
+    .offer-unit-picker {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+      max-width: 620px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--card);
+      box-shadow: var(--shadow-xs);
+    }
+    .offer-unit-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .offer-unit-heading .up-label { font-size: 10px; font-weight: 700; color: var(--ink-3); letter-spacing: .09em; }
+    .offer-unit-current { color: var(--brand); font-size: 12px; font-weight: 700; }
+    .offer-unit-picker .up-tabs { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+    .offer-unit-picker .up-tab {
+      min-height: 36px;
+      padding: 7px 10px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: var(--bg-2);
+      color: var(--ink-2);
+      font-size: 12px;
+      font-weight: 600;
+      transition: border-color .15s, background .15s, color .15s, box-shadow .15s;
+    }
+    .offer-unit-picker .up-tab:hover { border-color: var(--brand); color: var(--brand); }
+    .offer-unit-picker .up-tab:focus-visible { outline: 3px solid rgba(13,61,46,.2); outline-offset: 2px; }
+    .offer-unit-picker .up-tab.active {
+      border-color: var(--brand);
+      background: var(--brand);
+      color: #fff;
+      box-shadow: 0 3px 10px rgba(13,61,46,.18);
+    }
+    @media (max-width: 700px) {
+      .offer-toolbar { align-items: stretch; flex-direction: column; }
+      .offer-unit-picker { width: 100%; max-width: none; }
+      .offer-back { align-self: flex-start; }
+    }
+    @media (max-width: 420px) {
+      .offer-unit-picker .up-tabs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    .weight-field { padding: 12px; border: 1px dashed var(--border); border-radius: 10px; background: var(--bg-2); }
+    .weight-field[hidden] { display: none; }
   </style>
 </head>
 <body>
 <script type="module">
-  import { renderShell, guardSeller } from '/js/seller/shell.js';
+  import { renderShell } from '/js/seller/shell.js';
 
-  const seller = guardSeller();
+  const sellerResponse = await fetch('/api/sellers/me', { credentials: 'include' });
+  if (sellerResponse.status === 401) {
+    window.location.href = '/seller/login.html';
+    throw new Error('Sign in to manage seller offers.');
+  }
+  if (!sellerResponse.ok) {
+    const error = await sellerResponse.json().catch(() => ({}));
+    throw new Error(error.message || `Seller profile could not be loaded (${sellerResponse.status})`);
+  }
+  const seller = (await sellerResponse.json()).data;
+  localStorage.setItem('etfruit.seller', JSON.stringify(seller));
   const page = renderShell({ active: 'offers-new' });
+  const isVerified = seller.verificationStatus === 'verified';
+  const verificationMessage = seller.verificationStatus === 'pending'
+    ? 'Your seller application is under review.'
+    : 'Your seller account is not verified yet.';
 
-  // UPDATED UNITS CONFIG
   const UNITS = {
-    kg:      { short: 'kg',  long: 'kg',         factor: 1,    icon: '🌾', label: 'Kilo',    pricePlaceholder: '85.00' },
-    piece:   { short: 'pc',  long: 'piece',      factor: 1,    icon: '🍉', label: 'Piece',   pricePlaceholder: '150.00' },
-    bunch:   { short: 'bch', long: 'bunch',      factor: 1,    icon: '🥬', label: 'Bunch',   pricePlaceholder: '50.00' },
-    pack:    { short: 'pk',  long: 'pack',       factor: 1,    icon: '📦', label: 'Pack',    pricePlaceholder: '120.00' },
-    quintal: { short: 'qtl', long: 'quintal',    factor: 100,  icon: '📦', label: 'Quintal', pricePlaceholder: '8500.00' },
-    ton:     { short: 't',   long: 'metric ton', factor: 1000, icon: '🏭', label: 'Ton',     pricePlaceholder: '85000.00' },
+    kg:      { short: 'kg', long: 'kg', factor: 1, label: 'Kilogram', requiresWeight: false, pricePlaceholder: '85.00' },
+    quintal: { short: 'qtl', long: 'quintal', factor: 100, label: 'Quintal', requiresWeight: false, pricePlaceholder: '8500.00' },
+    ton:     { short: 'ton', long: 'ton', factor: 1000, label: 'Metric ton', requiresWeight: false, pricePlaceholder: '85000.00' },
+    bunch:   { short: 'bunch', long: 'bunch', factor: null, label: 'Bunch', requiresWeight: true, pricePlaceholder: '50.00' },
+    pack:    { short: 'pack', long: 'pack', factor: null, label: 'Pack', requiresWeight: true, pricePlaceholder: '120.00' },
+    piece:   { short: 'piece', long: 'piece', factor: null, label: 'Piece', requiresWeight: true, pricePlaceholder: '35.00' },
   };
 
-  const DEFAULT_UNIT_MAP = { retail: 'kg', wholesale: 'quintal', bulk: 'ton' };
-  let unit = DEFAULT_UNIT_MAP[seller.scale] || 'kg';
-  let selectedProductSlug = null;
-
-  const catalog = [
-    { slug: 'red-potatoes', name: 'Red Potatoes', category: 'Root Vegetables', image: '🥔' },
-    { slug: 'red-onions',   name: 'Red Onions',   category: 'Root Vegetables', image: '🧅' },
-    { slug: 'watermelon',   name: 'Watermelon',   category: 'Fruits', image: '🍉' },
-    { slug: 'cabbage',      name: 'Green Cabbage', category: 'Leafy Greens', image: '🥬' },
-    { slug: 'apples',       name: 'Red Apples',    category: 'Fruits', image: '🍎' },
-    { slug: 'kale',         name: 'Fresh Kale',    category: 'Leafy Greens', image: '🌿' },
-  ];
+  let unit = seller.scale === 'retail' ? 'kg' : seller.scale === 'bulk' ? 'ton' : 'quintal';
+  let selectedProduct = null;
+  let catalog = [];
+  let productLoadError = '';
 
   const fmtETB = (v) => v.toLocaleString('en-ET', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -55,40 +112,29 @@
   function renderPricePreview() {
     const u = UNITS[unit];
     const priceVal = parseFloat(document.getElementById('priceInput')?.value || '');
-    const estWeightVal = parseFloat(document.getElementById('estWeightInput')?.value || '');
+    const estimatedWeight = parseFloat(document.getElementById('estimatedWeightInput')?.value || '');
     
     const previewPrice = document.getElementById('previewPrice');
     const previewEq = document.getElementById('previewEq');
     const pricePreview = document.getElementById('pricePreview');
 
-    if (!priceVal || priceVal <= 0) {
+    if (!priceVal || priceVal <= 0 || (u.requiresWeight && (!estimatedWeight || estimatedWeight <= 0))) {
       previewPrice.textContent = '— ETB';
-      previewEq.textContent = `per ${u.short}`;
-      pricePreview.innerHTML = `<div style="color:var(--ink-3);font-size:12.5px">Enter a price to see the buyer-facing display and ETB/kg comparison.</div>`;
+      previewEq.textContent = `per ${u.long}`;
+      pricePreview.innerHTML = `<div style="color:var(--ink-3);font-size:12.5px">${u.requiresWeight ? 'Enter a price and estimated weight to calculate the market comparison.' : 'Enter a price to see the buyer-facing display and ETB/kg comparison.'}</div>`;
       return;
     }
 
-    let perKg = 0;
-    
-    // Logic for piece, bunch, pack
-    if (['piece', 'bunch', 'pack'].includes(unit)) {
-      if (estWeightVal > 0) {
-        perKg = (priceVal / estWeightVal).toFixed(2);
-      } else {
-        perKg = '?';
-      }
-    } else {
-      perKg = (priceVal / u.factor).toFixed(2);
-    }
+    const perKg = (priceVal / (u.requiresWeight ? estimatedWeight : u.factor)).toFixed(2);
 
     const fmtPrice = fmtETB(priceVal);
 
     previewPrice.textContent = `${fmtPrice} ETB`;
-    previewEq.textContent = `per ${u.long}` + (perKg !== '?' ? ` · ≈ ${perKg} ETB/kg` : '');
+    previewEq.textContent = `per ${u.long} · ≈ ${perKg} ETB/kg`;
 
     pricePreview.innerHTML = `
       <div class="main">${fmtPrice} ETB / ${u.long}</div>
-      <div class="eq">Buyers will see this. ${perKg !== '?' ? `Normalized to <strong>${perKg} ETB / kg</strong> for ranking.` : 'Please enter the estimated weight to calculate ETB/kg.'}</div>
+      <div class="eq">Buyers will see this. Normalized to <strong>${perKg} ETB / kg</strong> for market comparison${u.requiresWeight ? ` using ${estimatedWeight} kg per ${u.long}` : ''}.</div>
     `;
   }
 
@@ -102,19 +148,24 @@
     const priceInput = document.getElementById('priceInput');
     if (priceInput) priceInput.placeholder = u.pricePlaceholder;
 
-    // Show/Hide the Estimated Weight field
-    const estWeightField = document.getElementById('estWeightField');
-    if (estWeightField) {
-      if (['piece', 'bunch', 'pack'].includes(unit)) {
-        estWeightField.style.display = 'block';
-      } else {
-        estWeightField.style.display = 'none';
-      }
-    }
+    document.getElementById('sellerUnitLabel').textContent = u.label;
+    document.getElementById('estimatedWeightField').hidden = !u.requiresWeight;
+    document.getElementById('estimatedWeightLabel').textContent = `Estimated weight per ${u.long} (kg)`;
+    document.getElementById('estimatedWeightHelp').textContent = unit === 'pack'
+      ? 'Enter the combined weight of everything in one pack. For 4 apples weighing about 0.7 kg total, enter 0.7.'
+      : unit === 'piece'
+        ? 'Enter the approximate weight of one fruit or vegetable. For example, one pineapple may weigh about 1.2 kg.'
+        : 'Enter the approximate total weight of one bunch. This helps customers compare prices fairly.';
 
-    document.querySelectorAll('.unit-picker .up-tab').forEach(t => {
-      t.classList.toggle('active', t.dataset.unit === unit);
+    document.querySelectorAll('.unit-picker .up-tab').forEach((tab) => {
+      tab.classList.toggle('active', tab.dataset.unit === unit);
+      tab.setAttribute('aria-pressed', String(tab.dataset.unit === unit));
     });
+
+    const stock = Number(document.getElementById('stockInput').value);
+    document.getElementById('previewStock').textContent = Number.isInteger(stock) && stock > 0
+      ? `${stock.toLocaleString()} ${u.short}`
+      : '—';
 
     renderPricePreview();
   }
@@ -124,25 +175,34 @@
     <div class="page-top">
       <div class="ph">
         <div>
-          <h1 class="welcome-line">Add New Offer</h1>
-          <p>Choose your selling unit. The system auto-calculates ETB/kg for fair ranking.</p>
+          <h1 class="welcome-line">Create a market offer</h1>
+          <p>Choose what you supply, set your price and available stock, then preview how buyers will see it.</p>
         </div>
-        <div class="actions">
-          <a class="btn btn-ghost" href="/seller/offers.html">← Back to Offers</a>
-          
-          <div class="unit-picker">
-            <span class="up-label">UNIT</span>
-            <div class="up-tabs">
-              <button type="button" class="up-tab" data-unit="kg">🌾 kg</button>
-              <button type="button" class="up-tab" data-unit="piece">🍉 pc</button>
-              <button type="button" class="up-tab" data-unit="bunch">🥬 bch</button>
-              <button type="button" class="up-tab" data-unit="pack">📦 pk</button>
-              <button type="button" class="up-tab" data-unit="quintal">🧺 qtl</button>
-              <button type="button" class="up-tab" data-unit="ton">🏭 ton</button>
-            </div>
+      </div>
+      <div class="offer-toolbar">
+        <a class="btn btn-ghost offer-back" href="/seller/offers.html">← <span>Back to offers</span></a>
+        <div class="unit-picker offer-unit-picker">
+          <div class="offer-unit-heading">
+            <span class="up-label">SELLING UNIT</span>
+            <strong class="offer-unit-current" id="sellerUnitLabel"></strong>
+          </div>
+          <div class="up-tabs" role="group" aria-label="Choose selling unit">
+            <button class="up-tab" type="button" data-unit="kg" aria-pressed="false">kg</button>
+            <button class="up-tab" type="button" data-unit="quintal" aria-pressed="false">Quintal</button>
+            <button class="up-tab" type="button" data-unit="ton" aria-pressed="false">Ton</button>
+            <button class="up-tab" type="button" data-unit="bunch" aria-pressed="false">Bunch</button>
+            <button class="up-tab" type="button" data-unit="pack" aria-pressed="false">Pack</button>
+            <button class="up-tab" type="button" data-unit="piece" aria-pressed="false">Piece</button>
           </div>
         </div>
       </div>
+    </div>
+
+    <div class="offer-gate ${isVerified ? 'verified' : ''}" role="status">
+      <strong>${isVerified ? 'Your seller account is verified.' : verificationMessage}</strong>
+      ${isVerified
+        ? 'Publish your offer when the product, price and stock are ready.'
+        : 'Build your offer now and save it as a draft. It will not appear to customers until your account is verified and you publish it.'}
     </div>
 
     <div class="page-body">
@@ -152,7 +212,7 @@
         <div class="form-card">
           <div class="form-section">
             <h3><span>1.</span> Choose a product</h3>
-            <p class="sec-sub">Select from the Etfruit catalog.</p>
+            <p class="sec-sub">Choose the matching catalog item so customers can find your offer from its product page.</p>
             <div class="field product-search-shell">
               <div class="search-box block" id="prodSearch">
                 <span class="s-icon">🔍</span>
@@ -166,42 +226,40 @@
         <!-- Step 2: Pricing -->
         <div class="form-card">
           <div class="form-section">
-            <h3><span>2.</span> Set your price <span class="num">In <span data-unit-short>kg</span></span></h3>
-            <p class="sec-sub">Your price is shown to buyers in <strong data-unit-long>kg</strong>.</p>
+            <h3><span>2.</span> Set price and quantity</h3>
+            <p class="sec-sub">Enter your selling price and the stock you can fulfill. Your price is shown in <strong data-unit-long>kg</strong>.</p>
 
             <div class="field">
               <label>Your price (ETB / <span data-unit-long>kg</span>) <span class="req">*</span></label>
-              <input class="input" id="priceInput" type="number" step="0.01" min="0" />
+              <input class="input" id="priceInput" type="number" step="0.01" min="0.01" required />
               <div class="price-preview" id="pricePreview" style="margin-top:10px;">
                 <div style="color:var(--ink-3);font-size:12.5px">Enter a price to see the buyer-facing display.</div>
               </div>
             </div>
 
-            <!-- ESTIMATED WEIGHT FIELD (Dynamic) -->
-            <div class="field" id="estWeightField" style="display: none; background: var(--bg-2); padding: 12px; border-radius: 10px; border: 1px dashed var(--border);">
-              <label style="color: var(--brand);">Estimated Weight per <span data-unit-long>piece</span> (kg) <span class="req">*</span></label>
-              <input class="input" id="estWeightInput" type="number" step="0.1" min="0" placeholder="e.g. 5 for a Watermelon" />
-              <div class="help" style="font-size: 11.5px; margin-top: 4px;">This helps buyers compare your price per kg against others.</div>
+            <div class="field weight-field" id="estimatedWeightField" hidden>
+              <label id="estimatedWeightLabel" for="estimatedWeightInput">Estimated weight per unit (kg) <span class="req">*</span></label>
+              <input class="input" id="estimatedWeightInput" type="number" step="0.01" min="0.01" max="1000" placeholder="0.70" />
+              <div class="help" id="estimatedWeightHelp" style="font-size:11.5px;margin-top:4px"></div>
             </div>
 
             <div class="grid-2">
               <div class="field">
                 <label>Stock (<span data-unit-short>kg</span>) <span class="req">*</span></label>
-                <input class="input" id="stockInput" type="number" min="1" placeholder="50" />
-              </div>
-              <div class="field">
-                <label>Minimum order (<span data-unit-short>kg</span>) <span class="req">*</span></label>
-                <input class="input" id="minOrderInput" type="number" min="1" value="1" />
+                <input class="input" id="stockInput" type="number" min="1" step="1" placeholder="50" required />
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Step 3: Publish -->
+        <!-- Step 3: Save or publish -->
         <div class="form-card">
           <div class="form-section">
-            <button class="btn-hero" id="publishBtn" type="button" style="width: 100%;">
-              <span>🌱 Publish Offer</span>
+            <h3><span>3.</span> ${isVerified ? 'Publish your offer' : 'Save your draft'}</h3>
+            <p class="sec-sub">${isVerified ? 'Your offer becomes available to buyers as soon as it is published.' : 'Your offer stays private until seller verification is complete.'}</p>
+            <p class="sec-sub" id="offer-message" role="status" aria-live="polite"></p>
+            <button class="btn-hero" id="publishBtn" type="button" style="width: 100%;" disabled>
+              <span>${isVerified ? 'Publish to Market' : 'Save Offer Draft'}</span>
             </button>
           </div>
         </div>
@@ -216,6 +274,11 @@
             <div style="font-size:44px;line-height:1;margin-bottom:8px" id="previewImg">🥔</div>
             <div style="font-family:var(--serif);font-size:14px;font-weight:700;color:var(--ink)" id="previewName">Select a product</div>
             <div style="font-size:11.5px;color:var(--ink-3);margin-top:3px" id="previewCat">—</div>
+            <div class="preview-meta">
+              <span>Seller <strong id="previewSeller"></strong></span>
+              <span>Location <strong id="previewLocation"></strong></span>
+              <span>Available stock <strong id="previewStock">—</strong></span>
+            </div>
             <div style="margin-top:12px;padding-top:12px;border-top:1px dashed var(--border)">
               <div style="font-family:var(--serif);font-size:18px;font-weight:700;color:var(--ink)" id="previewPrice">— ETB</div>
               <div style="font-size:11px;color:var(--ink-3);margin-top:2px" id="previewEq">per unit</div>
@@ -226,47 +289,133 @@
     </div>
   `;
 
+  document.getElementById('previewSeller').textContent = seller.businessName || 'Your store';
+  document.getElementById('previewLocation').textContent = seller.city || seller.country || 'Not set';
+
   /* ── EVENT LISTENERS ── */
-  document.querySelectorAll('.unit-picker .up-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      unit = tab.dataset.unit;
-      refreshUnitUI();
-    });
-  });
-
   document.getElementById('priceInput')?.addEventListener('input', renderPricePreview);
-  document.getElementById('estWeightInput')?.addEventListener('input', renderPricePreview);
+  document.getElementById('estimatedWeightInput')?.addEventListener('input', renderPricePreview);
+  document.querySelector('.unit-picker .up-tabs')?.addEventListener('click', (event) => {
+    const tab = event.target.closest('[data-unit]');
+    if (!tab || !UNITS[tab.dataset.unit]) return;
+    unit = tab.dataset.unit;
+    refreshUnitUI();
+  });
+  document.getElementById('stockInput')?.addEventListener('input', () => {
+    const stock = Number(document.getElementById('stockInput').value);
+    document.getElementById('previewStock').textContent = Number.isInteger(stock) && stock > 0
+      ? `${stock.toLocaleString()} ${UNITS[unit].short}`
+      : '—';
+  });
+  refreshUnitUI();
 
-  // Product Picker logic (simplified for this example)
   const searchInput = document.getElementById('prodSearchInput');
   const prodResults = document.getElementById('productResults');
-  
-  searchInput?.addEventListener('input', (e) => {
-    const q = e.target.value.toLowerCase();
-    if (!q) { prodResults.innerHTML = ''; return; }
-    
-    const matches = catalog.filter(p => p.name.toLowerCase().includes(q));
-    prodResults.innerHTML = matches.map(p => `
-      <button type="button" class="product-result-item" data-slug="${p.slug}">
-        <span class="product-result-thumb">${p.image}</span>
-        <span class="product-result-copy"><strong>${p.name}</strong><small>${p.category}</small></span>
+  const publishButton = document.getElementById('publishBtn');
+  const offerMessage = document.getElementById('offer-message');
+
+  function renderProductResults() {
+    const query = searchInput.value.trim().toLowerCase();
+    const matches = catalog.filter((product) =>
+      `${product.name} ${product.category}`.toLowerCase().includes(query)
+    );
+
+    if (productLoadError) {
+      prodResults.innerHTML = `<p class="product-empty" role="alert">${productLoadError}</p>`;
+      return;
+    }
+
+    if (!matches.length) {
+      prodResults.innerHTML = `<p class="product-empty">${query ? 'No catalog products match your search.' : 'No products are available in the catalog yet.'}</p>`;
+      return;
+    }
+
+    prodResults.innerHTML = matches.map(product => `
+      <button type="button" class="product-result-item ${selectedProduct?.id === product.id ? 'is-selected' : ''}" data-product-id="${product.id}">
+        <span class="product-result-thumb">${product.image
+          ? `<img src="${product.image}" alt="" width="40" height="40" style="object-fit:cover;border-radius:8px">`
+          : '🥬'}</span>
+        <span class="product-result-copy"><strong>${product.name}</strong><small>${product.category}</small></span>
+        <span class="product-result-arrow">${selectedProduct?.id === product.id ? 'Selected' : 'Select'}</span>
       </button>
     `).join('');
+  }
 
-    prodResults.querySelectorAll('button').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const prod = catalog.find(p => p.slug === btn.dataset.slug);
-        document.getElementById('previewImg').textContent = prod.image;
-        document.getElementById('previewName').textContent = prod.name;
-        document.getElementById('previewCat').textContent = prod.category;
-        searchInput.value = prod.name;
-        prodResults.innerHTML = '';
-      });
-    });
+  searchInput?.addEventListener('input', (e) => {
+    renderProductResults();
   });
 
-  /* INIT */
-  refreshUnitUI();
+  prodResults?.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-product-id]');
+    if (!button) return;
+    selectedProduct = catalog.find(product => product.id === button.dataset.productId) || null;
+    if (!selectedProduct) return;
+
+    document.getElementById('previewImg').innerHTML = selectedProduct.image
+      ? `<img src="${selectedProduct.image}" alt="" width="88" height="72" style="object-fit:cover;border-radius:10px">`
+      : '🥬';
+    document.getElementById('previewName').textContent = selectedProduct.name;
+    document.getElementById('previewCat').textContent = selectedProduct.category;
+    publishButton.disabled = false;
+    offerMessage.textContent = '';
+    renderProductResults();
+  });
+
+  publishButton?.addEventListener('click', async () => {
+    const price = Number(document.getElementById('priceInput').value);
+    const stock = Number(document.getElementById('stockInput').value);
+    const estimatedWeightKg = Number(document.getElementById('estimatedWeightInput').value);
+    if (!selectedProduct) {
+      offerMessage.textContent = 'Choose a catalog product before publishing.';
+      return;
+    }
+    if (!Number.isFinite(price) || price <= 0 || !Number.isInteger(stock) || stock < 1) {
+      offerMessage.textContent = 'Enter a valid price and a whole-number stock amount greater than zero.';
+      return;
+    }
+    if (UNITS[unit].requiresWeight && (!Number.isFinite(estimatedWeightKg) || estimatedWeightKg <= 0)) {
+      offerMessage.textContent = `Enter the estimated weight in kg for one ${unit}.`;
+      return;
+    }
+
+    publishButton.disabled = true;
+    publishButton.textContent = isVerified ? 'Publishing…' : 'Saving draft…';
+    offerMessage.textContent = '';
+    try {
+      const response = await fetch('/api/sellers/me/offers', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productId: selectedProduct.id,
+          unit,
+          pricePerUnit: price,
+          stock,
+          ...(UNITS[unit].requiresWeight ? { estimatedWeightKg } : {}),
+        }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.message || `Offer could not be published (${response.status})`);
+      offerMessage.textContent = isVerified
+        ? 'Offer published. It is now available in customer merchant listings.'
+        : 'Offer saved as a draft. You can publish it from My Offers after your account is verified.';
+      window.setTimeout(() => { window.location.href = '/seller/offers.html'; }, 800);
+    } catch (error) {
+      offerMessage.textContent = error.message;
+      publishButton.disabled = false;
+      publishButton.textContent = isVerified ? 'Publish to Market' : 'Save Offer Draft';
+    }
+  });
+
+  try {
+    const response = await fetch('/api/products', { credentials: 'include' });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.message || `Products could not be loaded (${response.status})`);
+    catalog = result.data || [];
+  } catch (error) {
+    productLoadError = `Catalog unavailable: ${error.message}`;
+  }
+  renderProductResults();
 </script>
 </body>
 </html>

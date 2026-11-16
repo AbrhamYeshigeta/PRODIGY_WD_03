@@ -206,15 +206,13 @@
                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M3 6h18M6 12h12M10 18h4" />
               </svg>
-              Sort: <span id="sort-label">Popular</span>
+              Sort: <span id="sort-label">Most merchants</span>
             </button>
 
             <div class="sort-menu hidden" id="sort-menu">
-              <button data-sort="popular"     class="active">Popular</button>
+              <button data-sort="popular" class="active">Most merchants</button>
               <button data-sort="price-asc">Price: Low to High</button>
               <button data-sort="price-desc">Price: High to Low</button>
-              <button data-sort="newest">Newest</button>
-              <button data-sort="rating">Top Rated</button>
             </div>
           </div>
         </div>
@@ -245,10 +243,6 @@
               <input type="checkbox" id="filter-instock" />
               <span>In stock only</span>
             </label>
-            <label class="filter-option">
-              <input type="checkbox" id="filter-onsale" />
-              <span>On sale</span>
-            </label>
           </div>
 
           <div class="filter-actions-row">
@@ -277,7 +271,30 @@
         </section>
     
     <section class="product-grid" id="product-grid"></section>
+Invalid prisma.seller.findFirst() invocation in
+/home/abrham/Documents/Projects/prodigy-internship/task-03-ecommerce/src/controllers/sellerController.js:161:38
 
+158
+159 /* ── GET /api/sellers/:id ── public storefront ── */
+160 exports.publicProfile = asyncHandler(async (req, res) => {
+→ 161 const seller = await prisma.seller.findFirst({
+where: {
+id: "me",
+verificationStatus: "verified"
+},
+select: {
+id: true,
+businessName: true,
+businessType: true,
+scale: true,
+city: true,
+country: true,
+bio: true,
+rating: true,
+ratingCount: true,
+~~~~~~~~~~~
+fulfillmentRate: true,
+createdAt: true,
     <section class="value-row">
       <div class="value-item">
         <div class="value-icon">🚚</div>
@@ -299,7 +316,30 @@
 
     <section class="newsletter">
       <div class="newsletter-inner">
+Invalid prisma.seller.findFirst() invocation in
+/home/abrham/Documents/Projects/prodigy-internship/task-03-ecommerce/src/controllers/sellerController.js:161:38
 
+158
+159 /* ── GET /api/sellers/:id ── public storefront ── */
+160 exports.publicProfile = asyncHandler(async (req, res) => {
+→ 161 const seller = await prisma.seller.findFirst({
+where: {
+id: "me",
+verificationStatus: "verified"
+},
+select: {
+id: true,
+businessName: true,
+businessType: true,
+scale: true,
+city: true,
+country: true,
+bio: true,
+rating: true,
+ratingCount: true,
+~~~~~~~~~~~
+fulfillmentRate: true,
+createdAt: true,
         <div class="newsletter-copy">
           <div class="newsletter-icon">✉️</div>
           <div>
@@ -416,7 +456,30 @@
                 src="https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?auto=format&fit=crop&w=800&q=80"
                 alt="Product" />
             <div class="product-badges" id="pm-badges"></div>
-          </div>
+          </div>Invalid prisma.seller.findFirst() invocation in
+/home/abrham/Documents/Projects/prodigy-internship/task-03-ecommerce/src/controllers/sellerController.js:161:38
+
+158
+159 /* ── GET /api/sellers/:id ── public storefront ── */
+160 exports.publicProfile = asyncHandler(async (req, res) => {
+→ 161 const seller = await prisma.seller.findFirst({
+where: {
+id: "me",
+verificationStatus: "verified"
+},
+select: {
+id: true,
+businessName: true,
+businessType: true,
+scale: true,
+city: true,
+country: true,
+bio: true,
+rating: true,
+ratingCount: true,
+~~~~~~~~~~~
+fulfillmentRate: true,
+createdAt: true,
 
           <!-- Info -->
           <div class="product-modal-info">
@@ -447,7 +510,30 @@
 
             <!-- Price per kg -->
             <div class="pm-price-block">
-              <span class="pm-price-label">Price per kg</span>
+              <span class="pm-priceInvalid prisma.seller.findFirst() invocation in
+/home/abrham/Documents/Projects/prodigy-internship/task-03-ecommerce/src/controllers/sellerController.js:161:38
+
+158
+159 /* ── GET /api/sellers/:id ── public storefront ── */
+160 exports.publicProfile = asyncHandler(async (req, res) => {
+→ 161 const seller = await prisma.seller.findFirst({
+where: {
+id: "me",
+verificationStatus: "verified"
+},
+select: {
+id: true,
+businessName: true,
+businessType: true,
+scale: true,
+city: true,
+country: true,
+bio: true,
+rating: true,
+ratingCount: true,
+~~~~~~~~~~~
+fulfillmentRate: true,
+createdAt: true,-label">Price per kg</span>
               <div class="pm-price-values">
                 <span class="pm-price" id="pm-price">120.00 ETB</span>
                 <span class="pm-compare" id="pm-compare" style="display:none;">150.00 ETB</span>

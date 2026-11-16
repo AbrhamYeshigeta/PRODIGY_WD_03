@@ -1,10 +1,22 @@
-import { renderShell, guardSeller } from '/js/seller/shell.js';
+import { renderShell } from '/js/seller/shell.js';
 
-const seller = await guardSeller();
-if (!seller) {
-  throw new Error('Seller not available');
+async function initDashboard() {
+const sellerResponse = await fetch('/api/sellers/me', { credentials: 'include' });
+if (sellerResponse.status === 401) {
+  window.location.href = '/seller/login.html';
+  return;
+}
+if (sellerResponse.status === 403 || sellerResponse.status === 404) {
+  window.location.href = '/seller/apply.html';
+  return;
+}
+if (!sellerResponse.ok) {
+  const error = await sellerResponse.json().catch(() => ({}));
+  throw new Error(error.message || `Seller profile could not be loaded (${sellerResponse.status})`);
 }
 
+const seller = (await sellerResponse.json()).data;
+localStorage.setItem('etfruit.seller', JSON.stringify(seller));
 const page = renderShell({ active: 'dashboard' });
 const money = new Intl.NumberFormat('en-ET', {
   style: 'currency',
@@ -13,41 +25,35 @@ const money = new Intl.NumberFormat('en-ET', {
 });
 
 const defaultStats = {
-  revenueToday: 0,
-  revenueTodayFormatted: '0 ETB',
-  ordersNew: 0,
+  revenueToday: null,
+  revenueTodayFormatted: null,
+  ordersNew: null,
+  orderTrackingAvailable: false,
   offersActive: 0,
   offersTotal: 0,
+  offersDraft: 0,
+  stockByUnit: {},
   rating: seller.rating || 0,
-  ratingCount: seller.ratingCount || 0,
+  ratingCount: 0,
   fulfillmentRate: seller.fulfillmentRate || 100,
   lowStock: [],
   recentOrders: [],
 };
 
 let stats = defaultStats;
+let statsError = '';
 try {
   const res = await fetch('/api/sellers/me/stats', { credentials: 'include' });
-  if (res.ok) {
-    const json = await res.json();
-    stats = { ...defaultStats, ...json.data };
-  }
-} catch {
-  // keep a safe empty dashboard while real data comes in
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(json.message || `Dashboard stats could not be loaded (${res.status})`);
+  stats = { ...defaultStats, ...json.data };
+} catch (error) {
+  statsError = error.message;
 }
 
-const recentOrders = (stats.recentOrders || []).length
-  ? stats.recentOrders
-  : [{
-      _id: 'No orders yet',
-      buyer: 'Waiting for your first buyer',
-      items: [{ product: { name: 'Your products will appear here' } }],
-      total: 0,
-      status: 'pending_payment',
-      quantity: 0,
-    }];
+const recentOrders = stats.recentOrders || [];
 
-const orderRows = recentOrders.map((order) => {
+const orderRows = recentOrders.length ? recentOrders.map((order) => {
   const productName = order.items?.[0]?.product?.name || 'New product listing';
   const status = order.status || 'pending_payment';
   const total = Number(order.total || 0);
@@ -70,7 +76,11 @@ const orderRows = recentOrders.map((order) => {
       <td><span class="pill ${status}">${status.replace(/_/g, ' ')}</span></td>
     </tr>
   `;
-}).join('');
+}).join('') : `
+  <tr><td colspan="6" style="text-align:center;padding:40px 20px;color:var(--ink-3)">
+    ${stats.orderTrackingAvailable ? 'No orders yet. Your first sale will appear here.' : 'Order and revenue reporting is not connected to seller offers yet.'}
+  </td></tr>
+`;
 
 const lowStockItems = (stats.lowStock || []).length
   ? stats.lowStock.map((item) => `
@@ -92,19 +102,39 @@ const lowStockItems = (stats.lowStock || []).length
         </div>
       </div>
     `;
+const inventoryRows = Object.entries(stats.stockByUnit || {}).length
+  ? Object.entries(stats.stockByUnit).map(([unit, quantity]) => `
+      <div class="row-item">
+        <div class="ico blue">📦</div>
+        <div class="body"><strong>${Number(quantity).toLocaleString()} ${unit}</strong><small>Available inventory</small></div>
+      </div>
+    `).join('')
+  : '<div class="row-item"><div class="body"><strong>No active stock</strong><small>Published offer inventory appears here</small></div></div>';
 
 const verificationTag = seller.verificationStatus === 'verified'
   ? '<div class="dot-btn"><span class="dot"></span> Verified seller</div>'
   : '<div class="dot-btn"><span class="dot" style="background:var(--gold)"></span> Application under review</div>';
+const canPublishOffers = seller.verificationStatus === 'verified';
+const verificationMessage = canPublishOffers
+  ? ''
+  : `<div class="notif-banner" style="margin-bottom:20px">
+      <div class="pulse" style="background:var(--gold-dark)"></div>
+  <div class="body"><strong>Application under review:</strong> You can prepare offer drafts now. Publishing to customers will unlock after verification.</div>
+    </div>`;
+const statsMessage = statsError
+  ? `<div class="notif-banner" role="alert" style="margin-bottom:20px"><div class="body"><strong>Dashboard data unavailable:</strong> ${statsError}</div></div>`
+  : '';
 
 page.innerHTML = `
+  ${verificationMessage}
+  ${statsMessage}
   <div class="ph">
     <div>
       <h1 class="welcome-line">Good morning, ${seller.businessName || 'Your Merchant Shop'} 👋</h1>
       <p>Here is your merchant dashboard — <strong style="color:var(--brand)">${seller.city || 'Addis Ababa'}</strong> • ${seller.businessType || 'Merchant account'}</p>
     </div>
     <div class="actions">
-      <a class="btn btn-ghost" href="/seller/orders.html">🧾 View Orders</a>
+      <a class="btn btn-ghost ${stats.orderTrackingAvailable ? '' : 'disabled'}" href="${stats.orderTrackingAvailable ? '/seller/orders.html' : '#'}" aria-disabled="${!stats.orderTrackingAvailable}">🧾 View Orders</a>
       <a class="btn btn-gold" href="/seller/offers-new.html">➕ Add New Offer</a>
     </div>
   </div>
@@ -116,18 +146,18 @@ page.innerHTML = `
         <span class="stat__delta ${stats.revenueToday > 0 ? 'up' : 'flat'}">${stats.revenueToday > 0 ? '▲' : '—'} ${stats.revenueToday > 0 ? 'Live' : '0'}</span>
       </div>
       <div class="stat__label">Revenue today</div>
-      <div class="stat__value">${stats.revenueTodayFormatted || '0 ETB'}</div>
-      <div class="stat__foot">Sales will appear here once your first order is paid</div>
+      <div class="stat__value">${stats.revenueTodayFormatted || '—'}</div>
+      <div class="stat__foot">${stats.orderTrackingAvailable ? 'Sales today' : 'Order reporting not connected'}</div>
     </div>
 
     <div class="stat">
       <div class="stat__top">
         <div class="stat__ico blue">🧾</div>
-        <span class="stat__delta ${stats.ordersNew > 0 ? 'up' : 'flat'}">${stats.ordersNew > 0 ? '▲' : '—'} ${stats.ordersNew}</span>
+        <span class="stat__delta ${stats.ordersNew > 0 ? 'up' : 'flat'}">${stats.ordersNew ?? '—'}</span>
       </div>
       <div class="stat__label">New orders</div>
-      <div class="stat__value">${stats.ordersNew}</div>
-      <div class="stat__foot">Awaiting your review</div>
+      <div class="stat__value">${stats.ordersNew ?? '—'}</div>
+      <div class="stat__foot">${stats.orderTrackingAvailable ? 'Awaiting your review' : 'Order reporting not connected'}</div>
     </div>
 
     <div class="stat">
@@ -137,7 +167,7 @@ page.innerHTML = `
       </div>
       <div class="stat__label">Active offers</div>
       <div class="stat__value">${stats.offersActive}</div>
-      <div class="stat__foot">${stats.offersTotal} total listings</div>
+      <div class="stat__foot">${stats.offersDraft} drafts · ${stats.offersTotal} total listings</div>
     </div>
 
     <div class="stat">
@@ -163,9 +193,8 @@ page.innerHTML = `
     <div class="card__head">
       <div>
         <h3>Recent orders</h3>
-        <span class="sub">Latest customer activity</span>
+        <span class="sub">Order tracking becomes available when order items are connected to seller offers.</span>
       </div>
-      <a class="link" href="/seller/orders.html">View all →</a>
     </div>
     <table class="tbl">
       <thead>
@@ -200,6 +229,11 @@ page.innerHTML = `
         <span style="font-size:11.5px;color:var(--ink-3)">${seller.bank?.name || 'Bank account pending'}</span>
         <span class="pill active" style="margin-left:auto">Awaiting setup</span>
       </div>
+    </div>
+
+    <div class="mini">
+      <div class="mini__head"><h3>Inventory by measure</h3></div>
+      ${inventoryRows}
     </div>
 
     <div class="mini">
@@ -239,6 +273,18 @@ page.innerHTML = `
       <div class="dot-btn"><span class="dot" style="background:var(--gold)"></span> Chapa payouts enabled</div>
       <div class="dot-btn"><span class="dot" style="background:var(--blue)"></span> Storefront live</div>
     </div>
-    <a class="btn btn-gold" href="/seller/orders.html">Go to Orders →</a>
+    <span class="muted">Order reporting will appear here when order items are linked to your offers.</span>
   </div>
 `;
+}
+
+initDashboard().catch((error) => {
+  console.error('Failed to load seller dashboard', error);
+  document.body.innerHTML = `
+    <main style="max-width:640px;margin:12vh auto;padding:24px;font:16px/1.5 system-ui;color:#17221d">
+      <h1>Dashboard unavailable</h1>
+      <p>${error.message}</p>
+      <a href="/seller/dashboard.html">Try again</a>
+    </main>
+  `;
+});

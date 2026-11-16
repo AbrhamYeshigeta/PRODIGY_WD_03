@@ -256,7 +256,6 @@
 
     // If they are already a Seller, kick them to the dashboard
     if (isLoggedIn && currentUser.role === 'seller') {
-      alert("You are already a registered merchant!");
       window.location.href = '/seller/dashboard.html';
       return;
     }
@@ -296,10 +295,9 @@
         if (!isLoggedIn) {
           const emailValue = document.getElementById('email').value;
           const passwordValue = document.getElementById('password').value;
-          const generatedUsername = emailValue.split('@')[0] + Math.floor(Math.random() * 1000);
 
           const accountData = {
-            username: generatedUsername,
+            name: document.getElementById('fullName').value.trim(),
             email: emailValue,
             password: passwordValue
           };
@@ -362,6 +360,15 @@
           window.location.href = '/seller/dashboard.html';
         } else {
           const errorData = await applyRes.json();
+          if (applyRes.status === 409) {
+            const profileRes = await fetch('/api/sellers/me', { credentials: 'include' });
+            if (profileRes.ok) {
+              const profile = await profileRes.json();
+              localStorage.setItem('etfruit.seller', JSON.stringify(profile.data));
+              window.location.href = '/seller/dashboard.html';
+              return;
+            }
+          }
           throw new Error(errorData.message || 'Application failed. Please check your details.');
         }
 

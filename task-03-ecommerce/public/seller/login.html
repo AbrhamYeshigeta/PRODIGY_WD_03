@@ -14,6 +14,20 @@
     .auth-body { padding: 28px 32px 32px; }
     .auth-footer { text-align: center; font-size: 13px; color: var(--ink-3); margin-top: 20px; }
     .auth-footer a { color: var(--brand); font-weight: 700; text-decoration: none; }
+    
+    /* Professional Inline Error Styling */
+    .error-box {
+      display: none;
+      background: var(--red-tint);
+      color: var(--red-600);
+      border: 1px solid #fecaca;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 20px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -28,17 +42,32 @@
     </div>
 
     <div class="auth-body">
+      <!-- The Error Box -->
+      <div id="errorBox" class="error-box"></div>
+
       <form id="merchantLoginForm">
         <div class="field">
           <label>Email address</label>
           <input class="input" type="email" id="email" required placeholder="you@example.com" />
         </div>
-        <div class="field">
+                <div class="field">
           <label>Password</label>
-          <input class="input" type="password" id="password" required placeholder="••••••••" />
+          <div class="pw-wrap" style="position: relative; display: flex; align-items: center;">
+            <input class="input" type="password" id="password" required placeholder="••••••••" style="padding-right: 40px;" />
+            <button type="button" id="pw-toggle" style="position: absolute; right: 12px; background: none; border: none; cursor: pointer; color: var(--ink-3); padding: 0;">
+              <svg id="eye-show" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+              <svg id="eye-hide" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                <line x1="1" y1="1" x2="23" y2="23" />
+              </svg>
+            </button>
+          </div>
         </div>
         
-        <button type="submit" class="btn-hero" style="width: 100%; margin-top: 10px;">
+        <button type="submit" class="btn-hero" style="width: 100%; margin-top: 10px;" id="submitBtn">
           <span>Sign In to Dashboard →</span>
         </button>
       </form>
@@ -52,15 +81,33 @@
     </div>
   </div>
 
-    <script>
+  <script type="module">
+
+        // Password Visibility Toggle
+    const pwToggle = document.getElementById('pw-toggle');
+    const pwInput = document.getElementById('password');
+    const eyeShow = document.getElementById('eye-show');
+    const eyeHide = document.getElementById('eye-hide');
+
+    pwToggle.addEventListener('click', () => {
+      const isPassword = pwInput.getAttribute('type') === 'password';
+      pwInput.setAttribute('type', isPassword ? 'text' : 'password');
+      eyeShow.style.display = isPassword ? 'none' : 'block';
+      eyeHide.style.display = isPassword ? 'block' : 'none';
+    });
+    
     document.getElementById('merchantLoginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+      
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
-      const btn = e.target.querySelector('button');
+      const btn = document.getElementById('submitBtn');
+      const errorBox = document.getElementById('errorBox');
       
+      // Reset UI
       btn.disabled = true;
       btn.innerHTML = '<span>Verifying...</span>';
+      errorBox.style.display = 'none';
 
       try {
         const response = await fetch('/api/auth/login', {
@@ -76,23 +123,20 @@
           throw new Error(data.message || 'Invalid email or password');
         }
 
-        // 🔥 THE FIX: Safely extract the user object no matter how the backend formats it
-        const user = data.data?.user || data.user || data.data || data;
-
-        if (!user) {
-            throw new Error("Login failed: No user data returned from server.");
-        }
-
-        // PROTOCOL: Ensure they are actually a merchant
-        if (user.role !== 'seller' && user.role !== 'admin') {
+        // Check role
+        const user = data.user || (data.data && data.data.user);
+        if (!user || (user.role !== 'seller' && user.role !== 'admin')) {
            throw new Error("This account is a Customer account. Please use the normal Login page.");
         }
 
-        // If everything is good, go to dashboard!
+        // Success! Redirect
         window.location.href = '/seller/dashboard.html';
         
       } catch (err) {
-        alert(err.message);
+        // Show inline error instead of alert()
+        errorBox.textContent = err.message;
+        errorBox.style.display = 'block';
+        
         btn.disabled = false;
         btn.innerHTML = '<span>Sign In to Dashboard →</span>';
       }

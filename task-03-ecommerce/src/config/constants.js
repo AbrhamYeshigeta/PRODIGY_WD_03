@@ -12,6 +12,15 @@ const SELLER_SCALES = {
   bulk:      { unit: 'ton',     kgFactor: 1000, label: 'Ton Seller',     minOrder: 1 },
 };
 
+const OFFER_UNITS = {
+  kg:      { kgFactor: 1,    requiresEstimatedWeight: false },
+  quintal: { kgFactor: 100,  requiresEstimatedWeight: false },
+  ton:     { kgFactor: 1000, requiresEstimatedWeight: false },
+  bunch:   { kgFactor: null, requiresEstimatedWeight: true },
+  pack:    { kgFactor: null, requiresEstimatedWeight: true },
+  piece:   { kgFactor: null, requiresEstimatedWeight: true },
+};
+
 const SELLER_STATUS = {
   PENDING:   'pending',
   VERIFIED:  'verified',
@@ -47,6 +56,7 @@ const PLATFORM_COMMISSION_PCT = 10;
 module.exports = {
   ROLES,
   SELLER_SCALES,
+  OFFER_UNITS,
   SELLER_STATUS,
   ORDER_STATUS,
   PAYMENT_METHODS,

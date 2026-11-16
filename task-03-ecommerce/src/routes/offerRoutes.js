@@ -3,10 +3,10 @@ const express = require('express');
 const router  = express.Router();
 const offerController = require('../controllers/offerController');
 const { protect }     = require('../middleware/auth');
-const { requireVerifiedSeller } = require('../middleware/authorize');
+const { attachSeller } = require('../middleware/authorize');
 
-router.patch('/:id',         protect, requireVerifiedSeller, offerController.update);
-router.patch('/:id/pause',   protect, requireVerifiedSeller, offerController.togglePause);
-router.delete('/:id',        protect, requireVerifiedSeller, offerController.remove);
+router.patch('/:id',         protect, attachSeller, offerController.update);
+router.patch('/:id/pause',   protect, attachSeller, offerController.togglePause);
+router.delete('/:id',        protect, attachSeller, offerController.remove);
 
 module.exports = router;

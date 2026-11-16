@@ -1,0 +1,132 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── ENUMS (Optional, but good for strict data) ───
+enum Role {
+  customer
+  seller
+  admin
+}
+
+enum VerificationStatus {
+  pending
+  verified
+  rejected
+  suspended
+}
+
+// ─── MODELS ───
+model User {
+  id          String    @id @default(uuid())
+  name        String    
+  username    String?     @unique
+  email       String    @unique
+  password    String
+  role        Role      @default(customer)
+  phone       String?
+  createdAt   DateTime  @default(now())
+  lastLoginAt DateTime?
+
+  // Relationships
+  seller Seller?
+  orders Order[]
+  cart   Cart?
+}
+
+model Seller {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  businessName String
+  businessType String
+  scale        String  @default("wholesale")
+  city         String
+  country      String  @default("Ethiopia")
+  bio          String?
+  phone        String
+
+  faydaId String?
+  tin     String?
+
+  bankName    String?
+  bankAccount String?
+  bankHolder  String?
+  licenseUrl  String?
+
+  verificationStatus String @default("pending")
+  rating             Float  @default(0)
+  fulfillmentRate    Int    @default(100)
+
+  offers    Offer[]
+  createdAt DateTime @default(now())
+}
+
+model Cart {
+  id        String     @id @default(uuid())
+  userId    String     @unique
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     CartItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model CartItem {
+  id        String   @id @default(uuid())
+  quantity  Int      @default(1)
+  cartId    String
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  offerId   String
+  offer     Offer    @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([cartId, offerId])
+}
+
+model Product {
+  id       String @id @default(uuid())
+  name     String
+  slug     String @unique
+  image    String
+  category String
+
+  offers Offer[]
+}
+
+model Offer {
+  id                String  @id @default(uuid())
+  unit              String // kg, quintal, ton, bunch, pack, or piece
+  pricePerUnit      Int // Stored in cents (e.g., 8500 = 85.00 ETB)
+  pricePerKg        Int
+  estimatedWeightKg Float? // Weight of one bunch, pack, or piece in kg
+  stock             Int
+  status            String  @default("active")
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  sellerId String
+  seller   Seller @relation(fields: [sellerId], references: [id])
+
+  cartItems CartItem[]
+  createdAt DateTime @default(now())
+}
+
+model Order {
+  id            String @id @default(uuid())
+  totalAmount   Int
+  status        String @default("pending")
+  paymentMethod String
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+}

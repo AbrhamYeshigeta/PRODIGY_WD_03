@@ -12,6 +12,9 @@ const routes      = require('./routes');
 const notFound    = require('./middleware/notFound');
 const errorHandler = require('./middleware/error');
 
+const authRoutes   = require('./routes/authRoutes');
+const sellerRoutes = require('./routes/sellerRoutes');
+
 const app = express();
 
 /* ── Core middleware ── */
@@ -37,6 +40,8 @@ app.get('/api/health', (_req, res) => {
 
 /* ── API routes ── */
 app.use('/api', routes);
+app.use('/api/auth', authRoutes);
+app.use('/api/sellers', sellerRoutes);
 
 /* ── 404 + error ── */
 app.use(notFound);

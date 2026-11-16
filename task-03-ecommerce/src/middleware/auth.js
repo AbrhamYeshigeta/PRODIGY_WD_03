@@ -1,5 +1,6 @@
+// src/middleware/auth.js
 const { verifyToken } = require('../utils/token.js');
-const User = require('../models/User.js');
+const prisma = require('../config/prisma'); // ADDED PRISMA IMPORT
 
 const protect = async (req, res, next) => {
   try {
@@ -16,7 +17,9 @@ const protect = async (req, res, next) => {
     }
 
     const decoded = verifyToken(token);
-    const user = await User.findById(decoded.id);
+    
+    // Uses Prisma to find the user by ID
+    const user = await prisma.user.findUnique({ where: { id: decoded.id } });
 
     if (!user) {
       return res.status(401).json({ success: false, message: 'User no longer exists' });
@@ -24,7 +27,7 @@ const protect = async (req, res, next) => {
 
     req.user = user;
     next();
-  } catch {
+  } catch (err) {
     return res.status(401).json({ success: false, message: 'Not authorized, token invalid or expired' });
   }
 };

@@ -149,11 +149,11 @@ function render() {
           </div>
           <div class="cart-row-qty">
             <div class="qty-stepper">
-              <button type="button" class="qty-btn" data-act="minus" data-id="${it.id}">−</button>
+            <button type="button" class="qty-btn" data-act="minus" data-id="${it.id}" ${it.quantity <= 1 ? 'disabled' : ''}>−</button>
               <input type="number" class="qty-input" data-act="input" data-id="${it.id}"
-                     value="${it.quantity}" min="0.5" max="99" step="0.5" inputmode="decimal" />
-              <span class="qty-unit">kg</span>
-              <button type="button" class="qty-btn" data-act="plus" data-id="${it.id}">+</button>
+              value="${it.quantity}" min="1" max="${it.stock}" step="1" inputmode="numeric" />
+            <span class="qty-unit">${esc(it.unit || 'unit')}</span>
+            <button type="button" class="qty-btn" data-act="plus" data-id="${it.id}" ${it.quantity >= it.stock ? 'disabled' : ''}>+</button>
             </div>
           </div>
           <div class="cart-row-total">${formatPrice(Math.round(it.price * it.quantity))}</div>
@@ -204,18 +204,14 @@ function render() {
     if (!item) return;
 
     if (act === 'minus') {
-      el.addEventListener('click', () => {
-        if (item.quantity > 0.5) {
-          Cart.setQuantity(id, Math.round((item.quantity - 0.5) * 10) / 10);
-          render();
-        }
+      el.addEventListener('click', async () => {
+        if (item.quantity > 1) await Cart.setQuantity(id, item.quantity - 1);
       });
     }
 
     if (act === 'plus') {
-      el.addEventListener('click', () => {
-        Cart.setQuantity(id, Math.round((item.quantity + 0.5) * 10) / 10);
-        render();
+      el.addEventListener('click', async () => {
+        if (item.quantity < item.stock) await Cart.setQuantity(id, item.quantity + 1);
       });
     }
 
@@ -227,25 +223,24 @@ function render() {
     }
 
     if (act === 'input') {
-      el.addEventListener('change', () => {
-        let v = parseFloat(el.value);
-        if (isNaN(v) || v <= 0) { Cart.remove(id); }
-        else {
-          v = Math.max(0.5, Math.min(99, Math.round(v * 2) / 2));
-          Cart.setQuantity(id, v);
+      el.addEventListener('change', async () => {
+        const quantity = Number(el.value);
+        if (!Number.isInteger(quantity) || quantity < 1 || quantity > item.stock) {
+          showToast(`Choose a whole quantity from 1 to ${item.stock} ${item.unit}.`, 'error');
+          render();
+          return;
         }
-        render();
+        await Cart.setQuantity(id, quantity);
       });
     }
   });
 
   document.getElementById('clear-cart')?.addEventListener('click', () => {
     if (confirm('Clear the entire cart?')) {
-      Cart.clear();
-      render();
+      await Cart.clear();
     }
   });
 }
 
-/* ---------- Header badge updates automatically via cart.js ---------- */
+Cart.onChange(render);
 render();

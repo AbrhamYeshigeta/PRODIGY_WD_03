@@ -1,3 +1,4 @@
+// server.js
 require('dotenv').config();
 const express = require('express');
 const helmet = require('helmet');
@@ -5,12 +6,13 @@ const cors = require('cors');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
-const mongoSanitize = require('express-mongo-sanitize');
 const path = require('path');
 
-const { connectDB } = require('./src/config/db.js');
+// Routes
 const authRoutes = require('./src/routes/authRoutes.js');
 const sellerRoutes = require('./src/routes/sellerRoutes.js');
+const cartRoutes = require('./src/routes/cartRoutes.js');
+const productRoutes = require('./src/routes/productRoutes.js');
 const { notFound, errorHandler } = require('./src/middleware/error.js');
 
 const app = express();
@@ -40,7 +42,6 @@ app.use(
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: '10kb' }));
 app.use(cookieParser());
-app.use(mongoSanitize());
 app.use(morgan('dev'));
 
 /* Public storefront, gated actions: keep default landing page open while protecting cart and order pages */
@@ -48,6 +49,7 @@ app.use((req, res, next) => {
   const protectedPages = ['/cart.html', '/orders.html'];
   const isAuthRoute = req.path === '/login.html' || req.path === '/register.html';
   const isProtectedPage = protectedPages.includes(req.path);
+  
 
   if (isProtectedPage && !req.cookies?.token) {
     return res.redirect('/login.html');
@@ -85,11 +87,8 @@ app.use('/api/auth/register', authLimiter);
    ============================================ */
 app.use('/api/auth', authRoutes);
 app.use('/api/sellers', sellerRoutes);
-
-/* Placeholder routes — return empty data until Block 2 ships the real models */
-app.get('/api/products', (req, res) => {
-  res.json({ success: true, data: [], pagination: { total: 0, page: 1, pages: 0, limit: 20 } });
-});
+app.use('/api/cart', cartRoutes);
+app.use('/api/products', productRoutes);
 
 app.get('/api/cart', (req, res) => {
   res.json({ success: true, data: { items: [], subtotal: 0, total: 0 } });
@@ -112,9 +111,9 @@ app.use(errorHandler);
    ============================================ */
 const PORT = process.env.PORT || 5003;
 
-const start = async () => {
-  await connectDB();
-  app.listen(PORT, () => console.log(`🚀 Server on http://localhost:${PORT}`));
+const start = () => {
+  // 🚨 MONGODB CONNECT REMOVED. PRISMA CONNECTS AUTOMATICALLY ON FIRST QUERY.
+  app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
 };
 
 start();

@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<!-- saved from url=(0059)http://localhost:51212/#schema=public&table=User&view=table -->
+<html lang="en" style="height: 100%"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg%20width%3D%2212%22%20height%3D%2214%22%20viewBox%3D%220%200%2012%2014%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%20%20%3Cpath%0A%20%20%20%20fill-rule%3D%22evenodd%22%0A%20%20%20%20clip-rule%3D%22evenodd%22%0A%20%20%20%20d%3D%22M0.396923%208.8719C0.25789%209.09869%200.260041%209.38484%200.402469%209.60951L2.98037%2013.6761C3.14768%2013.94%203.47018%2014.0603%203.76949%2013.9705L11.2087%2011.7388C11.6147%2011.617%2011.8189%2011.1641%2011.6415%2010.7792L6.8592%200.405309C6.62598%20-0.100601%205.92291%20-0.142128%205.63176%200.332808L0.396923%208.8719ZM6.73214%202.77688C6.6305%202.54169%206.2863%202.57792%206.23585%202.82912L4.3947%2011.9965C4.35588%2012.1898%204.53686%2012.3549%204.72578%2012.2985L9.86568%2010.7642C10.0157%2010.7194%2010.093%2010.5537%2010.0309%2010.41L6.73214%202.77688Z%22%0A%20%20%20%20fill%3D%22currentColor%22%0A%20%20%2F%3E%0A%3C%2Fsvg%3E" type="image/svg+xml">
+    <link rel="stylesheet" href="./localhost_files/studio.css">
+    <style>
+      html {
+        height: 100%;
+      }
+
+      body {
+        color: black;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      #root {
+        height: 100%;
+      }
+    </style>
+  <style type="text/css">[data-sonner-toaster][dir=ltr],html[dir=ltr]{--toast-icon-margin-start:-3px;--toast-icon-margin-end:4px;--toast-svg-margin-start:-1px;--toast-svg-margin-end:0px;--toast-button-margin-start:auto;--toast-button-margin-end:0;--toast-close-button-start:0;--toast-close-button-end:unset;--toast-close-button-transform:translate(-35%, -35%)}[data-sonner-toaster][dir=rtl],html[dir=rtl]{--toast-icon-margin-start:4px;--toast-icon-margin-end:-3px;--toast-svg-margin-start:0px;--toast-svg-margin-end:-1px;--toast-button-margin-start:0;--toast-button-margin-end:auto;--toast-close-button-start:unset;--toast-close-button-end:0;--toast-close-button-transform:translate(35%, -35%)}[data-sonner-toaster]{position:fixed;width:var(--width);font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,Noto Sans,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;--gray1:hsl(0, 0%, 99%);--gray2:hsl(0, 0%, 97.3%);--gray3:hsl(0, 0%, 95.1%);--gray4:hsl(0, 0%, 93%);--gray5:hsl(0, 0%, 90.9%);--gray6:hsl(0, 0%, 88.7%);--gray7:hsl(0, 0%, 85.8%);--gray8:hsl(0, 0%, 78%);--gray9:hsl(0, 0%, 56.1%);--gray10:hsl(0, 0%, 52.3%);--gray11:hsl(0, 0%, 43.5%);--gray12:hsl(0, 0%, 9%);--border-radius:8px;box-sizing:border-box;padding:0;margin:0;list-style:none;outline:0;z-index:999999999;transition:transform .4s ease}@media (hover:none) and (pointer:coarse){[data-sonner-toaster][data-lifted=true]{transform:none}}[data-sonner-toaster][data-x-position=right]{right:var(--offset-right)}[data-sonner-toaster][data-x-position=left]{left:var(--offset-left)}[data-sonner-toaster][data-x-position=center]{left:50%;transform:translateX(-50%)}[data-sonner-toaster][data-y-position=top]{top:var(--offset-top)}[data-sonner-toaster][data-y-position=bottom]{bottom:var(--offset-bottom)}[data-sonner-toast]{--y:translateY(100%);--lift-amount:calc(var(--lift) * var(--gap));z-index:var(--z-index);position:absolute;opacity:0;transform:var(--y);touch-action:none;transition:transform .4s,opacity .4s,height .4s,box-shadow .2s;box-sizing:border-box;outline:0;overflow-wrap:anywhere}[data-sonner-toast][data-styled=true]{padding:16px;background:var(--normal-bg);border:1px solid var(--normal-border);color:var(--normal-text);border-radius:var(--border-radius);box-shadow:0 4px 12px rgba(0,0,0,.1);width:var(--width);font-size:13px;display:flex;align-items:center;gap:6px}[data-sonner-toast]:focus-visible{box-shadow:0 4px 12px rgba(0,0,0,.1),0 0 0 2px rgba(0,0,0,.2)}[data-sonner-toast][data-y-position=top]{top:0;--y:translateY(-100%);--lift:1;--lift-amount:calc(1 * var(--gap))}[data-sonner-toast][data-y-position=bottom]{bottom:0;--y:translateY(100%);--lift:-1;--lift-amount:calc(var(--lift) * var(--gap))}[data-sonner-toast][data-styled=true] [data-description]{font-weight:400;line-height:1.4;color:#3f3f3f}[data-rich-colors=true][data-sonner-toast][data-styled=true] [data-description]{color:inherit}[data-sonner-toaster][data-sonner-theme=dark] [data-description]{color:#e8e8e8}[data-sonner-toast][data-styled=true] [data-title]{font-weight:500;line-height:1.5;color:inherit}[data-sonner-toast][data-styled=true] [data-icon]{display:flex;height:16px;width:16px;position:relative;justify-content:flex-start;align-items:center;flex-shrink:0;margin-left:var(--toast-icon-margin-start);margin-right:var(--toast-icon-margin-end)}[data-sonner-toast][data-promise=true] [data-icon]>svg{opacity:0;transform:scale(.8);transform-origin:center;animation:sonner-fade-in .3s ease forwards}[data-sonner-toast][data-styled=true] [data-icon]>*{flex-shrink:0}[data-sonner-toast][data-styled=true] [data-icon] svg{margin-left:var(--toast-svg-margin-start);margin-right:var(--toast-svg-margin-end)}[data-sonner-toast][data-styled=true] [data-content]{display:flex;flex-direction:column;gap:2px}[data-sonner-toast][data-styled=true] [data-button]{border-radius:4px;padding-left:8px;padding-right:8px;height:24px;font-size:12px;color:var(--normal-bg);background:var(--normal-text);margin-left:var(--toast-button-margin-start);margin-right:var(--toast-button-margin-end);border:none;font-weight:500;cursor:pointer;outline:0;display:flex;align-items:center;flex-shrink:0;transition:opacity .4s,box-shadow .2s}[data-sonner-toast][data-styled=true] [data-button]:focus-visible{box-shadow:0 0 0 2px rgba(0,0,0,.4)}[data-sonner-toast][data-styled=true] [data-button]:first-of-type{margin-left:var(--toast-button-margin-start);margin-right:var(--toast-button-margin-end)}[data-sonner-toast][data-styled=true] [data-cancel]{color:var(--normal-text);background:rgba(0,0,0,.08)}[data-sonner-toaster][data-sonner-theme=dark] [data-sonner-toast][data-styled=true] [data-cancel]{background:rgba(255,255,255,.3)}[data-sonner-toast][data-styled=true] [data-close-button]{position:absolute;left:var(--toast-close-button-start);right:var(--toast-close-button-end);top:0;height:20px;width:20px;display:flex;justify-content:center;align-items:center;padding:0;color:var(--gray12);background:var(--normal-bg);border:1px solid var(--gray4);transform:var(--toast-close-button-transform);border-radius:50%;cursor:pointer;z-index:1;transition:opacity .1s,background .2s,border-color .2s}[data-sonner-toast][data-styled=true] [data-close-button]:focus-visible{box-shadow:0 4px 12px rgba(0,0,0,.1),0 0 0 2px rgba(0,0,0,.2)}[data-sonner-toast][data-styled=true] [data-disabled=true]{cursor:not-allowed}[data-sonner-toast][data-styled=true]:hover [data-close-button]:hover{background:var(--gray2);border-color:var(--gray5)}[data-sonner-toast][data-swiping=true]::before{content:'';position:absolute;left:-100%;right:-100%;height:100%;z-index:-1}[data-sonner-toast][data-y-position=top][data-swiping=true]::before{bottom:50%;transform:scaleY(3) translateY(50%)}[data-sonner-toast][data-y-position=bottom][data-swiping=true]::before{top:50%;transform:scaleY(3) translateY(-50%)}[data-sonner-toast][data-swiping=false][data-removed=true]::before{content:'';position:absolute;inset:0;transform:scaleY(2)}[data-sonner-toast][data-expanded=true]::after{content:'';position:absolute;left:0;height:calc(var(--gap) + 1px);bottom:100%;width:100%}[data-sonner-toast][data-mounted=true]{--y:translateY(0);opacity:1}[data-sonner-toast][data-expanded=false][data-front=false]{--scale:var(--toasts-before) * 0.05 + 1;--y:translateY(calc(var(--lift-amount) * var(--toasts-before))) scale(calc(-1 * var(--scale)));height:var(--front-toast-height)}[data-sonner-toast]>*{transition:opacity .4s}[data-sonner-toast][data-x-position=right]{right:0}[data-sonner-toast][data-x-position=left]{left:0}[data-sonner-toast][data-expanded=false][data-front=false][data-styled=true]>*{opacity:0}[data-sonner-toast][data-visible=false]{opacity:0;pointer-events:none}[data-sonner-toast][data-mounted=true][data-expanded=true]{--y:translateY(calc(var(--lift) * var(--offset)));height:var(--initial-height)}[data-sonner-toast][data-removed=true][data-front=true][data-swipe-out=false]{--y:translateY(calc(var(--lift) * -100%));opacity:0}[data-sonner-toast][data-removed=true][data-front=false][data-swipe-out=false][data-expanded=true]{--y:translateY(calc(var(--lift) * var(--offset) + var(--lift) * -100%));opacity:0}[data-sonner-toast][data-removed=true][data-front=false][data-swipe-out=false][data-expanded=false]{--y:translateY(40%);opacity:0;transition:transform .5s,opacity .2s}[data-sonner-toast][data-removed=true][data-front=false]::before{height:calc(var(--initial-height) + 20%)}[data-sonner-toast][data-swiping=true]{transform:var(--y) translateY(var(--swipe-amount-y,0)) translateX(var(--swipe-amount-x,0));transition:none}[data-sonner-toast][data-swiped=true]{user-select:none}[data-sonner-toast][data-swipe-out=true][data-y-position=bottom],[data-sonner-toast][data-swipe-out=true][data-y-position=top]{animation-duration:.2s;animation-timing-function:ease-out;animation-fill-mode:forwards}[data-sonner-toast][data-swipe-out=true][data-swipe-direction=left]{animation-name:swipe-out-left}[data-sonner-toast][data-swipe-out=true][data-swipe-direction=right]{animation-name:swipe-out-right}[data-sonner-toast][data-swipe-out=true][data-swipe-direction=up]{animation-name:swipe-out-up}[data-sonner-toast][data-swipe-out=true][data-swipe-direction=down]{animation-name:swipe-out-down}@keyframes swipe-out-left{from{transform:var(--y) translateX(var(--swipe-amount-x));opacity:1}to{transform:var(--y) translateX(calc(var(--swipe-amount-x) - 100%));opacity:0}}@keyframes swipe-out-right{from{transform:var(--y) translateX(var(--swipe-amount-x));opacity:1}to{transform:var(--y) translateX(calc(var(--swipe-amount-x) + 100%));opacity:0}}@keyframes swipe-out-up{from{transform:var(--y) translateY(var(--swipe-amount-y));opacity:1}to{transform:var(--y) translateY(calc(var(--swipe-amount-y) - 100%));opacity:0}}@keyframes swipe-out-down{from{transform:var(--y) translateY(var(--swipe-amount-y));opacity:1}to{transform:var(--y) translateY(calc(var(--swipe-amount-y) + 100%));opacity:0}}@media (max-width:600px){[data-sonner-toaster]{position:fixed;right:var(--mobile-offset-right);left:var(--mobile-offset-left);width:100%}[data-sonner-toaster][dir=rtl]{left:calc(var(--mobile-offset-left) * -1)}[data-sonner-toaster] [data-sonner-toast]{left:0;right:0;width:calc(100% - var(--mobile-offset-left) * 2)}[data-sonner-toaster][data-x-position=left]{left:var(--mobile-offset-left)}[data-sonner-toaster][data-y-position=bottom]{bottom:var(--mobile-offset-bottom)}[data-sonner-toaster][data-y-position=top]{top:var(--mobile-offset-top)}[data-sonner-toaster][data-x-position=center]{left:var(--mobile-offset-left);right:var(--mobile-offset-right);transform:none}}[data-sonner-toaster][data-sonner-theme=light]{--normal-bg:#fff;--normal-border:var(--gray4);--normal-text:var(--gray12);--success-bg:hsl(143, 85%, 96%);--success-border:hsl(145, 92%, 87%);--success-text:hsl(140, 100%, 27%);--info-bg:hsl(208, 100%, 97%);--info-border:hsl(221, 91%, 93%);--info-text:hsl(210, 92%, 45%);--warning-bg:hsl(49, 100%, 97%);--warning-border:hsl(49, 91%, 84%);--warning-text:hsl(31, 92%, 45%);--error-bg:hsl(359, 100%, 97%);--error-border:hsl(359, 100%, 94%);--error-text:hsl(360, 100%, 45%)}[data-sonner-toaster][data-sonner-theme=light] [data-sonner-toast][data-invert=true]{--normal-bg:#000;--normal-border:hsl(0, 0%, 20%);--normal-text:var(--gray1)}[data-sonner-toaster][data-sonner-theme=dark] [data-sonner-toast][data-invert=true]{--normal-bg:#fff;--normal-border:var(--gray3);--normal-text:var(--gray12)}[data-sonner-toaster][data-sonner-theme=dark]{--normal-bg:#000;--normal-bg-hover:hsl(0, 0%, 12%);--normal-border:hsl(0, 0%, 20%);--normal-border-hover:hsl(0, 0%, 25%);--normal-text:var(--gray1);--success-bg:hsl(150, 100%, 6%);--success-border:hsl(147, 100%, 12%);--success-text:hsl(150, 86%, 65%);--info-bg:hsl(215, 100%, 6%);--info-border:hsl(223, 43%, 17%);--info-text:hsl(216, 87%, 65%);--warning-bg:hsl(64, 100%, 6%);--warning-border:hsl(60, 100%, 9%);--warning-text:hsl(46, 87%, 65%);--error-bg:hsl(358, 76%, 10%);--error-border:hsl(357, 89%, 16%);--error-text:hsl(358, 100%, 81%)}[data-sonner-toaster][data-sonner-theme=dark] [data-sonner-toast] [data-close-button]{background:var(--normal-bg);border-color:var(--normal-border);color:var(--normal-text)}[data-sonner-toaster][data-sonner-theme=dark] [data-sonner-toast] [data-close-button]:hover{background:var(--normal-bg-hover);border-color:var(--normal-border-hover)}[data-rich-colors=true][data-sonner-toast][data-type=success]{background:var(--success-bg);border-color:var(--success-border);color:var(--success-text)}[data-rich-colors=true][data-sonner-toast][data-type=success] [data-close-button]{background:var(--success-bg);border-color:var(--success-border);color:var(--success-text)}[data-rich-colors=true][data-sonner-toast][data-type=info]{background:var(--info-bg);border-color:var(--info-border);color:var(--info-text)}[data-rich-colors=true][data-sonner-toast][data-type=info] [data-close-button]{background:var(--info-bg);border-color:var(--info-border);color:var(--info-text)}[data-rich-colors=true][data-sonner-toast][data-type=warning]{background:var(--warning-bg);border-color:var(--warning-border);color:var(--warning-text)}[data-rich-colors=true][data-sonner-toast][data-type=warning] [data-close-button]{background:var(--warning-bg);border-color:var(--warning-border);color:var(--warning-text)}[data-rich-colors=true][data-sonner-toast][data-type=error]{background:var(--error-bg);border-color:var(--error-border);color:var(--error-text)}[data-rich-colors=true][data-sonner-toast][data-type=error] [data-close-button]{background:var(--error-bg);border-color:var(--error-border);color:var(--error-text)}.sonner-loading-wrapper{--size:16px;height:var(--size);width:var(--size);position:absolute;inset:0;z-index:10}.sonner-loading-wrapper[data-visible=false]{transform-origin:center;animation:sonner-fade-out .2s ease forwards}.sonner-spinner{position:relative;top:50%;left:50%;height:var(--size);width:var(--size)}.sonner-loading-bar{animation:sonner-spin 1.2s linear infinite;background:var(--gray11);border-radius:6px;height:8%;left:-10%;position:absolute;top:-3.9%;width:24%}.sonner-loading-bar:first-child{animation-delay:-1.2s;transform:rotate(.0001deg) translate(146%)}.sonner-loading-bar:nth-child(2){animation-delay:-1.1s;transform:rotate(30deg) translate(146%)}.sonner-loading-bar:nth-child(3){animation-delay:-1s;transform:rotate(60deg) translate(146%)}.sonner-loading-bar:nth-child(4){animation-delay:-.9s;transform:rotate(90deg) translate(146%)}.sonner-loading-bar:nth-child(5){animation-delay:-.8s;transform:rotate(120deg) translate(146%)}.sonner-loading-bar:nth-child(6){animation-delay:-.7s;transform:rotate(150deg) translate(146%)}.sonner-loading-bar:nth-child(7){animation-delay:-.6s;transform:rotate(180deg) translate(146%)}.sonner-loading-bar:nth-child(8){animation-delay:-.5s;transform:rotate(210deg) translate(146%)}.sonner-loading-bar:nth-child(9){animation-delay:-.4s;transform:rotate(240deg) translate(146%)}.sonner-loading-bar:nth-child(10){animation-delay:-.3s;transform:rotate(270deg) translate(146%)}.sonner-loading-bar:nth-child(11){animation-delay:-.2s;transform:rotate(300deg) translate(146%)}.sonner-loading-bar:nth-child(12){animation-delay:-.1s;transform:rotate(330deg) translate(146%)}@keyframes sonner-fade-in{0%{opacity:0;transform:scale(.8)}100%{opacity:1;transform:scale(1)}}@keyframes sonner-fade-out{0%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.8)}}@keyframes sonner-spin{0%{opacity:1}100%{opacity:.15}}@media (prefers-reduced-motion){.sonner-loading-bar,[data-sonner-toast],[data-sonner-toast]>*{transition:none!important;animation:none!important}}.sonner-loader{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);transform-origin:center;transition:opacity .2s,transform .2s}.sonner-loader[data-visible=false]{opacity:0;transform:scale(.8) translate(-50%,-50%)}</style><script src="chrome-extension://liecbddmkiiihnedobmlmillhodjkdmb/js/recordConsoleEvents.js"></script></head>
+  <body><span data-radix-focus-guard="" tabindex="0" style="outline: none; opacity: 0; position: fixed; pointer-events: none;"></span>
+    <div id="root"><section aria-label="Notifications alt+T" tabindex="-1" aria-live="polite" aria-relevant="additions text" aria-atomic="false"></section><div class="ps min-h-0 min-w-0 max-w-full overflow-hidden dark" data-testid="studio-root" style="width: 100%; height: 100%;"><div class="flex min-w-0 max-w-full flex-col w-full h-full min-h-0 overflow-hidden font-sans"><div class="relative flex h-full min-h-0 w-full min-w-0 gap-0 overflow-hidden rounded-lg bg-background" data-testid="studio-shell"><div style="width: auto; opacity: 1;"><div class="relative flex shrink-0 flex-col overflow-y-auto min-h-full h-0 text-card-foreground shadow-xs rounded-lg" data-testid="studio-navigation" style="width: 192px;"><div class="flex items-center gap-2 pt-4 pb-0.5 px-4"><img alt="Prisma Logo" class="h-6 w-auto" src="data:image/svg+xml,&lt;svg%0A  width=&quot;58&quot;%0A  height=&quot;72&quot;%0A  viewBox=&quot;0 0 58 72&quot;%0A  fill=&quot;none&quot;%0A  xmlns=&quot;http://www.w3.org/2000/svg&quot;%0A&gt;%0A  &lt;path%0A    fill-rule=&quot;evenodd&quot;%0A    clip-rule=&quot;evenodd&quot;%0A    d=&quot;M0.522473 45.0933C-0.184191 46.246 -0.173254 47.7004 0.550665 48.8423L13.6534 69.5114C14.5038 70.8529 16.1429 71.4646 17.6642 71.0082L55.4756 59.6648C57.539 59.0457 58.5772 56.7439 57.6753 54.7874L33.3684 2.06007C32.183 -0.511323 28.6095 -0.722394 27.1296 1.69157L0.522473 45.0933ZM32.7225 14.1141C32.2059 12.9187 30.4565 13.1028 30.2001 14.3796L20.842 60.9749C20.6447 61.9574 21.5646 62.7964 22.5248 62.5098L48.6494 54.7114C49.4119 54.4838 49.8047 53.6415 49.4891 52.9111L32.7225 14.1141Z&quot;%0A    fill=&quot;white&quot;%0A  /&gt;%0A&lt;/svg&gt;%0A"><span class="text-lg font-medium font-sans">Prisma Studio</span></div><div class="flex items-center gap-1 pt-4 pb-2 px-4 sticky top-0 backdrop-blur-sm"><button type="button" role="combobox" aria-controls="radix-_r_j_" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" class="flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 shadow-sm ring-offset-background data-placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&amp;&gt;span]:line-clamp-1 text-xs"><div class="flex items-center gap-1"><span class="text-muted-foreground">Schema:</span><span style="pointer-events: none;">public</span></div><span aria-hidden="true" class="flex shrink-0 items-center justify-center opacity-50"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down h-4 w-4" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span></button></div><div><div class="flex items-center gap-1 pt-4 pb-2 px-4 sticky top-0  backdrop-blur-sm"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-table2 lucide-table-2 text-muted-foreground/60" aria-hidden="true"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"></path></svg><h2 class="text-sm font-medium">Studio</h2></div><nav aria-label="Studio" class="flex flex-col gap-px pb-3 p-2"><a href="http://localhost:51212/#schema=public&amp;view=schema" class="px-2 font-medium rounded-md flex gap-2 items-center border border-transparent bg-transparent py-1 font-mono text-xs text-foreground/60 hover:text-foreground transition-all cursor-pointer data-[active=true]:bg-accent data-[active=true]:foreground data-[active=true]:text-foreground w-full" data-sidebar="menu-button" data-active="false">Visualizer</a><a href="http://localhost:51212/#schema=public&amp;view=console" class="px-2 font-medium rounded-md flex gap-2 items-center border border-transparent bg-transparent py-1 font-mono text-xs text-foreground/60 hover:text-foreground transition-all cursor-pointer data-[active=true]:bg-accent data-[active=true]:foreground data-[active=true]:text-foreground w-full" data-sidebar="menu-button" data-active="false">Console</a><a href="http://localhost:51212/#schema=public&amp;view=sql" class="px-2 font-medium rounded-md flex gap-2 items-center border border-transparent bg-transparent py-1 font-mono text-xs text-foreground/60 hover:text-foreground transition-all cursor-pointer data-[active=true]:bg-accent data-[active=true]:foreground data-[active=true]:text-foreground w-full" data-sidebar="menu-button" data-active="false">SQL</a></nav></div><div class="group/navigation-search relative" data-search-open="false" data-testid="navigation-search-block-tables"><div class="relative flex items-center gap-1 pt-4 pb-2 px-4 sticky top-0 backdrop-blur-sm min-h-10"><div class="flex items-center gap-1 transition-opacity duration-200"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-table2 lucide-table-2 text-muted-foreground/60" aria-hidden="true"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"></path></svg><h2 class="text-sm font-medium">Tables</h2></div><div class="ml-auto flex items-center gap-0.5 pr-0.5 transition-opacity duration-200 opacity-0 group-hover/navigation-search:opacity-100 focus:opacity-100 focus-visible:opacity-100"><button aria-label="Search tables" class="flex h-6 w-6 items-center justify-center rounded-sm text-muted-foreground/60 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" type="button"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search" aria-hidden="true"><path d="m21 21-4.34-4.34"></path><circle cx="11" cy="11" r="8"></circle></svg></button><button aria-label="Refresh tables" class="flex h-6 w-6 items-center justify-center rounded-sm text-muted-foreground/60 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" type="button"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-refresh-cw" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></svg></button></div><div data-testid="navigation-search-input-wrapper-tables" class="absolute right-4 top-1/2 -translate-y-1/2 origin-right transition-[opacity,transform] duration-200 ease-out will-change-transform w-[calc(100%-2rem)] opacity-0 scale-x-0 pointer-events-none"><input class="flex rounded-md border border-input px-3 py-1 text-sm leading-5 font-normal text-foreground transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 h-9 w-full bg-background shadow-none" aria-label="Search tables" placeholder="Search tables..." value=""></div></div><nav aria-label="Tables" class="flex flex-col gap-px pb-3 p-2"><a href="http://localhost:51212/#table=Offer&amp;schema=public&amp;view=table" class="px-2 font-medium rounded-md flex gap-2 items-center border border-transparent bg-transparent py-1 font-mono text-xs text-foreground/60 hover:text-foreground transition-all cursor-pointer data-[active=true]:bg-accent data-[active=true]:foreground data-[active=true]:text-foreground w-full" data-sidebar="menu-button" data-active="false" data-search-highlighted="false">Offer</a><a href="http://localhost:51212/#table=Order&amp;schema=public&amp;view=table" class="px-2 font-medium rounded-md flex gap-2 items-center border border-transparent bg-transparent py-1 font-mono text-xs text-foreground/60 hover:text-foreground transition-all cursor-pointer data-[active=true]:bg-accent data-[active=true]:foreground data-[active=true]:text-foreground w-full" data-sidebar="menu-button" data-active="false" data-search-highlighted="false">Order</a><a href="http://localhost:51212/#table=Product&amp;schema=public&amp;view=table" class="px-2 font-medium rounded-md flex gap-2 items-center border border-transparent bg-transparent py-1 font-mono text-xs text-foreground/60 hover:text-foreground transition-all cursor-pointer data-[active=true]:bg-accent data-[active=true]:foreground data-[active=true]:text-foreground w-full" data-sidebar="menu-button" data-active="false" data-search-highlighted="false">Product</a><a href="http://localhost:51212/#table=Seller&amp;schema=public&amp;view=table" class="px-2 font-medium rounded-md flex gap-2 items-center border border-transparent bg-transparent py-1 font-mono text-xs text-foreground/60 hover:text-foreground transition-all cursor-pointer data-[active=true]:bg-accent data-[active=true]:foreground data-[active=true]:text-foreground w-full" data-sidebar="menu-button" data-active="false" data-search-highlighted="false">Seller</a><a href="http://localhost:51212/#table=User&amp;schema=public&amp;view=table" class="px-2 font-medium rounded-md flex gap-2 items-center border border-transparent bg-transparent py-1 font-mono text-xs text-foreground/60 hover:text-foreground transition-all cursor-pointer data-[active=true]:bg-accent data-[active=true]:foreground data-[active=true]:text-foreground w-full" data-sidebar="menu-button" data-active="true" data-search-highlighted="false">User</a></nav></div><button aria-label="Resize navigation" class="absolute inset-y-0 right-0 flex w-3 cursor-col-resize touch-none items-stretch justify-center outline-none" data-testid="navigation-resize-handle" type="button"></button></div></div><div class="flex h-full min-h-0 min-w-0 flex-1 flex-col self-stretch overflow-hidden rounded-lg bg-secondary p-px" data-testid="studio-main-pane"><div class="flex w-full rounded-t-lg border-b border-border bg-card p-2 py-3"><div class="flex w-full items-center gap-3"><div class="flex min-w-0 grow items-center gap-2"><button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border border-input bg-background text-foreground shadow-sm hover:bg-accent hover:text-accent-foreground h-9 w-9" aria-label="Close navigation"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-panel-left-close" aria-hidden="true" data-icon="inline-start"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M9 3v18"></path><path d="m16 15-3-3 3-3"></path></svg></button><div class="flex min-w-0 items-center gap-2"><div class="relative h-9 transition-[width] duration-200 ease-out w-9" data-row-search-open="false"><button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border border-input bg-background text-foreground shadow-sm hover:bg-accent hover:text-accent-foreground h-9 absolute top-0 min-w-9 w-auto px-2 transition-opacity duration-200 right-0" aria-label="Global search" type="button"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search" aria-hidden="true"><path d="m21 21-4.34-4.34"></path><circle cx="11" cy="11" r="8"></circle></svg></button><div class="absolute top-1/2 z-40 w-full -translate-y-1/2 transition-[opacity,transform] duration-200 ease-out will-change-transform right-0 origin-right pointer-events-none scale-x-0 opacity-0" data-row-search-input-wrapper="true"><div class="relative"><input class="flex rounded-md border border-input px-3 py-1 text-sm leading-5 font-normal text-foreground transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 h-9 w-full bg-background pr-10 shadow-none" aria-label="Global search" data-search-syntax-state="valid" placeholder="Global search" value=""><button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground absolute right-1 top-1/2 size-7 -translate-y-1/2 rounded-sm shadow-none" aria-label="Close search" data-testid="search-close-button" type="button"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div></div></div></div><div data-testid="table-ai-filter-control" class="flex min-w-0 items-center"><button aria-expanded="false" aria-label="Add filter" type="button" class="flex h-9 shrink-0 items-center gap-1.5 bg-transparent px-3 text-sm text-foreground transition-colors focus-visible:outline-none rounded-md border border-input shadow-sm hover:bg-accent" aria-haspopup="dialog" aria-controls="radix-_r_q_" data-state="closed"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-funnel size-4" aria-hidden="true"><path d="M10 20a1 1 0 0 0 .553.895l2 1A1 1 0 0 0 14 21v-7a2 2 0 0 1 .517-1.341L21.74 4.67A1 1 0 0 0 21 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z"></path></svg><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-3.5 text-muted-foreground" aria-hidden="true" data-testid="table-filter-menu-chevron"><path d="m6 9 6 6 6-6"></path></svg></button></div><button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border border-input bg-background text-foreground shadow-sm hover:bg-accent hover:text-accent-foreground py-2 h-9 px-5">Insert row</button></div><div data-testid="studio-header-end-controls" class="flex shrink-0 items-center gap-2 pl-2"><button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border border-input bg-background text-foreground shadow-sm hover:bg-accent hover:text-accent-foreground h-9 w-9" aria-label="Refresh table"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-refresh-cw" aria-hidden="true" data-icon="inline-start"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></svg></button></div></div></div><div data-studio="content" class="flex-1 w-0 h-0 min-h-0 min-w-full flex flex-col relative bg-background/50"><div></div><div class="flex min-h-0 flex-1 flex-col" data-state="closed"><div class="relative h-full w-full min-w-0 overflow-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25" aria-label="Table grid" data-grid-scroll-container="true" tabindex="0" style="container-type: inline-size;"><table class="w-full caption-bottom text-sm table-fixed border-separate border-spacing-0 box-border bg-background/50" style="min-width: 100%; width: 1835px;"><thead class=""><tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"><th class="h-10 text-left align-middle font-medium text-muted-foreground select-none touch-none top-0 bg-table-head group border-r border-b border-table-border overflow-hidden whitespace-nowrap text-ellipsis data-[pinning-animating=from]:transition-none data-[pinning-animating=true]:transition-transform data-[pinning-animating=true]:duration-[1000ms] data-[pinning-animating=true]:ease-out data-[pinning-animating=true]:will-change-transform motion-reduce:transition-none sticky z-40 p-0 cursor-pointer" data-grid-header-id="__ps_select" data-grid-header-column-id="__ps_select" aria-label="Row selection spacer" style="min-width: 35px; transform: translate3d(var(--ps-pinning-translate-x, 0px), var(--ps-pinning-translate-y, 0px), 0); width: 35px; left: 0px;"></th><th class="h-10 text-left align-middle font-medium text-muted-foreground select-none touch-none sticky top-0 bg-table-head group border-r border-b border-table-border overflow-hidden whitespace-nowrap text-ellipsis data-[pinning-animating=from]:transition-none data-[pinning-animating=true]:transition-transform data-[pinning-animating=true]:duration-[1000ms] data-[pinning-animating=true]:ease-out data-[pinning-animating=true]:will-change-transform motion-reduce:transition-none z-10 p-0" data-grid-header-id="id" data-grid-header-column-id="id" role="button" tabindex="0" aria-disabled="false" aria-roledescription="sortable" aria-describedby="DndDescribedBy-0" style="min-width: 200px; transform: translate3d(var(--ps-pinning-translate-x, 0px), var(--ps-pinning-translate-y, 0px), 0); width: 200px; cursor: grab; touch-action: none;"><div class="h-full min-w-0 w-full"><div class="group relative flex h-full w-full items-center justify-between min-w-0 px-2"><div class="flex items-center justify-between w-full min-w-0 pr-2"><div class="flex items-center gap-2 overflow-hidden text-ellipsis font-mono text-xs"><span class="flex min-w-0"><span class="min-w-0 overflow-hidden text-ellipsis text-foreground/90"><div class="flex min-w-0 items-center gap-1 overflow-hidden"><span class="inline-flex shrink-0 items-center justify-center" data-state="closed"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-key-round text-amber-500" aria-hidden="true"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"></path><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"></circle></svg></span><span class="inline-flex shrink-0 items-center justify-center" data-state="closed"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-asterisk text-destructive" aria-hidden="true"><path d="M12 6v12"></path><path d="M17.196 9 6.804 15"></path><path d="m6.804 9 10.392 6"></path></svg></span><span class="min-w-0 truncate font-medium">id</span><span class="min-w-0 truncate lowercase text-muted-foreground/70">text</span></div></span></span></div></div><span data-testid="column-header-controls" data-active="true" class="absolute right-1 top-1/2 -translate-y-1/2 z-10 inline-flex items-center gap-0.5 rounded-full border border-table-border bg-background/95 px-1 py-0.5 shadow-sm transition-opacity duration-150 opacity-100 pointer-events-auto"><button type="button" aria-label="Pin column" class="flex h-5 w-5 items-center justify-center rounded-full transition-colors text-muted-foreground/70 hover:text-foreground"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pin" aria-hidden="true"><path d="M12 17v5"></path><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"></path></svg></button><button type="button" aria-label="Sort descending" class="flex h-5 w-5 items-center justify-center rounded-full transition-colors text-foreground"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up" aria-hidden="true"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg></button></span><button type="button" tabindex="0" class="absolute inset-y-0 -right-2 z-20 block w-4 cursor-col-resize before:absolute before:inset-y-0 before:left-2 before:w-px before:bg-transparent hover:before:bg-table-border focus-visible:outline-none focus-visible:before:bg-table-border" aria-label="Resize column"></button></div></div></th><th class="h-10 text-left align-middle font-medium text-muted-foreground select-none touch-none sticky top-0 bg-table-head group border-r border-b border-table-border overflow-hidden whitespace-nowrap text-ellipsis data-[pinning-animating=from]:transition-none data-[pinning-animating=true]:transition-transform data-[pinning-animating=true]:duration-[1000ms] data-[pinning-animating=true]:ease-out data-[pinning-animating=true]:will-change-transform motion-reduce:transition-none z-10 p-0" data-grid-header-id="createdAt" data-grid-header-column-id="createdAt" role="button" tabindex="0" aria-disabled="false" aria-roledescription="sortable" aria-describedby="DndDescribedBy-0" style="min-width: 200px; transform: translate3d(var(--ps-pinning-translate-x, 0px), var(--ps-pinning-translate-y, 0px), 0); width: 200px; cursor: grab; touch-action: none;"><div class="h-full min-w-0 w-full"><div class="group relative flex h-full w-full items-center justify-between min-w-0 px-2"><div class="flex items-center justify-between w-full min-w-0 pr-2"><div class="flex items-center gap-2 overflow-hidden text-ellipsis font-mono text-xs"><span class="flex min-w-0"><span class="min-w-0 overflow-hidden text-ellipsis text-foreground/90"><div class="flex min-w-0 items-center gap-1 overflow-hidden"><span class="min-w-0 truncate font-medium">createdAt</span><span class="min-w-0 truncate lowercase text-muted-foreground/70">timestamp</span></div></span></span></div></div><span data-testid="column-header-controls" class="absolute right-1 top-1/2 -translate-y-1/2 z-10 inline-flex items-center gap-0.5 rounded-full border border-table-border bg-background/95 px-1 py-0.5 shadow-sm transition-opacity duration-150 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto focus-within:opacity-100 focus-within:pointer-events-auto"><button type="button" aria-label="Pin column" class="flex h-5 w-5 items-center justify-center rounded-full transition-colors text-muted-foreground/70 hover:text-foreground"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pin" aria-hidden="true"><path d="M12 17v5"></path><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"></path></svg></button><button type="button" aria-label="Sort ascending" class="flex h-5 w-5 items-center justify-center rounded-full transition-colors text-muted-foreground/70 hover:text-foreground"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up" aria-hidden="true"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg></button></span><button type="button" tabindex="0" class="absolute inset-y-0 -right-2 z-20 block w-4 cursor-col-resize before:absolute before:inset-y-0 before:left-2 before:w-px before:bg-transparent hover:before:bg-table-border focus-visible:outline-none focus-visible:before:bg-table-border" aria-label="Resize column"></button></div></div></th><th class="h-10 text-left align-middle font-medium text-muted-foreground select-none touch-none sticky top-0 bg-table-head group border-r border-b border-table-border overflow-hidden whitespace-nowrap text-ellipsis data-[pinning-animating=from]:transition-none data-[pinning-animating=true]:transition-transform data-[pinning-animating=true]:duration-[1000ms] data-[pinning-animating=true]:ease-out data-[pinning-animating=true]:will-change-transform motion-reduce:transition-none z-10 p-0" data-grid-header-id="email" data-grid-header-column-id="email" role="button" tabindex="0" aria-disabled="false" aria-roledescription="sortable" aria-describedby="DndDescribedBy-0" style="min-width: 200px; transform: translate3d(var(--ps-pinning-translate-x, 0px), var(--ps-pinning-translate-y, 0px), 0); width: 200px; cursor: grab; touch-action: none;"><div class="h-full min-w-0 w-full"><div class="group relative flex h-full w-full items-center justify-between min-w-0 px-2"><div class="flex items-center justify-between w-full min-w-0 pr-2"><div class="flex items-center gap-2 overflow-hidden text-ellipsis font-mono text-xs"><span class="flex min-w-0"><span class="min-w-0 overflow-hidden text-ellipsis text-foreground/90"><div class="flex min-w-0 items-center gap-1 overflow-hidden"><span class="inline-flex shrink-0 items-center justify-center" data-state="closed"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-asterisk text-destructive" aria-hidden="true"><path d="M12 6v12"></path><path d="M17.196 9 6.804 15"></path><path d="m6.804 9 10.392 6"></path></svg></span><span class="min-w-0 truncate font-medium">email</span><span class="min-w-0 truncate lowercase text-muted-foreground/70">text</span></div></span></span></div></div><span data-testid="column-header-controls" class="absolute right-1 top-1/2 -translate-y-1/2 z-10 inline-flex items-center gap-0.5 rounded-full border border-table-border bg-background/95 px-1 py-0.5 shadow-sm transition-opacity duration-150 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto focus-within:opacity-100 focus-within:pointer-events-auto"><button type="button" aria-label="Pin column" class="flex h-5 w-5 items-center justify-center rounded-full transition-colors text-muted-foreground/70 hover:text-foreground"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pin" aria-hidden="true"><path d="M12 17v5"></path><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"></path></svg></button><button type="button" aria-label="Sort ascending" class="flex h-5 w-5 items-center justify-center rounded-full transition-colors text-muted-foreground/70 hover:text-foreground"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up" aria-hidden="true"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg></button></span><button type="button" tabindex="0" class="absolute inset-y-0 -right-2 z-20 block w-4 cursor-col-resize before:absolute before:inset-y-0 before:left-2 before:w-px before:bg-transparent hover:before:bg-table-border focus-visible:outline-none focus-visible:before:bg-table-border" aria-label="Resize column"></button></div></div></th><th class="h-10 text-left align-middle font-medium text-muted-foreground select-none touch-none sticky top-0 bg-table-head group border-r border-b border-table-border overflow-hidden whitespace-nowrap text-ellipsis data-[pinning-animating=from]:transition-none data-[pinning-animating=true]:transition-transform data-[pinning-animating=true]:duration-[1000ms] data-[pinning-animating=true]:ease-out data-[pinning-animating=true]:will-change-transform motion-reduce:transition-none z-10 p-0" data-grid-header-id="name" data-grid-header-column-id="name" role="button" tabindex="0" aria-disabled="false" aria-roledescription="sortable" aria-describedby="DndDescribedBy-0" style="min-width: 200px; transform: translate3d(var(--ps-pinning-translate-x, 0px), var(--ps-pinning-translate-y, 0px), 0); width: 200px; cursor: grab; touch-action: none;"><div class="h-full min-w-0 w-full"><div class="group relative flex h-full w-full items-center justify-between min-w-0 px-2"><div class="flex items-center justify-between w-full min-w-0 pr-2"><div class="flex items-center gap-2 overflow-hidden text-ellipsis font-mono text-xs"><span class="flex min-w-0"><span class="min-w-0 overflow-hidden text-ellipsis text-foreground/90"><div class="flex min-w-0 items-center gap-1 overflow-hidden"><span class="inline-flex shrink-0 items-center justify-center" data-state="closed"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-asterisk text-destructive" aria-hidden="true"><path d="M12 6v12"></path><path d="M17.196 9 6.804 15"></path><path d="m6.804 9 10.392 6"></path></svg></span><span class="min-w-0 truncate font-medium">name</span><span class="min-w-0 truncate lowercase text-muted-foreground/70">text</span></div></span></span></div></div><span data-testid="column-header-controls" class="absolute right-1 top-1/2 -translate-y-1/2 z-10 inline-flex items-center gap-0.5 rounded-full border border-table-border bg-background/95 px-1 py-0.5 shadow-sm transition-opacity duration-150 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto focus-within:opacity-100 focus-within:pointer-events-auto"><button type="button" aria-label="Pin column" class="flex h-5 w-5 items-center justify-center rounded-full transition-colors text-muted-foreground/70 hover:text-foreground"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pin" aria-hidden="true"><path d="M12 17v5"></path><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"></path></svg></button><button type="button" aria-label="Sort ascending" class="flex h-5 w-5 items-center justify-center rounded-full transition-colors text-muted-foreground/70 hover:text-foreground"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up" aria-hidden="true"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg></button></span><button type="button" tabindex="0" class="absolute inset-y-0 -right-2 z-20 block w-4 cursor-col-resize before:absolute before:inset-y-0 before:left-2 before:w-px before:bg-transparent hover:before:bg-table-border focus-visible:outline-none focus-visible:before:bg-table-border" aria-label="Resize column"></button></div></div></th><th class="h-10 text-left align-middle font-medium text-muted-foreground select-none touch-none sticky top-0 bg-table-head group border-r border-b border-table-border overflow-hidden whitespace-nowrap text-ellipsis data-[pinning-animating=from]:transition-none data-[pinning-animating=true]:transition-transform data-[pinning-animating=true]:duration-[1000ms] data-[pinning-animating=true]:ease-out data-[pinning-animating=true]:will-change-transform motion-reduce:transition-none z-10 p-0" data-grid-header-id="password" data-grid-header-column-id="password" role="button" tabindex="0" aria-disabled="false" aria-roledescription="sortable" aria-describedby="DndDescribedBy-0" style="min-width: 200px; transform: translate3d(var(--ps-pinning-translate-x, 0px), var(--ps-pinning-translate-y, 0px), 0); width: 200px; cursor: grab; touch-action: none;"><div class="h-full min-w-0 w-full"><div class="group relative flex h-full w-full items-center justify-between min-w-0 px-2"><div class="flex items-center justify-between w-full min-w-0 pr-2"><div class="flex items-center gap-2 overflow-hidden text-ellipsis font-mono text-xs"><span class="flex min-w-0"><span class="min-w-0 overflow-hidden text-ellipsis text-foreground/90"><div class="flex min-w-0 items-center gap-1 overflow-hidden"><span class="inline-flex shrink-0 items-center justify-center" data-state="closed"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-asterisk text-destructive" aria-hidden="true"><path d="M12 6v12"></path><path d="M17.196 9 6.804 15"></path><path d="m6.804 9 10.392 6"></path></svg></span><span class="min-w-0 truncate font-medium">password</span><span class="min-w-0 truncate lowercase text-muted-foreground/70">text</span></div></span></span></div></div><span data-testid="column-header-controls" class="absolute right-1 top-1/2 -translate-y-1/2 z-10 inline-flex items-center gap-0.5 rounded-full border border-table-border bg-background/95 px-1 py-0.5 shadow-sm transition-opacity duration-150 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto focus-within:opacity-100 focus-within:pointer-events-auto"><button type="button" aria-label="Pin column" class="flex h-5 w-5 items-center justify-center rounded-full transition-colors text-muted-foreground/70 hover:text-foreground"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pin" aria-hidden="true"><path d="M12 17v5"></path><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"></path></svg></button><button type="button" aria-label="Sort ascending" class="flex h-5 w-5 items-center justify-center rounded-full transition-colors text-muted-foreground/70 hover:text-foreground"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up" aria-hidden="true"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg></button></span><button type="button" tabindex="0" class="absolute inset-y-0 -right-2 z-20 block w-4 cursor-col-resize before:absolute before:inset-y-0 before:left-2 before:w-px before:bg-transparent hover:before:bg-table-border focus-visible:outline-none focus-visible:before:bg-table-border" aria-label="Resize column"></button></div></div></th><th class="h-10 text-left align-middle font-medium text-muted-foreground select-none touch-none sticky top-0 bg-table-head group border-r border-b border-table-border overflow-hidden whitespace-nowrap text-ellipsis data-[pinning-animating=from]:transition-none data-[pinning-animating=true]:transition-transform data-[pinning-animating=true]:duration-[1000ms] data-[pinning-animating=true]:ease-out data-[pinning-animating=true]:will-change-transform motion-reduce:transition-none z-10 p-0" data-grid-header-id="phone" data-grid-header-column-id="phone" role="button" tabindex="0" aria-disabled="false" aria-roledescription="sortable" aria-describedby="DndDescribedBy-0" style="min-width: 200px; transform: translate3d(var(--ps-pinning-translate-x, 0px), var(--ps-pinning-translate-y, 0px), 0); width: 200px; cursor: grab; touch-action: none;"><div class="h-full min-w-0 w-full"><div class="group relative flex h-full w-full items-center justify-between min-w-0 px-2"><div class="flex items-center justify-between w-full min-w-0 pr-2"><div class="flex items-center gap-2 overflow-hidden text-ellipsis font-mono text-xs"><span class="flex min-w-0"><span class="min-w-0 overflow-hidden text-ellipsis text-foreground/90"><div class="flex min-w-0 items-center gap-1 overflow-hidden"><span class="min-w-0 truncate font-medium">phone</span><span class="min-w-0 truncate lowercase text-muted-foreground/70">text</span></div></span></span></div></div><span data-testid="column-header-controls" class="absolute right-1 top-1/2 -translate-y-1/2 z-10 inline-flex items-center gap-0.5 rounded-full border border-table-border bg-background/95 px-1 py-0.5 shadow-sm transition-opacity duration-150 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto focus-within:opacity-100 focus-within:pointer-events-auto"><button type="button" aria-label="Pin column" class="flex h-5 w-5 items-center justify-center rounded-full transition-colors text-muted-foreground/70 hover:text-foreground"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pin" aria-hidden="true"><path d="M12 17v5"></path><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"></path></svg></button><button type="button" aria-label="Sort ascending" class="flex h-5 w-5 items-center justify-center rounded-full transition-colors text-muted-foreground/70 hover:text-foreground"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up" aria-hidden="true"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg></button></span><button type="button" tabindex="0" class="absolute inset-y-0 -right-2 z-20 block w-4 cursor-col-resize before:absolute before:inset-y-0 before:left-2 before:w-px before:bg-transparent hover:before:bg-table-border focus-visible:outline-none focus-visible:before:bg-table-border" aria-label="Resize column"></button></div></div></th><th class="h-10 text-left align-middle font-medium text-muted-foreground select-none touch-none sticky top-0 bg-table-head group border-r border-b border-table-border overflow-hidden whitespace-nowrap text-ellipsis data-[pinning-animating=from]:transition-none data-[pinning-animating=true]:transition-transform data-[pinning-animating=true]:duration-[1000ms] data-[pinning-animating=true]:ease-out data-[pinning-animating=true]:will-change-transform motion-reduce:transition-none z-10 p-0" data-grid-header-id="role" data-grid-header-column-id="role" role="button" tabindex="0" aria-disabled="false" aria-roledescription="sortable" aria-describedby="DndDescribedBy-0" style="min-width: 200px; transform: translate3d(var(--ps-pinning-translate-x, 0px), var(--ps-pinning-translate-y, 0px), 0); width: 200px; cursor: grab; touch-action: none;"><div class="h-full min-w-0 w-full"><div class="group relative flex h-full w-full items-center justify-between min-w-0 px-2"><div class="flex items-center justify-between w-full min-w-0 pr-2"><div class="flex items-center gap-2 overflow-hidden text-ellipsis font-mono text-xs"><span class="flex min-w-0"><span class="min-w-0 overflow-hidden text-ellipsis text-foreground/90"><div class="flex min-w-0 items-center gap-1 overflow-hidden"><span class="min-w-0 truncate font-medium">role</span><span class="min-w-0 truncate lowercase text-muted-foreground/70">Role</span></div></span></span></div></div><span data-testid="column-header-controls" class="absolute right-1 top-1/2 -translate-y-1/2 z-10 inline-flex items-center gap-0.5 rounded-full border border-table-border bg-background/95 px-1 py-0.5 shadow-sm transition-opacity duration-150 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto focus-within:opacity-100 focus-within:pointer-events-auto"><button type="button" aria-label="Pin column" class="flex h-5 w-5 items-center justify-center rounded-full transition-colors text-muted-foreground/70 hover:text-foreground"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pin" aria-hidden="true"><path d="M12 17v5"></path><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"></path></svg></button><button type="button" aria-label="Sort ascending" class="flex h-5 w-5 items-center justify-center rounded-full transition-colors text-muted-foreground/70 hover:text-foreground"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up" aria-hidden="true"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg></button></span><button type="button" tabindex="0" class="absolute inset-y-0 -right-2 z-20 block w-4 cursor-col-resize before:absolute before:inset-y-0 before:left-2 before:w-px before:bg-transparent hover:before:bg-table-border focus-visible:outline-none focus-visible:before:bg-table-border" aria-label="Resize column"></button></div></div></th><th class="h-10 text-left align-middle font-medium text-muted-foreground select-none touch-none sticky top-0 bg-table-head group border-r border-b border-table-border overflow-hidden whitespace-nowrap text-ellipsis data-[pinning-animating=from]:transition-none data-[pinning-animating=true]:transition-transform data-[pinning-animating=true]:duration-[1000ms] data-[pinning-animating=true]:ease-out data-[pinning-animating=true]:will-change-transform motion-reduce:transition-none z-10 p-0" data-grid-header-id="Order" data-grid-header-column-id="Order" role="button" tabindex="0" aria-disabled="false" aria-roledescription="sortable" aria-describedby="DndDescribedBy-0" style="min-width: 200px; transform: translate3d(var(--ps-pinning-translate-x, 0px), var(--ps-pinning-translate-y, 0px), 0); width: 200px; cursor: grab; touch-action: none;"><div class="h-full min-w-0 w-full"><div class="flex h-full min-w-0 items-center px-2"><span class="min-w-0 truncate font-mono text-xs text-foreground/90">Order</span></div></div></th><th class="h-10 text-left align-middle font-medium text-muted-foreground select-none touch-none sticky top-0 bg-table-head group border-r border-b border-table-border overflow-hidden whitespace-nowrap text-ellipsis data-[pinning-animating=from]:transition-none data-[pinning-animating=true]:transition-transform data-[pinning-animating=true]:duration-[1000ms] data-[pinning-animating=true]:ease-out data-[pinning-animating=true]:will-change-transform motion-reduce:transition-none z-10 p-0" data-grid-header-id="Seller" data-grid-header-column-id="Seller" role="button" tabindex="0" aria-disabled="false" aria-roledescription="sortable" aria-describedby="DndDescribedBy-0" style="min-width: 200px; transform: translate3d(var(--ps-pinning-translate-x, 0px), var(--ps-pinning-translate-y, 0px), 0); width: 200px; cursor: grab; touch-action: none;"><div class="h-full min-w-0 w-full"><div class="flex h-full min-w-0 items-center px-2"><span class="min-w-0 truncate font-mono text-xs text-foreground/90">Seller</span></div></div></th></tr></thead><tbody class="[&amp;_tr:last-child]:border-0"><tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted bg-table-row group odd:bg-table-cell-odd even:bg-table-cell-even/50"><td class="align-middle group cursor-pointer group-hover:!bg-muted group-odd:!bg-table-cell-odd group-even:!bg-table-cell-even group border-r border-b border-table-border overflow-hidden whitespace-nowrap text-ellipsis data-[pinning-animating=from]:transition-none data-[pinning-animating=true]:transition-transform data-[pinning-animating=true]:duration-[1000ms] data-[pinning-animating=true]:ease-out data-[pinning-animating=true]:will-change-transform motion-reduce:transition-none sticky z-30 p-0 group-odd:bg-table-cell-odd group-even:bg-table-cell-even" data-select="true" data-grid-column-id="__ps_select" data-grid-row-index="0" data-grid-visual-row-index="0" data-grid-cell-context-target="true" data-row-select-cell="true" style="min-width: 35px; transform: translate3d(var(--ps-pinning-translate-x, 0px), var(--ps-pinning-translate-y, 0px), 0); width: 35px; left: 0px;"><div data-studio-cell-content="true" class="relative z-10 block h-(--studio-cell-height) w-full px-(--studio-cell-spacing) truncate text-xs font-mono text-foreground leading-(--studio-cell-height) group-data-[select=true]:p-0"></div></td><td class="align-middle p-0 group w-full h-full cursor-pointer group-hover:bg-muted group border-r border-b border-table-border overflow-hidden whitespace-nowrap text-ellipsis data-[pinning-animating=from]:transition-none data-[pinning-animating=true]:transition-transform data-[pinning-animating=true]:duration-[1000ms] data-[pinning-animating=true]:ease-out data-[pinning-animating=true]:will-change-transform motion-reduce:transition-none relative z-0 before:pointer-events-none before:absolute before:inset-0 before:z-20 before:border before:border-sky-300 before:content-['']" data-grid-column-id="id" data-grid-row-index="0" data-grid-visual-row-index="0" data-grid-cell-context-target="true" data-focused="true" type="button" aria-haspopup="dialog" aria-expanded="true" aria-controls="radix-_r_2a_" data-state="open" style="min-width: 200px; transform: translate3d(var(--ps-pinning-translate-x, 0px), var(--ps-pinning-translate-y, 0px), 0); width: 200px;"><div data-studio-cell-content="true" class="relative z-10 block h-(--studio-cell-height) w-full px-(--studio-cell-spacing) truncate text-xs font-mono text-foreground leading-(--studio-cell-height) group-data-[select=true]:p-0"><div class="flex w-full min-w-0 items-center justify-between gap-2"><div class="min-w-0 flex-1 truncate"><span class="italic text-muted-foreground select-none">(empty string)</span></div></div></div></td><td class="align-middle p-0 group cursor-pointer group-hover:bg-muted group border-r border-b border-table-border overflow-hidden whitespace-nowrap text-ellipsis data-[pinning-animating=from]:transition-none data-[pinning-animating=true]:transition-transform data-[pinning-animating=true]:duration-[1000ms] data-[pinning-animating=true]:ease-out data-[pinning-animating=true]:will-change-transform motion-reduce:transition-none relative z-0" data-grid-column-id="createdAt" data-grid-row-index="0" data-grid-visual-row-index="0" data-grid-cell-context-target="true" style="min-width: 200px; transform: translate3d(var(--ps-pinning-translate-x, 0px), var(--ps-pinning-translate-y, 0px), 0); width: 200px;"><div data-studio-cell-content="true" class="relative z-10 block h-(--studio-cell-height) w-full px-(--studio-cell-spacing) truncate text-xs font-mono text-foreground leading-(--studio-cell-height) group-data-[select=true]:p-0"><div class="flex w-full min-w-0 items-center justify-between gap-2"><div class="min-w-0 flex-1 truncate">2026-11-11T16:35:03.436Z</div></div></div></td><td class="align-middle p-0 group cursor-pointer group-hover:bg-muted group border-r border-b border-table-border overflow-hidden whitespace-nowrap text-ellipsis data-[pinning-animating=from]:transition-none data-[pinning-animating=true]:transition-transform data-[pinning-animating=true]:duration-[1000ms] data-[pinning-animating=true]:ease-out data-[pinning-animating=true]:will-change-transform motion-reduce:transition-none relative z-0" data-grid-column-id="email" data-grid-row-index="0" data-grid-visual-row-index="0" data-grid-cell-context-target="true" style="min-width: 200px; transform: translate3d(var(--ps-pinning-translate-x, 0px), var(--ps-pinning-translate-y, 0px), 0); width: 200px;"><div data-studio-cell-content="true" class="relative z-10 block h-(--studio-cell-height) w-full px-(--studio-cell-spacing) truncate text-xs font-mono text-foreground leading-(--studio-cell-height) group-data-[select=true]:p-0"><div class="flex w-full min-w-0 items-center justify-between gap-2"><div class="min-w-0 flex-1 truncate"><span class="text-muted-foreground select-none"></span>seller@etfruit.com<span class="text-muted-foreground select-none"></span></div></div></div></td><td class="align-middle p-0 group cursor-pointer group-hover:bg-muted group border-r border-b border-table-border overflow-hidden whitespace-nowrap text-ellipsis data-[pinning-animating=from]:transition-none data-[pinning-animating=true]:transition-transform data-[pinning-animating=true]:duration-[1000ms] data-[pinning-animating=true]:ease-out data-[pinning-animating=true]:will-change-transform motion-reduce:transition-none relative z-0" data-grid-column-id="name" data-grid-row-index="0" data-grid-visual-row-index="0" data-grid-cell-context-target="true" style="min-width: 200px; transform: translate3d(var(--ps-pinning-translate-x, 0px), var(--ps-pinning-translate-y, 0px), 0); width: 200px;"><div data-studio-cell-content="true" class="relative z-10 block h-(--studio-cell-height) w-full px-(--studio-cell-spacing) truncate text-xs font-mono text-foreground leading-(--studio-cell-height) group-data-[select=true]:p-0"><div class="flex w-full min-w-0 items-center justify-between gap-2"><div class="min-w-0 flex-1 truncate"><span class="text-muted-foreground select-none"></span>Abrham Yeshigeta<span class="text-muted-foreground select-none"></span></div></div></div></td><td class="align-middle p-0 group cursor-pointer group-hover:bg-muted group border-r border-b border-table-border overflow-hidden whitespace-nowrap text-ellipsis data-[pinning-animating=from]:transition-none data-[pinning-animating=true]:transition-transform data-[pinning-animating=true]:duration-[1000ms] data-[pinning-animating=true]:ease-out data-[pinning-animating=true]:will-change-transform motion-reduce:transition-none relative z-0" data-grid-column-id="password" data-grid-row-index="0" data-grid-visual-row-index="0" data-grid-cell-context-target="true" style="min-width: 200px; transform: translate3d(var(--ps-pinning-translate-x, 0px), var(--ps-pinning-translate-y, 0px), 0); width: 200px;"><div data-studio-cell-content="true" class="relative z-10 block h-(--studio-cell-height) w-full px-(--studio-cell-spacing) truncate text-xs font-mono text-foreground leading-(--studio-cell-height) group-data-[select=true]:p-0"><div class="flex w-full min-w-0 items-center justify-between gap-2"><div class="min-w-0 flex-1 truncate"><span class="text-muted-foreground select-none"></span>$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy<span class="text-muted-foreground select-none"></span></div></div></div></td><td class="align-middle p-0 group cursor-pointer group-hover:bg-muted group border-r border-b border-table-border overflow-hidden whitespace-nowrap text-ellipsis data-[pinning-animating=from]:transition-none data-[pinning-animating=true]:transition-transform data-[pinning-animating=true]:duration-[1000ms] data-[pinning-animating=true]:ease-out data-[pinning-animating=true]:will-change-transform motion-reduce:transition-none relative z-0" data-grid-column-id="phone" data-grid-row-index="0" data-grid-visual-row-index="0" data-grid-cell-context-target="true" style="min-width: 200px; transform: translate3d(var(--ps-pinning-translate-x, 0px), var(--ps-pinning-translate-y, 0px), 0); width: 200px;"><div data-studio-cell-content="true" class="relative z-10 block h-(--studio-cell-height) w-full px-(--studio-cell-spacing) truncate text-xs font-mono text-foreground leading-(--studio-cell-height) group-data-[select=true]:p-0"><div class="flex w-full min-w-0 items-center justify-between gap-2"><div class="min-w-0 flex-1 truncate"><span class="text-muted-foreground select-none"></span>+251911223344<span class="text-muted-foreground select-none"></span></div></div></div></td><td class="align-middle p-0 group cursor-pointer group-hover:bg-muted group border-r border-b border-table-border overflow-hidden whitespace-nowrap text-ellipsis data-[pinning-animating=from]:transition-none data-[pinning-animating=true]:transition-transform data-[pinning-animating=true]:duration-[1000ms] data-[pinning-animating=true]:ease-out data-[pinning-animating=true]:will-change-transform motion-reduce:transition-none relative z-0" data-grid-column-id="role" data-grid-row-index="0" data-grid-visual-row-index="0" data-grid-cell-context-target="true" style="min-width: 200px; transform: translate3d(var(--ps-pinning-translate-x, 0px), var(--ps-pinning-translate-y, 0px), 0); width: 200px;"><div data-studio-cell-content="true" class="relative z-10 block h-(--studio-cell-height) w-full px-(--studio-cell-spacing) truncate text-xs font-mono text-foreground leading-(--studio-cell-height) group-data-[select=true]:p-0"><div class="flex w-full min-w-0 items-center justify-between gap-2"><div class="min-w-0 flex-1 truncate">seller</div></div></div></td><td class="align-middle p-0 group cursor-pointer group-hover:bg-muted group border-r border-b border-table-border overflow-hidden whitespace-nowrap text-ellipsis data-[pinning-animating=from]:transition-none data-[pinning-animating=true]:transition-transform data-[pinning-animating=true]:duration-[1000ms] data-[pinning-animating=true]:ease-out data-[pinning-animating=true]:will-change-transform motion-reduce:transition-none relative z-0" data-grid-column-id="Order" data-grid-row-index="0" data-grid-visual-row-index="0" data-grid-cell-context-target="true" style="min-width: 200px; transform: translate3d(var(--ps-pinning-translate-x, 0px), var(--ps-pinning-translate-y, 0px), 0); width: 200px;"><div data-studio-cell-content="true" class="relative z-10 block h-(--studio-cell-height) w-full px-(--studio-cell-spacing) truncate text-xs font-mono text-foreground leading-(--studio-cell-height) group-data-[select=true]:p-0"><div class="flex h-full w-full items-center justify-end"><a href="http://localhost:51212/#schema=public&amp;table=Order&amp;filter=%7B%22kind%22%3A%22FilterGroup%22%2C%22id%22%3A%221cFWeNg6rRgbZSPNzAFH5d%22%2C%22after%22%3A%22and%22%2C%22filters%22%3A%5B%7B%22kind%22%3A%22ColumnFilter%22%2C%22id%22%3A%221cFWeNg6rRgbZSPNG2vuuz%22%2C%22column%22%3A%22userId%22%2C%22operator%22%3A%22%3D%22%2C%22value%22%3A%22%22%2C%22after%22%3A%22and%22%7D%5D%7D" class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border border-input bg-background text-foreground shadow-sm hover:bg-accent hover:text-accent-foreground h-6 rounded-md px-2 text-xs shrink-0" aria-label="Open Order"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right" aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></a></div></div></td><td class="align-middle p-0 group cursor-pointer group-hover:bg-muted group border-r border-b border-table-border overflow-hidden whitespace-nowrap text-ellipsis data-[pinning-animating=from]:transition-none data-[pinning-animating=true]:transition-transform data-[pinning-animating=true]:duration-[1000ms] data-[pinning-animating=true]:ease-out data-[pinning-animating=true]:will-change-transform motion-reduce:transition-none relative z-0" data-grid-column-id="Seller" data-grid-row-index="0" data-grid-visual-row-index="0" data-grid-cell-context-target="true" style="min-width: 200px; transform: translate3d(var(--ps-pinning-translate-x, 0px), var(--ps-pinning-translate-y, 0px), 0); width: 200px;"><div data-studio-cell-content="true" class="relative z-10 block h-(--studio-cell-height) w-full px-(--studio-cell-spacing) truncate text-xs font-mono text-foreground leading-(--studio-cell-height) group-data-[select=true]:p-0"><div class="flex h-full w-full items-center justify-end"><a href="http://localhost:51212/#schema=public&amp;table=Seller&amp;filter=%7B%22kind%22%3A%22FilterGroup%22%2C%22id%22%3A%221cFWeNg6WEeBe7B29Gj4vc%22%2C%22after%22%3A%22and%22%2C%22filters%22%3A%5B%7B%22kind%22%3A%22ColumnFilter%22%2C%22id%22%3A%221cFWeNg6WEeBe7B2cndCE9%22%2C%22column%22%3A%22userId%22%2C%22operator%22%3A%22%3D%22%2C%22value%22%3A%22%22%2C%22after%22%3A%22and%22%7D%5D%7D" class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border border-input bg-background text-foreground shadow-sm hover:bg-accent hover:text-accent-foreground h-6 rounded-md px-2 text-xs shrink-0" aria-label="Open Seller"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right" aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></a></div></div></td></tr></tbody></table></div><div id="DndDescribedBy-0" style="display: none;">
+    To pick up a draggable item, press the space bar.
+    While dragging, use the arrow keys to move the item.
+    Press space again to drop the item in its new position, or press escape to cancel.
+  </div><div id="DndLiveRegion-0" role="status" aria-live="assertive" aria-atomic="true" style="position: fixed; top: 0px; left: 0px; width: 1px; height: 1px; margin: -1px; border: 0px; padding: 0px; overflow: hidden; clip: rect(0px, 0px, 0px, 0px); clip-path: inset(100%); white-space: nowrap;"></div></div><div class="rounded-b-lg overflow-visible sticky bottom-0 left-0 border-t-0 w-full z-20 p-0"><div class="flex items-center justify-between gap-2 py-3 px-2 border-t border-table-border backdrop-blur-sm bg-background/90"><div class="flex flex-wrap items-center gap-2"><div aria-label="Pagination" class="inline-flex items-stretch overflow-hidden rounded-md border border-input bg-background shadow-sm" role="group"><button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 bg-background text-foreground hover:bg-accent hover:text-accent-foreground h-9 w-9 rounded-none border-0 border-r border-input shadow-none" aria-label="Go to first page" disabled="" aria-disabled="true"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevrons-left" aria-hidden="true" data-icon="inline-start"><path d="m11 17-5-5 5-5"></path><path d="m18 17-5-5 5-5"></path></svg></button><button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 bg-background text-foreground hover:bg-accent hover:text-accent-foreground h-9 w-9 rounded-none border-0 border-r border-input shadow-none" aria-label="Go to previous page" disabled="" aria-disabled="true"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left" aria-hidden="true" data-icon="inline-start"><path d="m15 18-6-6 6-6"></path></svg></button><div class="flex items-center gap-2 border-r border-input px-3 font-sans text-xs font-medium text-foreground tabular-nums"><input class="flex border-input bg-transparent py-1 font-normal transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 h-9 w-auto min-w-0 rounded-none border-0 px-1 text-right font-sans text-xs text-foreground tabular-nums shadow-none focus-visible:ring-0" aria-label="Page number" inputmode="numeric" pattern="[0-9]*" type="text" value="1" style="width: 2ch;"><span class="shrink-0">of</span><span class="shrink-0">1</span></div><button class="inline-flex items-center transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 bg-background text-foreground hover:bg-accent hover:text-accent-foreground h-9 rounded-none border-0 border-r border-input px-3 shadow-none font-sans text-xs font-medium justify-between gap-2 whitespace-nowrap" aria-label="Rows per page" type="button" id="radix-_r_1p_" aria-haspopup="menu" aria-expanded="false" data-state="closed"><span>25 rows per page</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down" aria-hidden="true" data-icon="inline-end"><path d="m6 9 6 6 6-6"></path></svg></button><button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 bg-background text-foreground hover:bg-accent hover:text-accent-foreground h-9 w-9 rounded-none border-0 border-r border-input shadow-none" aria-label="Go to next page" disabled="" aria-disabled="true"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right" aria-hidden="true" data-icon="inline-start"><path d="m9 18 6-6-6-6"></path></svg></button><button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground h-9 w-9 rounded-none border-0 shadow-none" aria-label="Go to last page" disabled="" aria-disabled="true"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevrons-right" aria-hidden="true" data-icon="inline-start"><path d="m6 17 5-5-5-5"></path><path d="m13 17 5-5-5-5"></path></svg></button></div><div class="inline-flex items-center justify-center whitespace-nowrap rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground py-2 h-9 gap-3 px-3 font-sans text-xs shadow-sm"><button type="button" role="switch" aria-checked="false" data-state="unchecked" value="on" class="peer inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input" id="_r_1o_" aria-label="Infinite scroll"><span data-state="unchecked" class="pointer-events-none block h-4 w-4 rounded-full bg-background shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-4 data-[state=unchecked]:translate-x-0"></span></button><label class="peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer font-sans text-xs font-medium" for="_r_1o_">infinite scroll</label></div></div></div></div></div></div></div></div><span aria-hidden="true" class="hidden"></span></div></div>
+    <script>window.__STUDIO_CONFIG__ = {"adapter":"postgres"};</script>
+    <script type="module" src="./localhost_files/studio.js"></script>
+  
+<div class="ps dark"></div><div class="ps dark"><div data-radix-popper-content-wrapper="" style="position: fixed; left: 0px; top: 0px; transform: translate(227px, 101px); min-width: max-content; --radix-popper-transform-origin: 0% 0px; z-index: 30; --radix-popper-available-width: 954px; --radix-popper-available-height: 798px; --radix-popper-anchor-width: 200px; --radix-popper-anchor-height: 39px;"><div data-side="bottom" data-align="start" data-state="open" role="dialog" id="radix-_r_2a_" class="flex flex-col border bg-popover text-popover-foreground shadow-md outline-none p-0 z-30 gap-0 border-muted-foreground/50 w-[calc(var(--radix-popover-trigger-width)+1px)] max-w-72 min-w-max" data-studio-cell-editor="true" tabindex="-1" style="--radix-popover-content-transform-origin: var(--radix-popper-transform-origin); --radix-popover-content-available-width: var(--radix-popper-available-width); --radix-popover-content-available-height: var(--radix-popper-available-height); --radix-popover-trigger-width: var(--radix-popper-anchor-width); --radix-popover-trigger-height: var(--radix-popper-anchor-height);"><div class="bg-secondary/70"><div><input class="flex h-9 w-full rounded-md border border-input bg-transparent py-1 text-sm leading-5 font-normal text-foreground transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 cell-input-leading border-none shadow-none focus-visible:ring-0 resize-none px-(--studio-cell-spacing)" aria-required="true" required="" type="text" value="a1b2c3d4-e5f6-7890-1234-56789abcdef0"><div class="flex flex-row gap-1 border-t border-table-border text-xs p-2"><div class="flex flex-col gap-1 w-full"><div class="grid grid-cols-2 gap-1 items-start justify-between"><div class="flex flex-col gap-1"><button class="flex flex-row gap-1 items-center cursor-pointer shrink-0"><kbd class="inline-flex justify-center items-center h-6 w-6 rounded-md bg-muted text-muted-foreground text-[8px] leading-none font-semibold">Esc</kbd> Cancel changes</button></div><div class="flex flex-col gap-1 items-end"></div></div></div></div></div></div></div></div></div><span data-radix-focus-guard="" tabindex="0" style="outline: none; opacity: 0; position: fixed; pointer-events: none;"></span></body><div id="smartyContainer" style="position: absolute; top: 0px; right: 0px; line-height: initial; z-index: 2147483647; width: auto; font-size: initial; pointer-events: none;"><template shadowrootmode="open"><style>@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/poppins/v24/pxiEyp8kv8JHgFVrJJfedw.ttf) format('truetype');
+}
+@media screen and (max-width: 812px) {
+  #sm-coupon-container {
+    position: fixed;
+    bottom: -6000px;
+    z-index: 2147483647;
+    -webkit-transition: all 0.8s;
+    -moz-transition: all 0.8s;
+    -o-transition: all 0.8s;
+    transition: all 0.8s;
+  }
+  #sm-coupon-container.sm-animate-visible {
+    bottom: 0;
+  }
+  #sm-coupon-container.sm-centered {
+    bottom: 0;
+  }
+  #sm-coupon-container .sm-coupon-wrapper {
+    background-color: #ffffff;
+    border-radius: 15px;
+    width: 100vw;
+  }
+  #sm-coupon-container .sm-header {
+    margin: 0px;
+    padding: 0px;
+    border-bottom: 1px solid #eee;
+  }
+  #sm-coupon-container .sm-header .sm-logo1 {
+    margin: 7px 5px 0 5px;
+    cursor: pointer;
+  }
+  #sm-coupon-container .sm-header img.sm-logo1 {
+    width: 80px;
+  }
+  #sm-coupon-container .sm-header .sm-cross-icon {
+    float: right;
+    cursor: pointer;
+    margin-top: 7px;
+    margin-right: 5px;
+  }
+  #sm-coupon-container .sm-header .sm-cross-icon img {
+    margin: 10px 14px;
+    width: 11px;
+  }
+  #sm-coupon-container .sm-activation-button {
+    font-size: 18px;
+    text-align: center;
+    min-width: 70%;
+    padding: 0 5px;
+    line-height: 40px;
+    border-radius: 5px;
+  }
+  #sm-coupon-container .sm-activation-button :hover {
+    font-size: 22px;
+    min-width: 85%;
+  }
+  #sm-coupon-container .sm-activation-button img {
+    height: 15px;
+  }
+  #sm-coupon-container .sm-support a {
+    font-size: 8px !important;
+  }
+  #sm-coupon-container .sm-coupon-codes {
+    width: 100%;
+    margin-top: 0;
+    margin-bottom: 5px;
+  }
+  #sm-coupon-container .sm-valid-codes {
+    overflow: hidden;
+    height: 56px;
+  }
+  #sm-coupon-container #exclusions-text {
+    font-family: Verdana;
+    font-size: 8pt;
+    bottom: 40px;
+    background-color: #eeeeee;
+    color: #333333;
+    padding: 5px 20px;
+    border-radius: 5px;
+  }
+  #sm-coupon-container h1 {
+    font-size: 20px;
+  }
+  #sm-coupon-container h2 {
+    font-size: 18px;
+  }
+  #sm-coupon-container h3 {
+    font-size: 15px;
+  }
+  #sm-coupon-container h4 {
+    font-size: 12px;
+  }
+  #sm-coupon-container h5 {
+    font-size: 10px;
+  }
+  #sm-coupon-container h6 {
+    font-size: 10.2px;
+  }
+}
+@media screen and (min-width: 813px) {
+  #sm-coupon-container {
+    position: fixed;
+    z-index: 2147483647;
+    top: -8px;
+    right: -3600px;
+    -webkit-transition: all 0.4s;
+    -moz-transition: all 0.4s;
+    -o-transition: all 0.4s;
+    transition: all 0.4s;
+  }
+  #sm-coupon-container.sm-animate-visible {
+    right: 0;
+  }
+  #sm-coupon-container.sm-centered {
+    right: calc(50vw - 325px);
+    top: calc(50vh - 240px);
+  }
+  #sm-coupon-container .sm-coupon-wrapper {
+    width: 374px;
+  }
+  #sm-coupon-container .sm-header {
+    margin: 0px;
+    padding: 0 15px;
+  }
+  #sm-coupon-container .sm-header .sm-logo1 {
+    margin: 10px;
+    cursor: pointer;
+  }
+  #sm-coupon-container .sm-header .sm-cross-icon {
+    float: right;
+    margin-top: 11px;
+    cursor: pointer;
+  }
+  #sm-coupon-container .sm-activation-button {
+    font-size: 20px;
+    text-align: center;
+    min-width: 70%;
+    padding: 0 5px;
+    line-height: 45px;
+    border-radius: 5px;
+  }
+  #sm-coupon-container .sm-activation-button :hover {
+    font-size: 22px;
+    min-width: 85%;
+  }
+  #sm-coupon-container .sm-activation-button img {
+    height: 15px;
+  }
+  #sm-coupon-container .sm-coupon-codes {
+    width: 100%;
+    margin-top: 0;
+    margin-bottom: 5px;
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+  #sm-coupon-container .sm-valid-codes {
+    overflow: hidden;
+    height: 62px;
+  }
+  #sm-coupon-container #exclusions-text {
+    font-family: Verdana;
+    font-size: 8pt;
+    margin-left: 15px;
+    position: absolute;
+    bottom: 40px;
+    width: 300px;
+    background-color: #eeeeee;
+    color: #333333;
+    padding: 20px;
+    border-radius: 10px;
+  }
+  #sm-coupon-container h1 {
+    font-size: 25px;
+  }
+  #sm-coupon-container h2 {
+    font-size: 20px;
+  }
+  #sm-coupon-container h3 {
+    font-size: 18px !important;
+    text-align: center !important;
+  }
+  #sm-coupon-container h4 {
+    font-size: 15px;
+  }
+  #sm-coupon-container h5 {
+    font-size: 12px;
+  }
+  #sm-coupon-container h6 {
+    font-size: 10.2px;
+  }
+}
+#sm-coupon-container {
+  pointer-events: auto;
+}
+#sm-coupon-container.no-transition {
+  -webkit-transition: none;
+  -moz-transition: none;
+  -o-transition: none;
+  transition: none;
+}
+#sm-coupon-container span#checkedCoupons,
+#sm-coupon-container span#totalCoupons {
+  font-size: inherit;
+}
+#sm-coupon-container .sm-coupon-wrapper {
+  background-color: #ffffff;
+  border-radius: 5px;
+  margin-top: 0px;
+  margin-right: 15px;
+  margin-top: 25px;
+}
+#sm-coupon-container a,
+#sm-coupon-container a:hover {
+  text-decoration: none;
+  cursor: pointer;
+}
+#sm-coupon-container .sm-activation-button {
+  display: inline-block;
+  background-color: #6d6fd5 !important;
+  color: #fff;
+  cursor: pointer;
+  -webkit-transition: 0.05s;
+  transition: 0.05s;
+  transition-timing-function: ease-in-out;
+}
+#sm-coupon-container #sm-style-4::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  background-color: #F5F5F5;
+}
+#sm-coupon-container #sm-style-4::-webkit-scrollbar {
+  width: 4px;
+  background-color: #999999;
+}
+#sm-coupon-container #sm-style-4::-webkit-scrollbar-thumb {
+  background-color: #999999;
+  border: 2px solid #999999;
+}
+#sm-coupon-container .sm-margin0 {
+  margin: 0px;
+}
+#sm-coupon-container .sm-coupons {
+  background-color: #fff;
+  padding: 0px 10px;
+  width: 100%;
+  text-align: center;
+  text-transform: none;
+}
+#sm-coupon-container .sm-best-coupons {
+  background-color: #6d6fd5 !important;
+  display: inline-block;
+  padding: 0 55px;
+  line-height: 49px;
+  color: #fff !important;
+  font-size: 18px;
+  cursor: pointer;
+  text-align: center;
+  border-radius: 5px;
+}
+#sm-coupon-container .sm-claim {
+  background-color: #6d6fd5 !important;
+  display: inline-block;
+  padding: 0 55px;
+  line-height: 49px;
+  color: #fff !important;
+  font-size: 18px;
+  cursor: pointer;
+  text-align: center;
+  border-radius: 5px;
+}
+#sm-coupon-container .sm-invalid-codes {
+  width: initial;
+}
+#sm-coupon-container .sm-support {
+  float: left;
+  margin-right: 15px;
+  width: initial;
+}
+#sm-coupon-container .sm-support .sm-icon {
+  float: left;
+  height: 20px;
+  margin-bottom: 5px;
+  width: 100%;
+}
+#sm-coupon-container .sm-support .sm-invalid {
+  transition: margin 0.1s;
+  -webkit-transition: margin 0.1s;
+  float: none;
+}
+#sm-coupon-container .sm-support .sm-valid {
+  margin: 5px;
+  transition: margin 0.1s;
+  -webkit-transition: margin 0.1s;
+}
+#sm-coupon-container .sm-support a {
+  width: 100%;
+  background-color: #e8e8e8 !important;
+  color: #6d6fd5 !important;
+  padding: 10px 8px;
+  font-size: 11px;
+  letter-spacing: 0.35px;
+  font-weight: 700;
+  border-radius: 5px;
+  min-width: 100px;
+  text-align: center;
+  transition: all 0.4s;
+  -webkit-transition: all 0.4s;
+}
+#sm-coupon-container .sm-coupon-invalid {
+  background-color: #fff !important;
+  width: 100%;
+  opacity: 0.3;
+  border: solid 1px #e8e8e8;
+  color: #5e5e5e;
+  padding: 2px 0px;
+  font-size: 11px;
+  font-weight: bold;
+  border-radius: 5px;
+}
+#sm-coupon-container .sm-progress-bar {
+  float: left;
+  width: 0;
+  height: 100%;
+  font-size: 12px;
+  line-height: 20px;
+  color: #fff;
+  text-align: center;
+  background-color: #6d6fd5;
+  -webkit-box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+  -webkit-transition: width 0.6s ease;
+  -o-transition: width 0.6s ease;
+  transition: width 0.6s ease;
+}
+#sm-coupon-container .sm-progress {
+  height: 7px;
+  margin-bottom: 14px;
+  overflow: hidden;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  -webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+#sm-coupon-container .sm-not-working {
+  position: absolute;
+  bottom: 10px;
+  width: 374px;
+  right: 25px;
+  text-align: center;
+}
+#sm-coupon-container .sm-not-working a {
+  text-transform: none;
+  color: #6d6fd5;
+}
+#sm-coupon-container .sm-error-img {
+  margin-top: 20px;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+#sm-coupon-container .sm-error {
+  font-size: 14px;
+  margin-top: 30px;
+  text-align: left;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+#sm-coupon-container .sm-error ul {
+  text-align: left;
+  margin-bottom: 30px;
+  padding-left: 20px;
+  list-style-type: disc !important;
+}
+#sm-coupon-container .sm-error ul li {
+  font-size: 14px;
+}
+#sm-coupon-container .sm-content {
+  font-size: 16px !important;
+  margin: 20px;
+  text-align: center;
+}
+#sm-coupon-container .sm-content a.sm-visit {
+  background-color: #6d6fd5 !important;
+  display: inline-block;
+  padding: 0 55px;
+  line-height: 49px;
+  color: #fff !important;
+  font-size: 18px;
+  cursor: pointer;
+  text-align: center;
+  border-radius: 5px;
+}
+#sm-coupon-container .sm-primary,
+#sm-coupon-container .sm-button {
+  background-color: #6d6fd5;
+  width: 100%;
+  line-height: 49px;
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  text-align: center;
+  padding: 9px 15px;
+  border-radius: 5px;
+}
+#sm-coupon-container .sm-activate-later {
+  font-size: 14px !important;
+  font-weight: 600;
+  color: #252d6a;
+}
+#sm-coupon-container .sm-coupon {
+  display: inline !important;
+  background-color: #e8e8e8 !important;
+  color: #6d6fd5 !important;
+  padding: 10px 20px !important;
+  font-size: 15px !important;
+  letter-spacing: 0.35px !important;
+  font-weight: 700 !important;
+  border-radius: 5px !important;
+  min-width: 100px !important;
+  text-align: center !important;
+}
+#sm-coupon-container .sm-share-coupon {
+  background-color: #6d6fd5 !important;
+  width: 100% !important;
+  line-height: 49px !important;
+  color: #fff !important;
+  font-size: 15px !important;
+  cursor: pointer !important;
+  text-align: center !important;
+  padding: 9px 15px !important;
+  border-radius: 5px !important;
+}
+#sm-coupon-container .sm-working-coupon {
+  color: #252d6a;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  border-radius: 5px;
+}
+#sm-coupon-container .sm-congrats {
+  color: #f5a80c;
+  font-size: 27px;
+  font-weight: 600;
+  text-align: center;
+  line-height: 40px;
+}
+#sm-coupon-container .sm-green {
+  color: #00c57d;
+  font-weight: 700;
+  font-size: 20px;
+}
+#sm-coupon-container .sm-success-btn {
+  padding: 10px;
+  height: 42px;
+  overflow: hidden;
+  background-color: transparent;
+  border-color: #6d6fd5 !important;
+  border-radius: 5px;
+  border-style: solid;
+  border-width: 1px;
+  color: #6d6fd5;
+  font-weight: bold !important;
+  font-size: 15px !important;
+  cursor: pointer;
+}
+#sm-coupon-container .sm-button-disabled {
+  padding: 10px;
+  height: 42px;
+  overflow: hidden;
+  background-color: transparent;
+  border-radius: 5px;
+  border-style: solid;
+  border-width: 1px;
+  color: #aaa;
+  font-weight: bold !important;
+  font-size: 15px !important;
+  cursor: pointer;
+}
+#sm-coupon-container .sm-review {
+  background: #6d6fd5;
+  color: #fff;
+  width: 185px;
+  margin: auto;
+}
+#sm-coupon-container .sm-logo {
+  justify-self: start;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+#sm-coupon-container .sm-close {
+  margin: 5px 10px;
+  justify-self: end;
+  align-self: start;
+  cursor: pointer;
+}
+#sm-coupon-container .exclusions {
+  text-align: center;
+}
+#sm-coupon-container #exclusions-button {
+  font-weight: 600;
+  font-size: 9pt;
+  cursor: pointer;
+}
+#sm-coupon-container .exclusions-hidden {
+  display: none;
+}
+#sm-coupon-container .sm-code {
+  color: #6d6fd5;
+}
+#sm-coupon-container .sm-copy {
+  border: 1px solid #f5a80c;
+  background: #ffc954;
+}
+#sm-coupon-container .sm-coupon-list::-webkit-scrollbar-thumb {
+  background-color: #6d6fd5;
+}
+#sm-coupon-container .sm-go {
+  background-color: #f5a80c;
+  color: #FFF;
+}
+#sm-coupon-container .span-all {
+  grid-column: 1 / span 2;
+}
+#sm-coupon-container .sm-save {
+  font-size: 13pt;
+  font-weight: 800;
+  color: #252d6a;
+  margin-bottom: 15px;
+}
+#sm-coupon-container .sm-price-redirect {
+  cursor: pointer;
+}
+#sm-coupon-container .sm-refer-email {
+  padding: 10px;
+  height: 35px;
+  width: 175px;
+  border-color: #949393 !important;
+  border-radius: 8px 0px 0px 8px;
+  border-style: solid;
+  border-width: 1px;
+  outline: none;
+  font-size: 14px !important;
+}
+#sm-coupon-container .sm-refer-submit {
+  padding: 5px 7px 7px 8px;
+  height: 32px;
+  overflow: hidden;
+  background-color: #6d6fd5;
+  border-color: #6d6fd5 !important;
+  border-radius: 0px 8px 8px 0px;
+  border-style: solid;
+  border-width: 1px;
+  color: #fff;
+  font-size: 15px !important;
+  cursor: pointer;
+}
+#sm-coupon-container .sm-refer-btn {
+  margin: auto;
+  padding: 6px;
+  height: 38px;
+  width: 180px;
+  overflow: hidden;
+  background-color: transparent;
+  border-color: #6d6fd5 !important;
+  border-radius: 5px;
+  border-style: solid;
+  border-width: 1px;
+  color: #6d6fd5;
+  font-size: 15px !important;
+  font-weight: bold;
+  cursor: pointer;
+}
+#sm-coupon-container .sm-referral-msg {
+  font-size: 14px !important;
+  margin: 5px;
+  font-weight: 500;
+  height: 40px;
+}
+#sm-coupon-container .sm-referral-success {
+  color: #00c57d;
+}
+#sm-coupon-container .sm-referral-error {
+  color: #ff0000;
+}
+#sm-coupon-container .sm-exclusions {
+  padding: 10px 0px;
+  color: #716f6f;
+  font-size: 14px;
+}
+#sm-coupon-container .sm-small-link {
+  text-decoration: underline;
+  color: #252d6a;
+  font-size: 8pt;
+  cursor: pointer;
+}
+#sm-inline-content {
+  all: initial;
+}
+#sm-inline-content .sm-searching-button {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 5px;
+  border: 2px solid #ccc;
+  color: #888;
+  font-family: Poppins;
+  font-size: 11pt;
+  font-weight: bold;
+  margin: 5px 0;
+  padding-top: 5px;
+  height: 22px;
+}
+#sm-inline-content .sm-found-button {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 5px;
+  background-color: #6d6fd5;
+  color: #ffffff;
+  border: initial;
+  font-family: Poppins;
+  font-size: 11pt;
+  font-weight: bold;
+  margin: 5px 0;
+  padding-top: 5px;
+  height: 25px;
+  cursor: pointer;
+}
+#sm-inline-content .sm-img {
+  vertical-align: middle;
+  height: 20px;
+  margin-right: 5px;
+}
+#sm-inline-content .sm-loading {
+  vertical-align: middle;
+  height: 8px;
+}
+#sm-full-loader {
+  pointer-events: auto;
+  position: fixed;
+  z-index: 2147483646;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  background-color: black;
+  opacity: 0.7;
+}
+.bg-facebook {
+  background-color: #3c579e;
+}
+.bg-google {
+  background-color: #4285f4;
+}
+.bg-microsoft {
+  background-color: #2f2f2f;
+}
+.bg-apple {
+  background-color: #000000;
+}
+</style></template></div></html>
