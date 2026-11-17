@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Product Offers · Etfruit</title>
+  <link rel="stylesheet" href="/css/design.css" />
+  <link rel="stylesheet" href="/css/storefront.css" />
+  <style>
+    /* Specific styles for the product offer page */
+    .product-hero {
+      display: flex;
+      gap: 40px;
+      align-items: center;
+      background: var(--bg-2);
+      padding: 40px;
+      border-radius: var(--r-xl);
+      margin-bottom: 40px;
+    }
+    .product-hero img {
+      width: 300px;
+      height: 300px;
+      object-fit: cover;
+      border-radius: var(--r-lg);
+      box-shadow: var(--shadow-md);
+    }
+    .product-hero-info h1 {
+      font-family: var(--serif);
+      font-size: 42px;
+      color: var(--brand);
+      margin: 0 0 16px 0;
+    }
+    .market-banner {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      padding: 16px 24px;
+      border-radius: var(--r-md);
+      margin-bottom: 32px;
+    }
+    .market-icon {
+      font-size: 32px;
+    }
+    .market-banner h4 {
+      margin: 0 0 4px 0;
+      color: #166534;
+      font-size: 18px;
+    }
+    .market-banner p {
+      margin: 0;
+      font-size: 13px;
+      color: #15803d;
+    }
+    .offer-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      margin-bottom: 16px;
+      background: #fff;
+      transition: box-shadow 0.2s;
+    }
+    .offer-card:hover {
+      box-shadow: var(--shadow-md);
+      border-color: var(--brand);
+    }
+    @media (max-width: 768px) {
+      .product-hero { flex-direction: column; text-align: center; padding: 20px; }
+      .product-hero img { width: 100%; max-width: 300px; height: auto; }
+      .offer-card { flex-direction: column; text-align: center; gap: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header (Simplified version for quick navigation) -->
+  <header class="site-header">
+    <div class="site-header-inner">
+      <a href="/" class="site-logo">
+        <img src="/img/logo.png" alt="Etfruit logo" class="site-logo-img" />
+      </a>
+      <div class="site-actions" style="margin-left: auto;">
+        <a href="/cart.html" class="btn btn-amber">🛒 Cart</a>
+        <a href="/" class="btn btn-ghost">Back to Shop</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="store-main" style="max-width: 1000px; margin: 0 auto; padding: 40px 20px;">
+    
+    <!-- 1. PRODUCT HERO -->
+    <div class="product-hero">
+      <img id="product-image" src="" alt="Product Image" />
+      <div class="product-hero-info">
+        <h1 id="product-title">Loading...</h1>
+        <p style="color: var(--text-muted); font-size: 16px;">
+          Compare prices from verified merchants below. We guarantee the quality of all produce on Etfruit.
+        </p>
+      </div>
+    </div>
+
+    <!-- 2. MARKET AVERAGE BANNER (Controlled by JS) -->
+    <div id="market-average-banner" class="market-banner" style="display: none;">
+      <!-- JS will inject the market average here -->
+    </div>
+
+    <!-- 3. MERCHANT OFFERS LIST -->
+    <h2 style="font-family: var(--serif); font-size: 24px; color: var(--brand); margin-bottom: 20px;">
+      Available Merchants
+    </h2>
+    <div id="offers-list">
+      <!-- JS will inject the merchant cards here -->
+      <p class="muted" style="text-align: center; padding: 40px;">Loading offers...</p>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-bottom">
+      <p>© 2025 Etfruit · Built for Prodigy InfoTech</p>
+    </div>
+  </footer>
+
+  <!-- The JavaScript that makes it all work -->
+  <script type="module" src="/js/shop/product.js"></script>
+</body>
+</html>
