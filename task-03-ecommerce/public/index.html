@@ -271,30 +271,6 @@
         </section>
     
     <section class="product-grid" id="product-grid"></section>
-Invalid prisma.seller.findFirst() invocation in
-/home/abrham/Documents/Projects/prodigy-internship/task-03-ecommerce/src/controllers/sellerController.js:161:38
-
-158
-159 /* ── GET /api/sellers/:id ── public storefront ── */
-160 exports.publicProfile = asyncHandler(async (req, res) => {
-→ 161 const seller = await prisma.seller.findFirst({
-where: {
-id: "me",
-verificationStatus: "verified"
-},
-select: {
-id: true,
-businessName: true,
-businessType: true,
-scale: true,
-city: true,
-country: true,
-bio: true,
-rating: true,
-ratingCount: true,
-~~~~~~~~~~~
-fulfillmentRate: true,
-createdAt: true,
     <section class="value-row">
       <div class="value-item">
         <div class="value-icon">🚚</div>
@@ -316,30 +292,6 @@ createdAt: true,
 
     <section class="newsletter">
       <div class="newsletter-inner">
-Invalid prisma.seller.findFirst() invocation in
-/home/abrham/Documents/Projects/prodigy-internship/task-03-ecommerce/src/controllers/sellerController.js:161:38
-
-158
-159 /* ── GET /api/sellers/:id ── public storefront ── */
-160 exports.publicProfile = asyncHandler(async (req, res) => {
-→ 161 const seller = await prisma.seller.findFirst({
-where: {
-id: "me",
-verificationStatus: "verified"
-},
-select: {
-id: true,
-businessName: true,
-businessType: true,
-scale: true,
-city: true,
-country: true,
-bio: true,
-rating: true,
-ratingCount: true,
-~~~~~~~~~~~
-fulfillmentRate: true,
-createdAt: true,
         <div class="newsletter-copy">
           <div class="newsletter-icon">✉️</div>
           <div>
@@ -456,30 +408,7 @@ createdAt: true,
                 src="https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?auto=format&fit=crop&w=800&q=80"
                 alt="Product" />
             <div class="product-badges" id="pm-badges"></div>
-          </div>Invalid prisma.seller.findFirst() invocation in
-/home/abrham/Documents/Projects/prodigy-internship/task-03-ecommerce/src/controllers/sellerController.js:161:38
-
-158
-159 /* ── GET /api/sellers/:id ── public storefront ── */
-160 exports.publicProfile = asyncHandler(async (req, res) => {
-→ 161 const seller = await prisma.seller.findFirst({
-where: {
-id: "me",
-verificationStatus: "verified"
-},
-select: {
-id: true,
-businessName: true,
-businessType: true,
-scale: true,
-city: true,
-country: true,
-bio: true,
-rating: true,
-ratingCount: true,
-~~~~~~~~~~~
-fulfillmentRate: true,
-createdAt: true,
+          </div>
 
           <!-- Info -->
           <div class="product-modal-info">
@@ -510,30 +439,7 @@ createdAt: true,
 
             <!-- Price per kg -->
             <div class="pm-price-block">
-              <span class="pm-priceInvalid prisma.seller.findFirst() invocation in
-/home/abrham/Documents/Projects/prodigy-internship/task-03-ecommerce/src/controllers/sellerController.js:161:38
-
-158
-159 /* ── GET /api/sellers/:id ── public storefront ── */
-160 exports.publicProfile = asyncHandler(async (req, res) => {
-→ 161 const seller = await prisma.seller.findFirst({
-where: {
-id: "me",
-verificationStatus: "verified"
-},
-select: {
-id: true,
-businessName: true,
-businessType: true,
-scale: true,
-city: true,
-country: true,
-bio: true,
-rating: true,
-ratingCount: true,
-~~~~~~~~~~~
-fulfillmentRate: true,
-createdAt: true,-label">Price per kg</span>
+              <span class="pm-price-label">Price per kg</span>
               <div class="pm-price-values">
                 <span class="pm-price" id="pm-price">120.00 ETB</span>
                 <span class="pm-compare" id="pm-compare" style="display:none;">150.00 ETB</span>
