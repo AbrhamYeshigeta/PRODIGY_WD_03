@@ -229,6 +229,48 @@ document.getElementById('empty-reset')?.addEventListener('click', () => {
   document.getElementById('filter-clear')?.click();
 });
 
+
+async function loadLandingPage() {
+  try {
+    const res = await fetch('/api/products');
+    const { data: products } = await res.json();
+    
+    const grid = document.getElementById('product-grid');
+    
+    // If no products have active offers, show empty state
+    const activeProducts = products.filter(p => p.sellerCount > 0);
+
+    if (activeProducts.length === 0) {
+       grid.innerHTML = `<p class="muted" style="grid-column: 1/-1; text-align:center;">No products available yet.</p>`;
+       return;
+    }
+
+    grid.innerHTML = activeProducts.map(product => {
+      // Convert cents to ETB
+      const price = (product.lowestPricePerKg / 100).toFixed(2);
+
+      return `
+        <div class="product-card" onclick="window.location.href='/product.html?slug=${product.slug}'">
+          <div class="product-image">
+            <img src="${product.image}" alt="${product.name}">
+          </div>
+          <div class="product-info">
+            <h3>${product.name}</h3>
+            <div class="product-price-row">
+              <span class="price">from ${price} ETB/kg</span>
+              <span class="sellers">🏪 ${product.sellerCount} sellers</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  } catch (err) {
+    console.error('Failed to load products', err);
+  }
+}
+
+loadLandingPage();
+
 async function updateHeaderForCurrentUser() {
   const userMenu = document.getElementById('user-menu');
   const dropdown = document.getElementById('user-dropdown');

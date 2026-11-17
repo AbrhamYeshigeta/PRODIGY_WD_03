@@ -1,13 +1,11 @@
-// src/controllers/productController.js
 const asyncHandler = require('../utils/asyncHandler');
 const ApiError     = require('../utils/ApiError');
-const prisma       = require('../config/prisma'); // Replaced Mongoose models
+const prisma       = require('../config/prisma');
 const { OFFER_STATUS } = require('../config/constants');
 
 /* ── GET /api/products ── landing page: one card per product */
 exports.list = asyncHandler(async (req, res) => {
   const { q, category, sort = 'popular', page = 1, limit = 24 } = req.query;
-
   const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
   const take = parseInt(limit, 10);
 
@@ -26,9 +24,9 @@ exports.list = asyncHandler(async (req, res) => {
       include: {
         offers: {
           where: {
-            status: OFFER_STATUS.ACTIVE,
-            stock: { gt: 0 },
-            seller: { is: { verificationStatus: 'verified' } },
+            status: OFFER_STATUS.ACTIVE, // Only count active offers
+            stock: { gt: 0 },            // Only count if in stock
+            seller: { is: { verificationStatus: 'verified' } }, // Only count if seller is verified
           },
         }
       }
@@ -44,7 +42,7 @@ exports.list = asyncHandler(async (req, res) => {
       : 0;
     const totalStock = p.offers.reduce((sum, o) => sum + o.stock, 0);
 
-    // Remove the offers array from the final payload to keep it lightweight
+    // Remove the heavy offers array from the final payload to keep the landing page fast
     const { offers, ...productData } = p; 
 
     return { 
@@ -100,49 +98,17 @@ exports.getOne = asyncHandler(async (req, res) => {
             },
           },
         },
-        orderBy: { pricePerKg: 'asc' }
+        orderBy: { pricePerKg: 'asc' } // Cheapest first
       }
     }
   });
 
   if (!product) throw ApiError.notFound('Product not found');
 
+  // This returns { success: true, data: { id, name, slug, offers: [...] } }
+  // It matches the frontend perfectly.
   res.json({ 
     success: true, 
-    data: { 
-      product, 
-      offers: product.offers 
-    } 
+    data: product 
   });
-});
-
-// src/controllers/productController.js
-exports.getLandingPageProducts = asyncHandler(async (req, res) => {
-  // Fetch ALL products, regardless of whether they have offers
-  const products = await prisma.product.findMany({
-    include: {
-      offers: {
-        where: { status: 'active' },
-        orderBy: { pricePerKg: 'asc' }
-      }
-    }
-  });
-
-  const formattedProducts = products.map(product => {
-    const offers = product.offers;
-    const lowestPricePerKg = offers.length > 0 ? offers[0].pricePerKg : 0;
-    const sellerCount = offers.length;
-
-    return {
-      id: product.id,
-      name: product.name,
-      slug: product.slug,
-      image: product.image,
-      category: product.category,
-      sellerCount,           // Will be 0 if no one is selling
-      lowestPricePerKg       // Will be 0 if no one is selling
-    };
-  });
-
-  res.json({ success: true, data: formattedProducts });
 });
