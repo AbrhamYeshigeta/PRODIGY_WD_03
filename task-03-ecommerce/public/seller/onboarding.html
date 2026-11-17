@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Setup Your Shop · Etfruit</title>
+  <link rel="stylesheet" href="/css/seller.css" />
+  <style>
+    /* Full screen wizard override */
+    body { background: var(--bg); display: grid; place-items: center; min-height: 100vh; padding: 20px; }
+    .wizard-container { max-width: 800px; width: 100%; background: var(--card); border-radius: var(--r-xl); box-shadow: var(--shadow-lg); overflow: hidden; }
+    .wizard-header { padding: 30px 40px; background: linear-gradient(135deg, var(--brand), var(--brand-dark)); color: #fff; }
+    .wizard-header h1 { margin: 0 0 8px; font-family: var(--serif); font-size: 28px; }
+    .wizard-header p { margin: 0; color: rgba(255,255,255,0.8); font-size: 15px; }
+    .wizard-body { padding: 40px; }
+    .step { display: none; }
+    .step.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .product-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 20px; }
+    .product-checkbox { display: flex; align-items: center; gap: 12px; padding: 16px; border: 2px solid var(--border); border-radius: 12px; cursor: pointer; transition: .15s; }
+    .product-checkbox:hover { border-color: var(--brand); }
+    .product-checkbox.checked { border-color: var(--brand); background: var(--brand-tint); }
+    .product-checkbox input { display: none; }
+    .pricing-row { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 16px; align-items: center; background: var(--bg-2); padding: 16px; border-radius: 12px; margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+
+<div class="wizard-container">
+  <div class="wizard-header">
+    <h1>Welcome to Etfruit, <span id="merchantFirstName">Merchant</span>! 🎉</h1>
+    <p>Let's stock your digital shop. What do you have ready for the market today?</p>
+  </div>
+
+  <div class="wizard-body">
+    <!-- STEP 1: SELECT PRODUCTS -->
+    <div class="step active" id="step-1">
+      <h2 style="font-family: var(--serif); margin-top: 0;">Step 1: Select your products</h2>
+      <p class="muted">Choose all the vegetables and fruits you currently have in stock.</p>
+      
+      <div class="product-grid" id="productGrid">
+        <p class="muted">Loading catalog...</p>
+      </div>
+
+      <div style="margin-top: 30px; display: flex; justify-content: space-between;">
+        <button class="btn btn-ghost" onclick="skipWizard()">Skip for now</button>
+        <button class="btn btn-hero" onclick="goToStep(2)">Next: Add Quantities →</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: ADD QUANTITIES & PRICES -->
+    <div class="step" id="step-2">
+      <h2 style="font-family: var(--serif); margin-top: 0;">Step 2: Set Stock & Price</h2>
+      <p class="muted">How much do you have, and what is your price per <span id="unitLabel">quintal</span>?</p>
+      
+      <div id="pricingInputs" style="margin-top: 20px;">
+        <!-- Dynamically generated based on Step 1 selections -->
+      </div>
+
+      <div style="margin-top: 30px; display: flex; justify-content: space-between;">
+        <button class="btn btn-ghost" onclick="goToStep(1)">← Back</button>
+        <button class="btn btn-hero" id="publishBtn" onclick="submitOffers()">🚀 Publish & Open Shop</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { guardSeller } from '/js/seller/shell.js';
+
+  const seller = guardSeller();
+  
+  // 1. Determine the unit based on their scale
+  let unit = 'quintal';
+  let unitShort = 'qtl';
+  if (seller.scale === 'retail') { unit = 'kg'; unitShort = 'kg'; }
+  if (seller.scale === 'bulk') { unit = 'ton'; unitShort = 'ton'; }
+  
+  // Update UI text
+  document.getElementById('unitLabel').textContent = unit;
+
+  // 2. Set First Name (Handle Titles)
+  const fullName = seller.user?.name || 'Merchant';
+  const titles = ['mr', 'mrs', 'ms', 'dr', 'eng', 'ato', 'w/ro', 'w/rt'];
+  const parts = fullName.split(/\s+/);
+  let firstName = parts.find(p => !titles.includes(p.toLowerCase().replace(/\./g, ''))) || fullName;
+  document.getElementById('merchantFirstName').textContent = firstName;
+
+  // 3. Fetch Real Catalog
+  let catalog = [];
+  try {
+    const res = await fetch('/api/products', { credentials: 'include' });
+    const json = await res.json();
+    catalog = json.data || [];
+  } catch (err) {
+    console.error('Failed to load catalog', err);
+  }
+
+  // Render Checkboxes
+  document.getElementById('productGrid').innerHTML = catalog.length ? catalog.map(p => `
+    <label class="product-checkbox" onclick="this.classList.toggle('checked')">
+      <input type="checkbox" value="${p._id}" data-name="${p.name}" data-icon="${p.image || '🥦'}">
+      <span style="font-size: 28px;">${p.image || '🥦'}</span>
+      <div>
+        <strong style="display: block; color: var(--ink); font-size: 14px;">${p.name}</strong>
+        <small style="color: var(--ink-3);">${p.category || 'Produce'}</small>
+      </div>
+    </label>
+  `).join('') : '<p class="muted">No products available in the catalog yet.</p>';
+
+  // Navigation
+  window.goToStep = (stepNum) => {
+    if (stepNum === 2) {
+      const selected = document.querySelectorAll('input:checked');
+      if (selected.length === 0) {
+        alert('Please select at least one product to continue, or click "Skip".');
+        return;
+      }
+      renderPricingInputs();
+    }
+    
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    document.getElementById(`step-${stepNum}`).classList.add('active');
+  };
+
+  // Render Inputs for Step 2
+  function renderPricingInputs() {
+    const selected = Array.from(document.querySelectorAll('input:checked'));
+    const container = document.getElementById('pricingInputs');
+    
+    container.innerHTML = selected.map(p => `
+      <div class="pricing-row">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span style="font-size: 24px;">${p.dataset.icon}</span>
+          <strong style="color: var(--ink);">${p.dataset.name}</strong>
+        </div>
+        <div>
+          <label style="font-size: 11px; color: var(--ink-3); text-transform: uppercase;">Stock (${unitShort})</label>
+          <input type="number" class="input qty-input" data-id="${p.value}" placeholder="e.g. 50" min="1" />
+        </div>
+        <div>
+          <label style="font-size: 11px; color: var(--ink-3); text-transform: uppercase;">Price / ${unitShort}</label>
+          <input type="number" class="input price-input" data-id="${p.value}" placeholder="e.g. 8500" min="1" />
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Submit to Backend
+  window.submitOffers = async () => {
+    const btn = document.getElementById('publishBtn');
+    const qtyInputs = document.querySelectorAll('.qty-input');
+    const priceInputs = document.querySelectorAll('.price-input');
+    
+    const offers = [];
+    
+    // Validate
+    for (let i = 0; i < qtyInputs.length; i++) {
+      const qty = qtyInputs[i].value;
+      const price = priceInputs[i].value;
+      if (!qty || !price) {
+        alert('Please fill out all quantities and prices, or uncheck the product.');
+        return;
+      }
+      offers.push({
+        productId: qtyInputs[i].dataset.id,
+        unit: unit, 
+        stock: Number(qty),
+        pricePerUnit: Number(price) * 100 // convert to cents
+      });
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = 'Publishing...';
+
+    try {
+      for (const offer of offers) {
+        const res = await fetch('/api/sellers/me/offers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(offer)
+        });
+        
+        if (!res.ok) {
+          const error = await res.json();
+          throw new Error(error.message || 'Failed to create offer');
+        }
+      }
+
+      // Success! Mark as completed and go to dashboard
+      localStorage.setItem('onboarding_completed', 'true');
+      window.location.href = '/seller/dashboard.html';
+
+    } catch (err) {
+      alert(err.message || 'Something went wrong. Please try again.');
+      btn.disabled = false;
+      btn.innerHTML = '🚀 Publish & Open Shop';
+    }
+  };
+
+  // Skip Wizard
+  window.skipWizard = () => {
+    localStorage.setItem('onboarding_skipped', 'true');
+    window.location.href = '/seller/dashboard.html';
+  };
+</script>
+</body>
+</html>
