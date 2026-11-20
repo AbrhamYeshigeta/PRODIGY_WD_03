@@ -85,7 +85,7 @@ async function initDashboard() {
 
     return `
       <tr>
-        <td><strong style="color:var(--brand)">${order._id || '—'}</strong></td>
+        <td><strong style="color:var(--brand)">${order.id || order._id || '—'}</strong></td>
         <td>
           <div class="prod-cell">
             <div class="prod-thumb">📦</div>
@@ -97,7 +97,7 @@ async function initDashboard() {
         </td>
         <td>${order.buyer || seller.businessName || 'Buyer'}</td>
         <td><strong>${order.quantity || 0}</strong></td>
-        <td><strong style="color:var(--brand)">${total ? `${money.format(total)} ETB` : '0 ETB'}</strong></td>
+        <td><strong style="color:var(--brand)">${total ? money.format(total) : '0 ETB'}</strong></td>
         <td><span class="pill ${status}">${status.replace(/_/g, ' ')}</span></td>
       </tr>
     `;

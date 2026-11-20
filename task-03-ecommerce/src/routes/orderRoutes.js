@@ -6,6 +6,8 @@ const { protect } = require('../middleware/auth');
 
 // Buyer routes
 router.post('/checkout', protect, orderController.createOrder);
+router.get('/verify/:transactionRef', protect, orderController.verifyMine);
+router.post('/webhook', orderController.handleWebhook);
 router.get('/', protect, orderController.listMine);
 
 module.exports = router;

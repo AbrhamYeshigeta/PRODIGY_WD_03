@@ -14,6 +14,7 @@ const sellerRoutes = require('./src/routes/sellerRoutes.js');
 const cartRoutes = require('./src/routes/cartRoutes.js');
 const productRoutes = require('./src/routes/productRoutes.js');
 const offerRoutes = require('./src/routes/offerRoutes.js');
+const orderRoutes = require('./src/routes/orderRoutes.js');
 const { notFound, errorHandler } = require('./src/middleware/error.js');
 const { verifyToken } = require('./src/utils/token.js');
 
@@ -129,14 +130,7 @@ app.use('/api/sellers', sellerRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/offers', offerRoutes);
-
-app.get('/api/cart', (req, res) => {
-  res.json({ success: true, data: { items: [], subtotal: 0, total: 0 } });
-});
-
-app.post('/api/cart/items', (req, res) => {
-  res.status(503).json({ success: false, message: 'Cart API coming in the next block' });
-});
+app.use('/api/orders', orderRoutes);
 
 app.get('/api/health', (req, res) => res.json({ success: true }));
 

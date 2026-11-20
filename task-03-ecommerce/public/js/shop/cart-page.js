@@ -1,24 +1,22 @@
 import { API } from '../api.js';
 import { Cart } from '../cart.js';
 
-let currentUser = null;
-
 /* ---------- Session chip ---------- */
 (async function checkSession() {
   try {
     const { user } = await API.get('/api/auth/me');
-    currentUser = user;
-    document.getElementById('user-name').textContent = user.username;
-    document.getElementById('user-avatar').textContent = user.username[0];
+    const name = user.name || user.username || user.email;
+    document.getElementById('user-name').textContent = name;
+    document.getElementById('user-avatar').textContent = name[0].toUpperCase();
     document.getElementById('user-menu').onclick = () => {
-      window.location.href = user.role === 'admin' || user.role === 'staff'
-        ? '/admin/index.html'
-        : '/orders.html';
+      window.location.href = '/orders.html';
     };
-  } catch {
-    sessionStorage.setItem('post_login_redirect', '/cart.html');
+  } catch (error) {
+    if (!error.message.includes('(401)') && !/not authorized/i.test(error.message)) {
+      console.error('[cart] Could not load the customer session:', error);
+    }
     document.getElementById('user-menu').onclick = () => {
-      window.location.href = '/login.html';
+      window.location.href = `/login.html?${new URLSearchParams({ redirect: '/cart.html' })}`;
     };
   }
 })();
@@ -59,82 +57,35 @@ async function setCartQuantity(itemId, quantity) {
   }
 }
 
-async function handleChapaPayment() {
-  const items = Cart.getAll();
-  if (items.length === 0) {
-    showToast('Your cart is empty.', 'error');
-    return;
-  }
-
-  let user = currentUser;
-  if (!user) {
-    try {
-      const response = await API.get('/api/auth/me');
-      user = response.user;
-      currentUser = user;
-    } catch {
-      sessionStorage.setItem('post_login_redirect', '/cart.html');
-      window.location.href = '/login.html';
-      return;
-    }
-  }
-
-  const subtotal = Cart.getSubtotal();
-  const shipping = subtotal >= 50000 ? 0 : 5000;
-  const total = subtotal + shipping;
-  const amount = Number((total / 100).toFixed(2));
-  const button = document.getElementById('pay-with-chapa');
-
-  if (!button) return;
-
-  button.disabled = true;
-  const originalText = button.textContent;
-  button.textContent = 'Opening Chapa...';
-
-  try {
-    const txRef = `PRODIGY-${Date.now()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
-    const name = String(user.username || 'Customer');
-    const phone = String(user.phone || '0911111111').replace(/\D/g, '');
-    const normalizedPhone = phone.startsWith('251') ? `0${phone.slice(3)}` : phone.startsWith('0') ? phone : `0${phone}`;
-
-    const { checkout_url } = await API.post('/api/payments/initialize', {
-      tx_ref: txRef,
-      amount,
-      currency: 'ETB',
-      email: user.email || 'customer@prodigy.store',
-      first_name: name.split(' ')[0] || 'Customer',
-      last_name: name.split(' ').slice(1).join(' ') || 'Customer',
-      phone_number: normalizedPhone,
-      return_url: `${window.location.origin}/?payment=success&tx_ref=${encodeURIComponent(txRef)}`,
-      callback_url: `${window.location.origin}/api/payments/webhook`,
-      customization: {
-        title: 'Prodigy Store',
-        description: `Payment for ${items.length} item(s) in your cart`,
-      },
-      items: items.map((it) => ({
-        offerId: it.id,
-        sellerId: it.merchant || 'prodigy',
-        quantity: it.quantity,
-        price: it.price,
-      })),
-    });
-
-    if (!checkout_url) throw new Error('Chapa checkout link was not returned.');
-    window.location.href = checkout_url;
-  } catch (err) {
-    console.error('[cart] Chapa payment failed:', err);
-    showToast(err.message || 'Unable to connect to Chapa. Please try again.', 'error');
-    button.disabled = false;
-    button.textContent = originalText;
-  }
-}
-
 /* ---------- Render ---------- */
 function render() {
   const items = Cart.getAll();
   const emptyEl   = document.getElementById('cart-empty');
   const itemsEl   = document.getElementById('cart-items');
   const summaryEl = document.getElementById('cart-summary-wrap');
+
+  if (Cart.isLoading) {
+    emptyEl.style.display = 'none';
+    itemsEl.style.display = '';
+    summaryEl.style.display = 'none';
+    itemsEl.innerHTML = '<div class="cart-load-error" role="status">Loading your cart…</div>';
+    return;
+  }
+
+  if (Cart.loadError) {
+    emptyEl.style.display = 'none';
+    itemsEl.style.display = '';
+    summaryEl.style.display = 'none';
+    itemsEl.innerHTML = `
+      <div class="cart-load-error" role="alert">
+        <strong>We couldn't load your cart.</strong>
+        <p>${esc(Cart.loadError)}</p>
+        <button type="button" class="btn btn-green" id="retry-cart">Try again</button>
+      </div>
+    `;
+    document.getElementById('retry-cart')?.addEventListener('click', () => Cart.fetchCart());
+    return;
+  }
 
   if (items.length === 0) {
     emptyEl.style.display = '';
@@ -232,9 +183,12 @@ function render() {
     }
 
     if (act === 'remove') {
-      el.addEventListener('click', () => {
-        Cart.remove(id);
-        render();
+      el.addEventListener('click', async () => {
+        el.disabled = true;
+        if (!await Cart.remove(id)) {
+          showToast('Could not remove this item. Please try again.', 'error');
+          el.disabled = false;
+        }
       });
     }
 
@@ -253,9 +207,13 @@ function render() {
     }
   });
 
-  document.getElementById('clear-cart')?.addEventListener('click', () => {
-    if (confirm('Clear the entire cart?')) {
+  document.getElementById('clear-cart')?.addEventListener('click', async () => {
+    if (!confirm('Clear the entire cart?')) return;
+    try {
       await Cart.clear();
+    } catch (error) {
+      console.error('[cart] Could not clear cart:', error);
+      showToast(error.message || 'Could not clear the cart.', 'error');
     }
   });
 }

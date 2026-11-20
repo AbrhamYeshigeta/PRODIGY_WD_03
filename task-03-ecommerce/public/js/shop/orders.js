@@ -1,119 +1,204 @@
-// public/js/shop/merchants-modal.js
+import { API } from '../api.js';
 
-const fmtETB = (n) => (n / 100).toLocaleString('en-ET', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ETB';
+const escapeHTML = (value = '') => String(value).replace(/[&<>"']/g, (char) => ({
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;',
+}[char]));
 
-let currentMerchants = [];
+const formatMoney = (cents) => `${(Number(cents || 0) / 100).toLocaleString('en-ET', {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+})} ETB`;
 
-/* ============================================
-   1. Fetch Merchants from DB and Render
-   ============================================ */
-window.openMerchantsModal = async function(slug, productName) {
-  const backdrop = document.getElementById('merchants-backdrop');
-  const list = document.getElementById('merchants-list');
-  const title = document.getElementById('merchants-title');
-  const count = document.getElementById('merchants-count');
+const formatDate = (value) => new Date(value).toLocaleString('en-ET', {
+  dateStyle: 'medium',
+  timeStyle: 'short',
+});
 
-  title.textContent = productName;
-  list.innerHTML = '<div style="text-align:center; padding: 30px;">Loading merchants from database...</div>';
-  backdrop.classList.remove('hidden');
-  document.body.style.overflow = 'hidden';
+const label = (value = '') => value.replace(/_/g, ' ');
+
+function renderOrder(order) {
+  const items = order.items || [];
+  const previews = items.slice(0, 3).map((item) => `
+    <div class="order-thumb">
+      <img src="${escapeHTML(item.productImage || '/img/logo.png')}" alt="${escapeHTML(item.productName)}" loading="lazy" />
+    </div>
+  `).join('');
+  const more = items.length > 3
+    ? `<div class="order-thumb order-thumb-more">+${items.length - 3}</div>`
+    : '';
+  const itemSummary = items.map((item) => (
+    `${escapeHTML(item.productName)} × ${Number(item.quantity).toLocaleString('en-ET', { maximumFractionDigits: 2 })} ${escapeHTML(item.quantityUnit)}`
+  )).join(' · ');
+  const payment = order.payments?.[0];
+  const statusText = order.status === 'cancelled'
+    ? 'Cancelled'
+    : order.paymentStatus === 'pending'
+      ? 'Awaiting payment'
+      : order.paymentStatus === 'failed'
+        ? 'Payment failed'
+        : label(order.status);
+
+  return `
+    <article class="order-card">
+      <div class="order-card-head">
+        <div>
+          <div class="order-card-id">Order #${escapeHTML(order.id.slice(0, 8).toUpperCase())}</div>
+          <div class="order-card-date">${escapeHTML(formatDate(order.createdAt))}</div>
+        </div>
+        <span class="order-status order-status-${escapeHTML(order.status)}">${escapeHTML(statusText)}</span>
+      </div>
+      <div class="order-card-body">
+        <div class="order-thumbs">${previews}${more}</div>
+        <div class="order-items-text">
+          <div class="order-items-title">${items.length} item${items.length === 1 ? '' : 's'}</div>
+          <div class="order-items-sub">${itemSummary || 'Order items unavailable'}</div>
+        </div>
+        <div class="order-card-total">
+          <div class="order-total-label">Order total</div>
+          <div class="order-total-value">${formatMoney(order.totalAmount)}</div>
+        </div>
+      </div>
+      <div class="order-card-foot">
+        <div class="order-address">
+          <span>${escapeHTML(label(order.paymentMethod || ''))} · Payment ${escapeHTML(label(payment?.status || order.paymentStatus || 'pending'))}</span>
+        </div>
+        <div class="order-actions">
+          ${order.paymentStatus === 'pending' && payment?.transactionRef
+            ? `<button type="button" class="order-btn order-btn-outline" data-verify="${escapeHTML(payment.transactionRef)}">Check payment</button>`
+            : ''}
+          ${order.paymentReference
+            ? `<span class="order-items-sub">Ref: ${escapeHTML(order.paymentReference)}</span>`
+            : ''}
+        </div>
+      </div>
+    </article>
+  `;
+}
+
+async function loadOrders() {
+  const container = document.getElementById('orders-container');
+  const count = document.getElementById('orders-count');
+  container.innerHTML = '<div class="orders-empty" role="status">Loading your orders…</div>';
 
   try {
-    // Fetch the product AND all its sellers (offers) from Prisma
-    const res = await fetch(`/api/products/${slug}`);
-    const data = await res.json();
-    
-    if (!res.ok) throw new Error(data.message);
-    
-    currentMerchants = data.data.offers;
+    const [{ user }, response] = await Promise.all([
+      API.get('/api/auth/me'),
+      API.get('/api/orders'),
+    ]);
+    const name = user.name || user.username || user.email;
+    const avatar = document.getElementById('user-avatar');
+    document.getElementById('user-name').textContent = name;
+    if (avatar) avatar.textContent = name.charAt(0).toUpperCase();
+    document.getElementById('dropdown-name')?.replaceChildren(document.createTextNode(name));
+    document.getElementById('dropdown-email')?.replaceChildren(document.createTextNode(user.email || ''));
+    document.getElementById('dropdown-avatar')?.replaceChildren(document.createTextNode(name.charAt(0).toUpperCase()));
+    document.getElementById('user-menu')?.classList.add('logged-in');
 
-    if (currentMerchants.length === 0) {
-      count.textContent = `0 merchants`;
-      list.innerHTML = '<p style="text-align:center; padding:20px; color:var(--text-muted);">No sellers are offering this product right now.</p>';
+    try {
+      const cartResponse = await API.get('/api/cart');
+      const badge = document.getElementById('cart-count');
+      if (badge) badge.textContent = String(cartResponse.data?.items?.length || 0);
+    } catch (error) {
+      console.error('Cart count could not be refreshed:', error);
+    }
+
+    const orders = response.data || [];
+    count.textContent = `${orders.length} order${orders.length === 1 ? '' : 's'}`;
+    if (!orders.length) {
+      container.innerHTML = `
+        <section class="orders-empty">
+          <div class="orders-empty-icon">📦</div>
+          <h2>You haven't placed any orders yet</h2>
+          <p>Your purchases and payment updates will appear here.</p>
+          <a href="/" class="btn btn-green btn-lg">Start shopping</a>
+        </section>
+      `;
       return;
     }
 
-    count.textContent = `${currentMerchants.length} merchant${currentMerchants.length === 1 ? '' : 's'}`;
-    
-    // Render each merchant row
-    list.innerHTML = currentMerchants.map(offer => {
-      const seller = offer.seller;
-      const isVerified = seller.verificationStatus === 'verified';
-      
-      return `
-        <div class="merchant-item" data-offer-id="${offer.id}">
-          <div class="merchant-summary">
-            <div class="merchant-avatar">🚜</div>
-            <div class="merchant-main">
-              <div class="merchant-name-row">
-                <span class="merchant-shop">${seller.businessName}</span>
-                ${isVerified ? '<span class="merchant-verified">Verified</span>' : '<span class="merchant-verified pending">Pending</span>'}
-              </div>
-              <div class="merchant-meta-row">
-                <span>📍 ${seller.city}</span>
-                <span class="dot">·</span>
-                <span>⭐ ${seller.rating || 'New'}</span>
-              </div>
-            </div>
-            <div class="merchant-stock">
-              <span class="merchant-price">${fmtETB(offer.pricePerUnit)}<small>/ ${offer.unit}</small></span>
-            </div>
-            <button class="merchant-select-btn" data-select>
-              Select →
-            </button>
-          </div>
-        </div>
-      `;
-    }).join('');
-
-    attachMerchantListeners();
-
-  } catch (err) {
-    list.innerHTML = `<p style="color: red; text-align: center; padding: 20px;">Error: ${err.message}</p>`;
-  }
-};
-
-/* ============================================
-   2. Handle Merchant Selection
-   ============================================ */
-function attachMerchantListeners() {
-  const list = document.getElementById('merchants-list');
-  
-  list.addEventListener('click', (e) => {
-    const btn = e.target.closest('[data-select]');
-    if (!btn) return;
-
-    const item = btn.closest('.merchant-item');
-    const offerId = item.dataset.offerId;
-    const selectedOffer = currentMerchants.find(o => o.id === offerId);
-
-    if (selectedOffer) {
-      // 1. Close Merchants Modal
-      document.getElementById('merchants-backdrop').classList.add('hidden');
-      
-      // 2. Open Quick-View Modal (Function from home.js)
-      // We pass all the exact data needed
-      setTimeout(() => {
-        window.openQuickViewModal({
-          offerId: selectedOffer.id,
-          name: selectedOffer.product.name,
-          image: selectedOffer.product.image,
-          category: selectedOffer.product.category,
-          pricePerUnit: selectedOffer.pricePerUnit,
-          pricePerKg: selectedOffer.pricePerKg,
-          unit: selectedOffer.unit,
-          stock: selectedOffer.stock,
-          estimatedWeightKg: selectedOffer.estimatedWeightKg,
-          sellerName: selectedOffer.seller.businessName,
-          sellerCity: selectedOffer.seller.city
-        });
-      }, 150); // Small delay for smooth transition
+    container.innerHTML = `<div class="orders-list">${orders.map(renderOrder).join('')}</div>`;
+  } catch (error) {
+    if (error.message.includes('(401)') || /not authorized/i.test(error.message)) {
+      window.location.href = `/login.html?${new URLSearchParams({ redirect: '/orders.html' })}`;
+      return;
     }
-  });
+    console.error('Orders could not be loaded:', error);
+    count.textContent = 'Unavailable';
+    container.innerHTML = `
+      <section class="orders-empty" role="alert">
+        <div class="orders-empty-icon">⚠️</div>
+        <h2>We couldn't load your orders</h2>
+        <p>${escapeHTML(error.message || 'Please try again in a moment.')}</p>
+        <button type="button" class="btn btn-green" id="retry-orders">Try again</button>
+      </section>
+    `;
+    document.getElementById('retry-orders')?.addEventListener('click', loadOrders);
+  }
 }
 
-// Close Modal Logic
-document.getElementById('merchants-close')?.addEventListener('click', () => {
-  document.getElementById('merchants-backdrop').classList.add('hidden');
-  document.body.style.overflow = '';
+async function init() {
+  const params = new URLSearchParams(window.location.search);
+  const transactionRef = params.get('tx_ref');
+  if (transactionRef) {
+    const container = document.getElementById('orders-container');
+    container.innerHTML = '<div class="orders-empty" role="status">Confirming your payment securely…</div>';
+    try {
+      const result = await API.get(`/api/orders/verify/${encodeURIComponent(transactionRef)}`);
+      const notice = document.createElement('p');
+      notice.className = 'payment-result-notice';
+      notice.setAttribute('role', 'status');
+      notice.textContent = result.data?.status === 'paid'
+        ? 'Payment confirmed. Your order is being prepared.'
+        : 'Payment verification is still processing. You can check again below.';
+      container.before(notice);
+    } catch (error) {
+      const notice = document.createElement('p');
+      notice.className = 'payment-result-notice error';
+      notice.setAttribute('role', 'alert');
+      notice.textContent = `Payment status could not be confirmed yet: ${error.message}`;
+      container.before(notice);
+    }
+    params.delete('tx_ref');
+    const query = params.toString();
+    window.history.replaceState({}, '', `${window.location.pathname}${query ? `?${query}` : ''}`);
+  }
+  await loadOrders();
+}
+
+document.getElementById('user-menu')?.addEventListener('click', () => {
+  document.getElementById('user-dropdown')?.classList.toggle('hidden');
 });
+document.getElementById('logout-btn')?.addEventListener('click', async () => {
+  try {
+    await API.post('/api/auth/logout', {});
+    window.location.href = '/';
+  } catch (error) {
+    console.error('Sign out failed:', error);
+    window.alert('Could not sign out. Please try again.');
+  }
+});
+document.getElementById('orders-container')?.addEventListener('click', async (event) => {
+  const button = event.target.closest('[data-verify]');
+  if (!button) return;
+  button.disabled = true;
+  button.textContent = 'Checking…';
+  try {
+    await API.get(`/api/orders/verify/${encodeURIComponent(button.dataset.verify)}`);
+    await loadOrders();
+  } catch (error) {
+    button.disabled = false;
+    button.textContent = 'Check payment';
+    window.alert(error.message || 'Payment status could not be checked.');
+  }
+});
+document.addEventListener('click', (event) => {
+  if (!event.target.closest('.user-menu-wrap')) {
+    document.getElementById('user-dropdown')?.classList.add('hidden');
+  }
+});
+
+init();

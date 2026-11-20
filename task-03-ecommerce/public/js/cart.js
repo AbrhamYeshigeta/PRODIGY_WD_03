@@ -3,6 +3,8 @@
 export const Cart = {
   // We store the cart data in memory so we don't have to fetch it on every single interaction
   currentCart: { items: [], total: 0 },
+  isLoading: true,
+  loadError: null,
   listeners: new Set(),
 
   getAll() {
@@ -49,32 +51,37 @@ export const Cart = {
      Fetch the cart from PostgreSQL via Prisma
      ============================================ */
   async fetchCart() {
+    this.isLoading = true;
+    this.loadError = null;
+    this.notifyChange();
     try {
       const res = await fetch('/api/cart', { credentials: 'include' });
       
-      // If the user is not logged in (401), just return empty
       if (res.status === 401) {
+        const redirect = encodeURIComponent(`${window.location.pathname}${window.location.search}`);
+        window.location.href = `/login.html?redirect=${redirect}`;
+        this.isLoading = false;
         this.currentCart = { items: [], total: 0 };
         this.updateHeaderBadge();
         this.notifyChange();
         return this.currentCart;
       }
 
-      const json = await res.json();
-      if (json.success) {
-        this.currentCart = json.data;
-        this.updateHeaderBadge();
-        this.notifyChange();
-
-        // If we are on the cart page, render the items
-        if (window.location.pathname.includes('cart.html')) {
-          this.renderCartPage();
-        }
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || !json.success || !json.data) {
+        throw new Error(json.message || `Cart could not be loaded (${res.status})`);
       }
+      this.currentCart = json.data;
+      this.isLoading = false;
+      this.updateHeaderBadge();
+      this.notifyChange();
       return this.currentCart;
     } catch (err) {
-      console.error("[Cart] Failed to fetch from DB:", err);
-      return { items: [], total: 0 };
+      this.isLoading = false;
+      this.loadError = err.message || 'Cart could not be loaded. Please try again.';
+      console.error('[Cart] Failed to fetch from DB:', err);
+      this.notifyChange();
+      return null;
     }
   },
 
@@ -207,22 +214,31 @@ export const Cart = {
   },
 
   async clear() {
-    await Promise.all((this.currentCart.items || []).map((item) => fetch(`/api/cart/remove/${encodeURIComponent(item.id)}`, {
+    const responses = await Promise.all((this.currentCart.items || []).map((item) => fetch(`/api/cart/remove/${encodeURIComponent(item.id)}`, {
       method: 'DELETE',
       credentials: 'include',
     })));
+    if (responses.some((response) => !response.ok)) {
+      throw new Error('Some cart items could not be removed. Please try again.');
+    }
     return this.fetchCart();
   },
 
   async removeItem(cartItemId) {
     try {
-      await fetch(`/api/cart/remove/${cartItemId}`, {
+      const response = await fetch(`/api/cart/remove/${encodeURIComponent(cartItemId)}`, {
         method: 'DELETE',
         credentials: 'include'
       });
-      this.fetchCart(); // Refresh data from DB
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || 'Could not remove this item.');
+      }
+      await this.fetchCart();
+      return true;
     } catch (err) {
       console.error("Failed to remove item", err);
+      return false;
     }
   }
 };

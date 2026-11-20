@@ -33,7 +33,9 @@ function showToast(message, type = 'success') {
 function getSummary() {
   const items = Cart.getAll();
   const subtotal = Cart.getSubtotal();
-  const shipping = subtotal >= 50000 ? 0 : 5000;
+  const standardShipping = subtotal >= 50000 ? 0 : 5000;
+  const deliveryMethod = document.querySelector('input[name="shipping"]:checked')?.value || 'standard';
+  const shipping = standardShipping + (deliveryMethod === 'express' ? 12000 : 0);
   const total = subtotal + shipping;
   return { items, subtotal, shipping, total };
 }
@@ -71,9 +73,12 @@ function renderOrderSummary() {
   subtotalEl.textContent = formatPrice(summary.subtotal);
   shippingEl.textContent = summary.shipping === 0 ? 'Free' : formatPrice(summary.shipping);
   totalEl.textContent = formatPrice(summary.total);
-  shippingNoteEl.textContent = summary.shipping === 0
-    ? 'Free delivery unlocked'
-    : `Add ${formatPrice(50000 - summary.subtotal)} more for free delivery`;
+  const deliveryMethod = document.querySelector('input[name="shipping"]:checked')?.value || 'standard';
+  shippingNoteEl.textContent = deliveryMethod === 'express'
+    ? 'Priority delivery selected'
+    : summary.shipping === 0
+      ? 'Free delivery unlocked'
+      : `Add ${formatPrice(50000 - summary.subtotal)} more for free delivery`;
 
   itemsEl.innerHTML = summary.items.map((item) => `
     <div class="checkout-item-row">
@@ -98,8 +103,9 @@ async function loadSession() {
   try {
     const { user } = await API.get('/api/auth/me');
     currentUser = user;
-    if (userName) userName.textContent = user.username;
-    if (userAvatar) userAvatar.textContent = user.username?.[0]?.toUpperCase() || '?';
+    const name = user.name || user.username || user.email;
+    if (userName) userName.textContent = name;
+    if (userAvatar) userAvatar.textContent = name[0]?.toUpperCase() || '?';
     if (userMenu) {
       userMenu.onclick = () => {
         window.location.href = user.role === 'admin' || user.role === 'staff' ? '/admin/index.html' : '/orders.html';
@@ -110,12 +116,15 @@ async function loadSession() {
     const emailInput = document.getElementById('checkout-email');
     const phoneInput = document.getElementById('checkout-phone');
 
-    if (nameInput) nameInput.value = user.username || '';
+    if (nameInput) nameInput.value = user.name || user.username || '';
     if (emailInput) emailInput.value = user.email || '';
     if (phoneInput) phoneInput.value = user.phone || '';
-  } catch {
-    sessionStorage.setItem('post_login_redirect', '/checkout.html');
-    window.location.href = '/login.html';
+  } catch (error) {
+    if (error.message.includes('(401)') || /not authorized/i.test(error.message)) {
+      window.location.href = `/login.html?${new URLSearchParams({ redirect: '/checkout.html' })}`;
+      return;
+    }
+    throw error;
   }
 }
 
@@ -135,17 +144,17 @@ async function handleChapaPayment() {
       const response = await API.get('/api/auth/me');
       user = response.user;
       currentUser = user;
-    } catch {
-      sessionStorage.setItem('post_login_redirect', '/checkout.html');
-      window.location.href = '/login.html';
+    } catch (error) {
+      if (error.message.includes('(401)') || /not authorized/i.test(error.message)) {
+        window.location.href = `/login.html?${new URLSearchParams({ redirect: '/checkout.html' })}`;
+        return;
+      }
+      console.error('[checkout] Could not confirm the customer session:', error);
+      showToast(error.message || 'Your session could not be verified.', 'error');
       return;
     }
   }
 
-  const subtotal = Cart.getSubtotal();
-  const shipping = subtotal >= 50000 ? 0 : 5000;
-  const total = subtotal + shipping;
-  const amount = Number((total / 100).toFixed(2));
   const button = document.getElementById('pay-with-chapa');
 
   if (!button) return;
@@ -155,7 +164,6 @@ async function handleChapaPayment() {
   button.textContent = 'Opening Chapa...';
 
   try {
-    const txRef = `PRODIGY-${Date.now()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
     const nameValue = document.getElementById('checkout-name').value.trim();
     const emailValue = document.getElementById('checkout-email').value.trim();
     const phoneValue = document.getElementById('checkout-phone').value.trim();
@@ -163,47 +171,37 @@ async function handleChapaPayment() {
     const addressValue = document.getElementById('checkout-address').value.trim();
     const notesValue = document.getElementById('checkout-notes').value.trim();
 
-    const name = String(nameValue || user.username || 'Customer');
+    const name = String(nameValue || user.name || user.username || 'Customer');
     const email = String(emailValue || user.email || 'customer@prodigy.store');
     const phone = String(phoneValue || user.phone || '0911111111').replace(/\D/g, '');
     const normalizedPhone = phone.startsWith('251') ? `0${phone.slice(3)}` : phone.startsWith('0') ? phone : `0${phone}`;
 
-    sessionStorage.setItem('prodigy_checkout_session', JSON.stringify({
-      name,
-      email,
-      phone: normalizedPhone,
-      city: cityValue,
-      address: addressValue,
-      notes: notesValue,
-      amount,
-      tx_ref: txRef,
-    }));
-
-    const { checkout_url } = await API.post('/api/payments/initialize', {
-      tx_ref: txRef,
-      amount,
-      currency: 'ETB',
-      email,
-      first_name: name.split(' ')[0] || 'Customer',
-      last_name: name.split(' ').slice(1).join(' ') || 'Customer',
-      phone_number: normalizedPhone,
-      return_url: `${window.location.origin}/?payment=success&tx_ref=${encodeURIComponent(txRef)}`,
-      callback_url: `${window.location.origin}/api/payments/webhook`,
-      customization: {
-        title: 'Prodigy Store',
-        description: `Payment for ${items.length} item(s) in your cart`,
+    const paymentMethod = document.querySelector('input[name="payment"]:checked')?.value || 'chapa';
+    const deliveryMethod = document.querySelector('input[name="shipping"]:checked')?.value || 'standard';
+    const result = await API.post('/api/orders/checkout', {
+      paymentMethod,
+      deliveryMethod,
+      shippingAddress: {
+        name,
+        email,
+        phone: normalizedPhone,
+        city: cityValue,
+        address: addressValue,
+        notes: notesValue,
       },
-      items: items.map((it) => ({
-        offerId: it.id,
-        sellerId: it.merchant || 'prodigy',
-        quantity: it.quantity,
-        price: it.price,
-      })),
     });
 
-    if (!checkout_url) throw new Error('Chapa checkout link was not returned.');
-    window.location.href = checkout_url;
+    if (paymentMethod === 'cod') {
+      window.location.href = '/orders.html?placed=1';
+      return;
+    }
+    if (!result.data?.checkoutUrl) throw new Error('Secure checkout link was not returned.');
+    window.location.href = result.data.checkoutUrl;
   } catch (err) {
+    if (err.message.includes('(401)') || /not authorized/i.test(err.message)) {
+      window.location.href = `/login.html?${new URLSearchParams({ redirect: '/checkout.html' })}`;
+      return;
+    }
     console.error('[checkout] payment failed:', err);
     showToast(err.message || 'Unable to connect to Chapa.', 'error');
     button.disabled = false;
@@ -223,24 +221,28 @@ function bindEvents() {
   document.querySelectorAll('input[name="shipping"]').forEach((radio) => {
     radio.addEventListener('change', () => {
       document.querySelectorAll('.shipping-option').forEach((label) => label.classList.toggle('selected', label.querySelector('input').checked));
+      renderOrderSummary();
     });
   });
 
   document.querySelectorAll('input[name="payment"]').forEach((radio) => {
     radio.addEventListener('change', () => {
       document.querySelectorAll('.payment-option').forEach((label) => label.classList.toggle('selected', label.querySelector('input').checked));
+      const button = document.getElementById('pay-with-chapa');
+      if (button) button.textContent = radio.checked && radio.value === 'cod' ? 'Place cash-on-delivery order' : 'Pay securely with Chapa';
     });
   });
 }
 
 (async function init() {
   bindEvents();
-  renderOrderSummary();
-
   try {
+    await Cart.fetchCart();
+    renderOrderSummary();
     await loadSession();
-  } catch {
-    // handled in loadSession
+  } catch (error) {
+    console.error('Checkout could not be initialized:', error);
+    showToast(error.message || 'Checkout could not be loaded.', 'error');
   }
 
   const items = Cart.getAll();

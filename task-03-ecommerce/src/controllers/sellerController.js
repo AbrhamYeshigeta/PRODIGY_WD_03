@@ -53,48 +53,51 @@ exports.me = asyncHandler(async (req, res) => {
 
 /* ── GET /api/sellers/me/orders ── (The Seller's Inbox) ── */
 exports.getSellerOrders = asyncHandler(async (req, res) => {
-  const sellerId = req.seller.id;
-
-  // Find orders that contain at least one item belonging to this seller
-  const orders = await prisma.order.findMany({
-    where: {
-      items: { some: { offer: { sellerId: sellerId } } }
-    },
-    include: {
-      user: { select: { name: true, email: true, phone: true } },
-      items: {
-        where: { offer: { sellerId: sellerId } }, // Only show this seller's items in the order
-        include: { offer: { include: { product: true } } }
-      }
-    },
-    orderBy: { createdAt: 'desc' }
-  });
-
-  res.json({ success: true, data: orders });
+  res.json({ success: true, data: await listSellerOrderRows(req.seller.id) });
 });
 
 /* ── PATCH /api/sellers/me/orders/:id/status ── */
 exports.updateOrderStatus = asyncHandler(async (req, res) => {
   const { status } = req.body;
-  const orderId = req.params.id;
-  const sellerId = req.seller.id;
+  if (!['processing', 'shipped', 'delivered'].includes(status)) {
+    throw ApiError.badRequest('Choose a valid fulfillment status.');
+  }
 
-  // Verify this seller has an item in this order before updating
-  const order = await prisma.order.findFirst({
-    where: { 
-      id: orderId,
-      items: { some: { offer: { sellerId: sellerId } } }
+  const updated = await prisma.$transaction(async (tx) => {
+    const order = await tx.order.findFirst({
+      where: {
+        id: req.params.id,
+        items: { some: { sellerId: req.seller.id } },
+      },
+      include: { items: true },
+    });
+    if (!order) throw ApiError.notFound('Order not found.');
+    if (order.paymentStatus === 'pending' || order.paymentStatus === 'failed') {
+      throw ApiError.badRequest('This order is not ready for fulfillment.');
     }
+
+    await tx.orderItem.updateMany({
+      where: { orderId: order.id, sellerId: req.seller.id },
+      data: { status },
+    });
+
+    const allItems = order.items.map((item) => item.sellerId === req.seller.id
+      ? status
+      : item.status);
+    const orderStatus = allItems.every((itemStatus) => itemStatus === 'delivered')
+      ? 'delivered'
+      : allItems.some((itemStatus) => itemStatus === 'shipped')
+        ? 'shipped'
+        : allItems.some((itemStatus) => itemStatus === 'processing')
+          ? 'processing'
+          : 'paid';
+    return tx.order.update({
+      where: { id: order.id },
+      data: { status: orderStatus },
+    });
   });
 
-  if (!order) throw ApiError.notFound('Order not found or unauthorized');
-
-  const updatedOrder = await prisma.order.update({
-    where: { id: orderId },
-    data: { status }
-  });
-
-  res.json({ success: true, data: updatedOrder });
+  res.json({ success: true, data: updated });
 });
 
 /* ── GET /api/sellers/me/stats ── */
@@ -116,13 +119,34 @@ exports.stats = asyncHandler(async (req, res) => {
       return totals;
     }, {});
 
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const [paidItemsToday, newOrderItems, recentOrders] = await Promise.all([
+    prisma.orderItem.findMany({
+      where: { sellerId, order: { paymentStatus: 'paid', createdAt: { gte: today } } },
+      select: { sellerAmount: true },
+    }),
+    prisma.orderItem.findMany({
+      where: { sellerId, status: 'paid' },
+      select: { orderId: true },
+      distinct: ['orderId'],
+    }),
+    listSellerOrderRows(sellerId, 5),
+  ]);
+  const revenueToday = paidItemsToday.reduce((sum, item) => sum + item.sellerAmount, 0) / 100;
+  const money = new Intl.NumberFormat('en-ET', {
+    style: 'currency',
+    currency: 'ETB',
+    maximumFractionDigits: 2,
+  });
+
   res.json({
     success: true,
     data: {
-      revenueToday: null,
-      revenueTodayFormatted: null,
-      ordersNew: null,
-      orderTrackingAvailable: false,
+      revenueToday,
+      revenueTodayFormatted: money.format(revenueToday),
+      ordersNew: newOrderItems.length,
+      orderTrackingAvailable: true,
       offersActive: offers.filter(o => o.status === 'active' && o.stock > 0).length,
       offersTotal: offers.length,
       offersDraft: offers.filter(o => o.status === 'draft').length,
@@ -131,10 +155,71 @@ exports.stats = asyncHandler(async (req, res) => {
       ratingCount: 0,
       fulfillmentRate: req.seller.fulfillmentRate || 100,
       lowStock,
-      recentOrders: [],
+      recentOrders: recentOrders.map((order) => ({
+        ...order,
+        total: order.total / 100,
+        buyer: order.buyer.name,
+        quantity: order.items.reduce((sum, item) => sum + item.quantity, 0),
+        items: order.items.map((item) => ({
+          product: { name: item.productName, image: item.productImage },
+          quantity: item.quantity,
+        })),
+      })),
     },
   });
 });
+
+async function listSellerOrderRows(sellerId, take) {
+  const items = await prisma.orderItem.findMany({
+    where: { sellerId },
+    include: {
+      order: {
+        include: {
+          user: { select: { name: true, email: true, phone: true } },
+          payments: {
+            select: { transactionRef: true, provider: true, status: true, verifiedAt: true },
+          },
+        },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+    ...(take ? { take: take * 10 } : {}),
+  });
+  const grouped = new Map();
+  for (const item of items) {
+    let order = grouped.get(item.orderId);
+    if (!order) {
+      const payment = item.order.payments[0];
+      order = {
+        id: item.order.id,
+        createdAt: item.order.createdAt,
+        status: item.order.status,
+        paymentStatus: item.order.paymentStatus,
+        paymentMethod: item.order.paymentMethod,
+        transactionRef: payment?.transactionRef || null,
+        buyer: item.order.user,
+        delivery: item.order.shippingAddress,
+        total: 0,
+        items: [],
+      };
+      grouped.set(item.orderId, order);
+    }
+    order.total += item.sellerAmount;
+    order.items.push({
+      id: item.id,
+      productName: item.productName,
+      productImage: item.productImage,
+      sellerName: item.sellerName,
+      quantity: item.quantity,
+      unit: item.quantityUnit,
+      lineTotal: item.lineTotal,
+      sellerAmount: item.sellerAmount,
+      status: item.status,
+    });
+  }
+  const rows = [...grouped.values()];
+  return take ? rows.slice(0, take) : rows;
+}
 
 /* ── PATCH /api/sellers/me ── */
 exports.updateMe = asyncHandler(async (req, res) => {

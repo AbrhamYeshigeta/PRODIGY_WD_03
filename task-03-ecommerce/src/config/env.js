@@ -4,7 +4,6 @@ require('dotenv').config();
 const required = [
   'NODE_ENV',
   'PORT',
-  'MONGO_URI',
   'JWT_SECRET',
   'JWT_EXPIRES_IN',
 ];
