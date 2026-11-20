@@ -1,6 +1,28 @@
 // src/controllers/cartController.js
 const prisma = require('../config/prisma');
 const ApiError = require('../utils/ApiError');
+const { OFFER_UNITS } = require('../config/constants');
+
+const quantityConfig = (offer) => OFFER_UNITS[offer.unit];
+
+function maxOrderQuantity(offer) {
+  const config = quantityConfig(offer);
+  if (!config?.kgFactor) return offer.stock;
+  return Math.floor((offer.stock * config.kgFactor + 1e-8) / 0.5) * 0.5;
+}
+
+function isValidQuantity(quantity, offer) {
+  const config = quantityConfig(offer);
+  if (!config || !Number.isFinite(quantity) || quantity <= 0) return false;
+  if (!config.kgFactor) return Number.isInteger(quantity);
+  return quantity >= 0.5 && Math.abs(quantity * 2 - Math.round(quantity * 2)) < 1e-8;
+}
+
+function lineTotalCents(quantity, offer) {
+  const config = quantityConfig(offer);
+  const centsPerQuantity = config?.kgFactor ? offer.pricePerKg : offer.pricePerUnit;
+  return Math.round(centsPerQuantity * quantity);
+}
 
 /* ── GET /api/cart ── */
 exports.getCart = async (req, res) => {
@@ -27,9 +49,7 @@ exports.getCart = async (req, res) => {
     }
 
     // 3. Calculate total price
-    const total = cart.items.reduce((sum, item) => {
-      return sum + (item.offer.pricePerUnit * item.quantity);
-    }, 0);
+    const total = cart.items.reduce((sum, item) => sum + lineTotalCents(item.quantity, item.offer), 0);
 
     res.status(200).json({ success: true, data: { ...cart, total } });
   } catch (err) {
@@ -42,8 +62,8 @@ exports.addToCart = async (req, res) => {
   try {
     const { offerId, quantity } = req.body;
     const qty = Number(quantity);
-    if (!offerId || !Number.isInteger(qty) || qty < 1) {
-      return res.status(400).json({ success: false, message: 'Choose an offer and a whole-number quantity greater than zero.' });
+    if (typeof offerId !== 'string' || !offerId.trim()) {
+      return res.status(400).json({ success: false, message: 'Choose a product offer.' });
     }
 
     const offer = await prisma.offer.findUnique({
@@ -51,6 +71,10 @@ exports.addToCart = async (req, res) => {
       include: { seller: { select: { verificationStatus: true } } },
     });
     if (!offer) return res.status(404).json({ message: 'Offer not found' });
+    if (!isValidQuantity(qty, offer)) {
+      const unit = quantityConfig(offer)?.kgFactor ? '0.5 kg' : 'whole-number';
+      return res.status(400).json({ success: false, message: `Choose a valid ${unit} quantity greater than zero.` });
+    }
     if (offer.status !== 'active' || offer.seller.verificationStatus !== 'verified') {
       return res.status(400).json({ success: false, message: 'This offer is no longer available.' });
     }
@@ -65,7 +89,7 @@ exports.addToCart = async (req, res) => {
         where: { cartId_offerId: { cartId: cart.id, offerId } },
       });
       const nextQuantity = (existingItem?.quantity || 0) + qty;
-      if (nextQuantity > offer.stock) {
+      if (nextQuantity > maxOrderQuantity(offer)) {
         throw ApiError.badRequest('Not enough stock available.');
       }
 
@@ -92,9 +116,6 @@ exports.updateCartItem = async (req, res) => {
     const { itemId } = req.params;
     const { quantity } = req.body;
     const qty = Number(quantity);
-    if (!Number.isInteger(qty) || qty < 1) {
-      return res.status(400).json({ success: false, message: 'Quantity must be a whole number greater than zero.' });
-    }
 
     const cart = await prisma.cart.findUnique({ where: { userId: req.user.id } });
     if (!cart) return res.status(404).json({ message: 'Cart not found' });
@@ -104,7 +125,16 @@ exports.updateCartItem = async (req, res) => {
       include: { offer: true },
     });
     if (!item) return res.status(404).json({ success: false, message: 'Cart item not found.' });
-    if (qty > item.offer.stock) return res.status(400).json({ success: false, message: 'Not enough stock available.' });
+    if (!isValidQuantity(qty, item.offer)) {
+      const unit = quantityConfig(item.offer)?.kgFactor ? '0.5 kg' : 'whole-number';
+      return res.status(400).json({ success: false, message: `Choose a valid ${unit} quantity greater than zero.` });
+    }
+    if (item.offer.status !== 'active' || item.offer.stock <= 0) {
+      return res.status(400).json({ success: false, message: 'This offer is no longer available.' });
+    }
+    if (qty > maxOrderQuantity(item.offer)) {
+      return res.status(400).json({ success: false, message: 'Not enough stock available.' });
+    }
 
     await prisma.cartItem.update({ where: { id: item.id }, data: { quantity: qty } });
 

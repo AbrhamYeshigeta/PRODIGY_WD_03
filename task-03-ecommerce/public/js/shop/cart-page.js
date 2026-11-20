@@ -31,6 +31,10 @@ function formatPrice(cents) {
   }) + ' ETB';
 }
 
+function formatQuantity(quantity) {
+  return Number(quantity).toLocaleString('en-ET', { maximumFractionDigits: 2 });
+}
+
 function esc(s) {
   return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
@@ -45,6 +49,14 @@ function showToast(message, type = 'success') {
   toast.innerHTML = `<span>${type === 'success' ? '✓' : '⚠'}</span><span>${esc(message)}</span>`;
   container.appendChild(toast);
   setTimeout(() => toast.remove(), 3000);
+}
+
+async function setCartQuantity(itemId, quantity) {
+  const updated = await Cart.setQuantity(itemId, quantity);
+  if (!updated) {
+    showToast('Could not update the cart quantity. Please try again.', 'error');
+    render();
+  }
 }
 
 async function handleChapaPayment() {
@@ -149,9 +161,9 @@ function render() {
           </div>
           <div class="cart-row-qty">
             <div class="qty-stepper">
-            <button type="button" class="qty-btn" data-act="minus" data-id="${it.id}" ${it.quantity <= 1 ? 'disabled' : ''}>−</button>
+            <button type="button" class="qty-btn" data-act="minus" data-id="${it.id}" ${it.quantity <= it.quantityStep ? 'disabled' : ''}>−</button>
               <input type="number" class="qty-input" data-act="input" data-id="${it.id}"
-              value="${it.quantity}" min="1" max="${it.stock}" step="1" inputmode="numeric" />
+            value="${formatQuantity(it.quantity)}" min="${it.quantityStep}" max="${it.stock}" step="${it.quantityStep}" inputmode="decimal" />
             <span class="qty-unit">${esc(it.unit || 'unit')}</span>
             <button type="button" class="qty-btn" data-act="plus" data-id="${it.id}" ${it.quantity >= it.stock ? 'disabled' : ''}>+</button>
             </div>
@@ -205,13 +217,17 @@ function render() {
 
     if (act === 'minus') {
       el.addEventListener('click', async () => {
-        if (item.quantity > 1) await Cart.setQuantity(id, item.quantity - 1);
+        if (item.quantity > item.quantityStep) {
+          await setCartQuantity(id, item.quantity - item.quantityStep);
+        }
       });
     }
 
     if (act === 'plus') {
       el.addEventListener('click', async () => {
-        if (item.quantity < item.stock) await Cart.setQuantity(id, item.quantity + 1);
+        if (item.quantity < item.stock) {
+          await setCartQuantity(id, Math.min(item.stock, item.quantity + item.quantityStep));
+        }
       });
     }
 
@@ -225,12 +241,14 @@ function render() {
     if (act === 'input') {
       el.addEventListener('change', async () => {
         const quantity = Number(el.value);
-        if (!Number.isInteger(quantity) || quantity < 1 || quantity > item.stock) {
-          showToast(`Choose a whole quantity from 1 to ${item.stock} ${item.unit}.`, 'error');
+        const step = item.quantityStep;
+        if (!Number.isFinite(quantity) || quantity < step || quantity > item.stock
+          || Math.abs(quantity / step - Math.round(quantity / step)) > 1e-8) {
+          showToast(`Choose a quantity from ${formatQuantity(step)} to ${formatQuantity(item.stock)} ${item.unit} in ${formatQuantity(step)} ${item.unit} steps.`, 'error');
           render();
           return;
         }
-        await Cart.setQuantity(id, quantity);
+        await setCartQuantity(id, quantity);
       });
     }
   });

@@ -6,20 +6,30 @@ export const Cart = {
   listeners: new Set(),
 
   getAll() {
-    return (this.currentCart.items || []).map((item) => ({
-      id: item.id,
-      offerId: item.offer.id,
-      quantity: item.quantity,
-      price: item.offer.pricePerUnit,
-      image: item.offer.product.image,
-      name: item.offer.product.name,
-      slug: item.offer.product.slug,
-      category: item.offer.product.category,
-      merchant: item.offer.seller?.businessName || 'Etfruit seller',
-      unit: item.offer.unit,
-      stock: item.offer.stock,
-      estimatedWeightKg: item.offer.estimatedWeightKg,
-    }));
+    return (this.currentCart.items || []).map((item) => {
+      const offer = item.offer;
+      const kgFactors = { kg: 1, quintal: 100, ton: 1000 };
+      const kgFactor = kgFactors[offer.unit];
+      const isWeightBased = kgFactor !== undefined;
+
+      return {
+        id: item.id,
+        offerId: offer.id,
+        quantity: item.quantity,
+        price: isWeightBased ? offer.pricePerKg : offer.pricePerUnit,
+        image: offer.product.image,
+        name: offer.product.name,
+        slug: offer.product.slug,
+        category: offer.product.category,
+        merchant: offer.seller?.businessName || 'Etfruit seller',
+        unit: isWeightBased ? 'kg' : offer.unit,
+        stock: isWeightBased
+          ? Math.floor((offer.stock * kgFactor + 1e-8) / 0.5) * 0.5
+          : offer.stock,
+        quantityStep: isWeightBased ? 0.5 : 1,
+        estimatedWeightKg: offer.estimatedWeightKg,
+      };
+    });
   },
 
   getSubtotal() {
@@ -113,8 +123,12 @@ export const Cart = {
       const seller = offer.seller;
       
       // Convert cents to ETB
-      const price = (offer.pricePerUnit / 100).toFixed(2);
-      const lineTotal = ((offer.pricePerUnit * item.quantity) / 100).toFixed(2);
+      const kgFactors = { kg: 1, quintal: 100, ton: 1000 };
+      const kgFactor = kgFactors[offer.unit];
+      const quantityUnit = kgFactor === undefined ? offer.unit : 'kg';
+      const unitPrice = kgFactor === undefined ? offer.pricePerUnit : offer.pricePerKg;
+      const lineTotal = ((unitPrice * item.quantity) / 100).toFixed(2);
+      const quantityStep = kgFactor === undefined ? 1 : 0.5;
 
       return `
         <div class="cart-row">
@@ -129,11 +143,11 @@ export const Cart = {
           
           <div class="cart-row-qty">
             <div class="qty-stepper" style="border: 1px solid var(--border); border-radius: 999px; display: inline-flex; align-items: center;">
-              <button class="qty-btn" onclick="window.Cart.updateQty('${item.id}', ${item.quantity - 1})" style="padding: 5px 10px;">−</button>
+              <button class="qty-btn" onclick="window.Cart.updateQty('${item.id}', ${item.quantity - quantityStep})" style="padding: 5px 10px;">−</button>
               <span style="padding: 0 10px; font-weight: bold;">${item.quantity}</span>
-              <button class="qty-btn" onclick="window.Cart.updateQty('${item.id}', ${item.quantity + 1})" style="padding: 5px 10px;">+</button>
+              <button class="qty-btn" onclick="window.Cart.updateQty('${item.id}', ${item.quantity + quantityStep})" style="padding: 5px 10px;">+</button>
             </div>
-            <span class="qty-unit" style="font-size:12px; color:var(--text-muted); margin-left:5px;">${offer.unit}</span>
+            <span class="qty-unit" style="font-size:12px; color:var(--text-muted); margin-left:5px;">${quantityUnit}</span>
           </div>
           
           <div class="cart-row-total">
@@ -161,21 +175,26 @@ export const Cart = {
      Actions (Update, Remove)
      ============================================ */
   async updateQty(cartItemId, newQty) {
-    if (newQty < 1) {
+    if (newQty <= 0) {
       return this.removeItem(cartItemId);
     }
     
     try {
-      // Requires a PATCH route in your backend
-      await fetch(`/api/cart/update/${cartItemId}`, {
+      const response = await fetch(`/api/cart/update/${cartItemId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ quantity: newQty }),
         credentials: 'include'
       });
-      this.fetchCart(); // Refresh data from DB
+      const result = await response.json();
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || 'Could not update the cart quantity.');
+      }
+      await this.fetchCart();
+      return true;
     } catch (err) {
       console.error("Failed to update quantity", err);
+      return false;
     }
   },
 

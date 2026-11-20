@@ -76,17 +76,23 @@
   <script>
     // 1. Check URL for redirect parameter (Merchant flow)
     const urlParams = new URLSearchParams(window.location.search);
-    const redirectUrl = urlParams.get('redirect');
+    const requestedRedirect = urlParams.get('redirect');
+    const safeReturnTo = (candidate) => {
+      if (!candidate || !candidate.startsWith('/') || candidate.startsWith('//') || candidate.includes('\\')) {
+        return null;
+      }
 
-    if (redirectUrl && redirectUrl.includes('seller')) {
-      document.title = "Merchant Registration · Prodigy Store";
-      document.getElementById('page-title').textContent = "Become a Merchant";
-      document.getElementById('page-subtitle').textContent = "Step 1: Create your base account to begin your application.";
-    }
+      const url = new URL(candidate, window.location.origin);
+      return url.origin === window.location.origin
+        && !/^\/(seller|admin)(\/|$)/.test(url.pathname)
+        ? `${url.pathname}${url.search}${url.hash}`
+        : null;
+    };
+    const redirectUrl = safeReturnTo(requestedRedirect);
 
     const loginLink = document.getElementById('login-link');
     if (loginLink && redirectUrl) {
-      loginLink.href = `/login.html?redirect=${redirectUrl}`;
+      loginLink.href = `/login.html?${new URLSearchParams({ redirect: redirectUrl })}`;
     }
 
     // 2. Handle Form Submission
@@ -119,15 +125,19 @@
       throw new Error(data.message || 'Registration failed');
     }
 
-    // Redirect on success
-    const urlParams = new URLSearchParams(window.location.search);
-    const redirectUrl = urlParams.get('redirect');
+    await fetch('/api/auth/customer-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+      credentials: 'include'
+    }).then(async (loginResponse) => {
+      const loginData = await loginResponse.json();
+      if (!loginResponse.ok) {
+        throw new Error(loginData.message || 'Account created, but sign-in failed');
+      }
+    });
 
-    if (redirectUrl) {
-      window.location.href = redirectUrl;
-    } else {
-      window.location.href = '/';
-    }
+    window.location.href = redirectUrl || '/';
 
   } catch (err) {
     msg.textContent = err.message;

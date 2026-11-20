@@ -6,12 +6,23 @@ let allProducts = [];
 
 const filters = {
   search: '',
-  category: '',
+  category: '', // Empty string means 'All Products'
   minPrice: null,
   maxPrice: null,
   inStockOnly: false,
   sort: 'popular',
 };
+
+// Define the exact 7 categories you requested
+const CATEGORIES = [
+  'All Products', 
+  'Leafy Greens', 
+  'Root Vegetables', 
+  'Fruit Vegetables', 
+  'Peppers', 
+  'Herbs', 
+  'Fruits'
+];
 
 const escapeHTML = (value = '') => String(value).replace(/[&<>"']/g, (char) => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
@@ -21,6 +32,24 @@ const formatETB = (cents) => `${(cents / 100).toLocaleString('en-ET', {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 })} ETB`;
+
+/* Render the 7 Categories into the HTML */
+function renderCategoryChips() {
+  const container = document.getElementById('category-chips');
+  if (!container) return;
+
+  container.innerHTML = CATEGORIES.map(cat => {
+    // 'All Products' maps to empty string for the backend filter
+    const filterValue = cat === 'All Products' ? '' : cat;
+    const isActive = filters.category === filterValue ? 'active' : '';
+    
+    return `
+      <button type="button" class="chip ${isActive}" data-category="${filterValue}">
+        ${cat}
+      </button>
+    `;
+  }).join('');
+}
 
 /* Load the live catalog and its verified, in-stock offer summaries. */
 async function fetchAndRenderProducts() {
@@ -106,7 +135,7 @@ function renderProductCard(product) {
   const image = product.image ? escapeHTML(product.image) : '/img/placeholder.png';
   const name = escapeHTML(product.name);
   const category = escapeHTML(product.category);
-  const price = hasOffers ? `From ${formatETB(product.lowestPricePerKg)} / kg` : 'No current offers';
+  const price = hasOffers ? `${formatETB(product.lowestPricePerKg)} / kg` : 'No current offers';
   const merchantCount = `${product.sellerCount || 0} verified merchant${product.sellerCount === 1 ? '' : 's'}`;
 
   return `
@@ -135,13 +164,13 @@ function renderProductCard(product) {
 }
 
 /* ============================================
-   Search, category, sort, and availability filters
+   Event Listeners for Filters & Modals
    ============================================ */
 document.getElementById('product-grid')?.addEventListener('click', (event) => {
   const card = event.target.closest('.product-card');
-  if (card && window.openMerchantsModal) {
-    window.openMerchantsModal(card.dataset.slug, card.querySelector('.product-name').textContent);
-  }
+  if (!card || !window.openMerchantsModal) return;
+
+  window.openMerchantsModal(card.dataset.slug, card.querySelector('.product-name').textContent);
 });
 
 document.getElementById('product-search')?.addEventListener('input', (event) => {
@@ -225,52 +254,15 @@ document.getElementById('empty-reset')?.addEventListener('click', () => {
   filters.search = '';
   filters.category = '';
   document.getElementById('product-search').value = '';
+  // Click the "All Products" chip
   document.querySelector('#category-chips [data-category=""]')?.click();
   document.getElementById('filter-clear')?.click();
 });
 
 
-async function loadLandingPage() {
-  try {
-    const res = await fetch('/api/products');
-    const { data: products } = await res.json();
-    
-    const grid = document.getElementById('product-grid');
-    
-    // If no products have active offers, show empty state
-    const activeProducts = products.filter(p => p.sellerCount > 0);
-
-    if (activeProducts.length === 0) {
-       grid.innerHTML = `<p class="muted" style="grid-column: 1/-1; text-align:center;">No products available yet.</p>`;
-       return;
-    }
-
-    grid.innerHTML = activeProducts.map(product => {
-      // Convert cents to ETB
-      const price = (product.lowestPricePerKg / 100).toFixed(2);
-
-      return `
-        <div class="product-card" onclick="window.location.href='/product.html?slug=${product.slug}'">
-          <div class="product-image">
-            <img src="${product.image}" alt="${product.name}">
-          </div>
-          <div class="product-info">
-            <h3>${product.name}</h3>
-            <div class="product-price-row">
-              <span class="price">from ${price} ETB/kg</span>
-              <span class="sellers">🏪 ${product.sellerCount} sellers</span>
-            </div>
-          </div>
-        </div>
-      `;
-    }).join('');
-  } catch (err) {
-    console.error('Failed to load products', err);
-  }
-}
-
-loadLandingPage();
-
+/* ============================================
+   User Header Logic
+   ============================================ */
 async function updateHeaderForCurrentUser() {
   const userMenu = document.getElementById('user-menu');
   const dropdown = document.getElementById('user-dropdown');
@@ -288,6 +280,7 @@ async function updateHeaderForCurrentUser() {
     userMenu.classList.add('logged-in');
     dropdown?.classList.add('hidden');
     if (login) login.hidden = true;
+    
     document.getElementById('logout-btn')?.addEventListener('click', async () => {
       try {
         const response = await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
@@ -319,58 +312,72 @@ async function updateHeaderForCurrentUser() {
 }
 
 /* ============================================
-   4. Global function to open Quick-View Modal
-   (Called by merchants-modal.js after selection)
+   Quick-View Modal & Cart
    ============================================ */
 window.openQuickViewModal = function(merchantData) {
-  // Populate the HTML
   document.getElementById('pm-image').src = merchantData.image;
   document.getElementById('pm-title').textContent = merchantData.name;
   document.getElementById('pm-category').textContent = merchantData.category;
   document.getElementById('pm-merchant').textContent = merchantData.sellerName;
   document.getElementById('pm-location').textContent = '📍 ' + merchantData.sellerCity;
-  
-  // Format the price correctly
-  const priceETB = (merchantData.pricePerUnit / 100).toFixed(2);
-  document.getElementById('pm-price').textContent = `${priceETB} ETB / ${merchantData.unit}`;
+
+  const weightUnits = { kg: 1, quintal: 100, ton: 1000 };
+  const kgFactor = weightUnits[merchantData.unit];
+  const isWeightBased = kgFactor !== undefined;
+  const quantityUnit = isWeightBased ? 'kg' : merchantData.unit;
+  const quantityStep = isWeightBased ? 0.5 : 1;
+  const availableQuantity = isWeightBased
+    ? Number(merchantData.stock) * kgFactor
+    : Number(merchantData.stock);
+  const maxQuantity = Math.floor((availableQuantity + 1e-8) / quantityStep) * quantityStep;
+  const unitPrice = isWeightBased
+    ? Number(merchantData.pricePerKg ?? merchantData.pricePerUnit / kgFactor)
+    : Number(merchantData.pricePerUnit);
+  const priceETB = (unitPrice / 100).toFixed(2);
+  document.getElementById('pm-price').textContent = `${priceETB} ETB / ${quantityUnit}`;
   const priceLabel = document.querySelector('.pm-price-label');
-  if (priceLabel) priceLabel.textContent = `Price per ${merchantData.unit}`;
+  if (priceLabel) priceLabel.textContent = `Price per ${quantityUnit}`;
+  
   const unitComparison = document.getElementById('pm-unit-comparison');
   if (unitComparison) {
-    unitComparison.textContent = merchantData.estimatedWeightKg > 0
+    unitComparison.textContent = !isWeightBased && merchantData.estimatedWeightKg > 0
       ? `≈ ${(Number(priceETB) / merchantData.estimatedWeightKg).toLocaleString('en-ET', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ETB / kg (${merchantData.estimatedWeightKg} kg per ${merchantData.unit})`
       : '';
-    unitComparison.hidden = !merchantData.estimatedWeightKg;
+    unitComparison.hidden = isWeightBased || !merchantData.estimatedWeightKg;
   }
   
-  // Update the quantity hint dynamically (e.g., / kg or / qtl)
   const qtyHint = document.querySelector('.pm-quantity-hint');
   const qtyUnit = document.querySelector('.qty-unit');
-  if (qtyHint) qtyHint.textContent = `(${merchantData.unit} · whole units)`;
-  if (qtyUnit) qtyUnit.textContent = merchantData.unit;
+  if (qtyHint) qtyHint.textContent = isWeightBased
+    ? '(kg · 0.5 kg steps)'
+    : `(${quantityUnit} · whole units)`;
+  if (qtyUnit) qtyUnit.textContent = quantityUnit;
   
-  // Store the REAL offer ID globally for the cart
   window.currentOfferId = merchantData.offerId;
-  window.currentOfferPrice = merchantData.pricePerUnit;
+  window.currentOfferPrice = unitPrice;
 
-  // Reset quantity to 1
   const qtyInput = document.getElementById('pm-input');
   if (qtyInput) {
-    qtyInput.value = 1;
-    qtyInput.setAttribute('min', 1);
-    qtyInput.setAttribute('max', Math.max(1, Number(merchantData.stock) || 1));
-    qtyInput.setAttribute('step', 1);
+    qtyInput.value = Math.min(1, maxQuantity);
+    qtyInput.setAttribute('min', quantityStep);
+    qtyInput.setAttribute('max', maxQuantity);
+    qtyInput.setAttribute('step', quantityStep);
   }
+
+  const addToCartButton = document.getElementById('pm-add-to-cart');
+  if (addToCartButton) addToCartButton.disabled = maxQuantity < quantityStep;
+  
   document.querySelectorAll('.qty-preset').forEach((preset) => {
     const quantity = Number(preset.dataset.qty);
-    preset.hidden = !Number.isInteger(quantity) || quantity > Number(merchantData.stock);
-    preset.textContent = `${quantity} ${merchantData.unit}`;
+    preset.hidden = (!isWeightBased && !Number.isInteger(quantity))
+      || quantity > maxQuantity;
+    preset.textContent = `${quantity} ${quantityUnit}`;
   });
+  
   updateQuickViewQuantity();
   const totalEl = document.getElementById('pm-total');
   if (totalEl) totalEl.textContent = `${priceETB} ETB`;
 
-  // Show Modal
   document.getElementById('product-modal-backdrop').classList.remove('hidden');
   document.body.style.overflow = 'hidden';
 };
@@ -379,8 +386,21 @@ function updateQuickViewQuantity() {
   const input = document.getElementById('pm-input');
   if (!input) return;
   const min = Number(input.min) || 1;
-  const max = Number(input.max) || 1;
-  const quantity = Math.min(max, Math.max(min, Math.round(Number(input.value) || min)));
+  const max = Number(input.max);
+  const step = Number(input.step) || 1;
+  if (!Number.isFinite(max) || max < min) {
+    input.value = '';
+    document.getElementById('pm-total').textContent = '0.00 ETB';
+    document.getElementById('pm-minus').disabled = true;
+    document.getElementById('pm-plus').disabled = true;
+    document.querySelectorAll('.qty-preset').forEach((preset) => {
+      preset.classList.remove('active');
+    });
+    return;
+  }
+
+  const requested = Number(input.value);
+  const quantity = Math.min(max, Math.max(min, Math.round((Number.isFinite(requested) ? requested : min) / step) * step));
   input.value = quantity;
   const total = (Number(window.currentOfferPrice || 0) * quantity / 100).toLocaleString('en-ET', {
     minimumFractionDigits: 2,
@@ -388,6 +408,9 @@ function updateQuickViewQuantity() {
   });
   const totalEl = document.getElementById('pm-total');
   if (totalEl) totalEl.textContent = `${total} ETB`;
+  document.querySelectorAll('.qty-preset').forEach((preset) => {
+    preset.classList.toggle('active', Number(preset.dataset.qty) === quantity);
+  });
   const minus = document.getElementById('pm-minus');
   const plus = document.getElementById('pm-plus');
   if (minus) minus.disabled = quantity <= min;
@@ -396,13 +419,13 @@ function updateQuickViewQuantity() {
 
 document.getElementById('pm-minus')?.addEventListener('click', () => {
   const input = document.getElementById('pm-input');
-  if (input) input.value = Math.max(Number(input.min) || 1, Number(input.value) - 1);
+  if (input) input.value = Math.max(Number(input.min) || 1, Number(input.value) - (Number(input.step) || 1));
   updateQuickViewQuantity();
 });
 
 document.getElementById('pm-plus')?.addEventListener('click', () => {
   const input = document.getElementById('pm-input');
-  if (input) input.value = Math.min(Number(input.max) || 1, Number(input.value) + 1);
+  if (input) input.value = Math.min(Number(input.max), Number(input.value) + (Number(input.step) || 1));
   updateQuickViewQuantity();
 });
 
@@ -416,9 +439,6 @@ document.querySelector('.qty-presets')?.addEventListener('click', (event) => {
   updateQuickViewQuantity();
 });
 
-/* ============================================
-   5. Handle "Add to Cart" Button
-   ============================================ */
 document.getElementById('pm-add-to-cart')?.addEventListener('click', async (e) => {
   if (!window.currentOfferId) {
     alert("Please select a merchant first.");
@@ -429,8 +449,11 @@ document.getElementById('pm-add-to-cart')?.addEventListener('click', async (e) =
   const originalText = btn.innerHTML;
   const qtyInput = document.getElementById('pm-input');
   const quantity = qtyInput ? Number(qtyInput.value) : 1;
-  if (!Number.isInteger(quantity) || quantity < 1 || quantity > Number(qtyInput?.max || 1)) {
-    alert('Choose a whole quantity within the available stock.');
+  const step = Number(qtyInput?.step) || 1;
+  if (!Number.isFinite(quantity) || quantity < Number(qtyInput?.min || 1)
+    || quantity > Number(qtyInput?.max || 1)
+    || Math.abs(quantity / step - Math.round(quantity / step)) > 1e-8) {
+    alert('Choose a valid quantity within the available stock.');
     return;
   }
 
@@ -438,7 +461,19 @@ document.getElementById('pm-add-to-cart')?.addEventListener('click', async (e) =
   btn.innerHTML = '<span>Adding...</span>';
 
   try {
-    // Send the specific offerId to the backend
+    try {
+      await API.get('/api/auth/me');
+    } catch (authError) {
+      if (authError.message.includes('(401)') || /not authorized|token invalid|user no longer exists/i.test(authError.message)) {
+        const returnTo = window.currentProductSlug
+          ? `/?product=${encodeURIComponent(window.currentProductSlug)}`
+          : '/';
+        window.location.href = `/login.html?${new URLSearchParams({ redirect: returnTo })}`;
+        return;
+      }
+      throw authError;
+    }
+
     await API.post('/api/cart/add', {
       offerId: window.currentOfferId,
       quantity: quantity
@@ -448,7 +483,6 @@ document.getElementById('pm-add-to-cart')?.addEventListener('click', async (e) =
     document.getElementById('product-modal-backdrop').classList.add('hidden');
     document.body.style.overflow = '';
     
-    // Refresh cart badge
     if (Cart && Cart.fetchCart) {
       await Cart.fetchCart();
     } else if (Cart && Cart.refresh) {
@@ -457,23 +491,27 @@ document.getElementById('pm-add-to-cart')?.addEventListener('click', async (e) =
 
   } catch (err) {
     console.error(err);
-    alert(err.message || "Failed to add to cart. Are you logged in?");
+    alert(err.message || "Failed to add to cart. Please try again.");
   } finally {
     btn.disabled = false;
     btn.innerHTML = originalText;
+    if (Number(qtyInput?.max) < (Number(qtyInput?.step) || 1)) btn.disabled = true;
   }
 });
 
-// Close modals
 document.getElementById('product-modal-close')?.addEventListener('click', () => {
   document.getElementById('product-modal-backdrop').classList.add('hidden');
   document.body.style.overflow = '';
 });
 
 /* ============================================
-   Boot
+   Boot Sequence
    ============================================ */
 document.addEventListener('DOMContentLoaded', async () => {
+  // 1. Render the strict 7 categories
+  renderCategoryChips();
+
+  // 2. Handle category query param from URL (e.g., /?category=Leafy%20Greens)
   const requestedCategory = new URLSearchParams(window.location.search).get('category');
   if (requestedCategory) {
     const normalize = (value) => value.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -486,6 +524,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     }
   }
+
+  // 3. Load user data and products
   await updateHeaderForCurrentUser();
   await fetchAndRenderProducts();
+
+  const requestedProduct = new URLSearchParams(window.location.search).get('product');
+  const product = allProducts.find((item) => item.slug === requestedProduct);
+  if (product && window.openMerchantsModal) {
+    window.openMerchantsModal(product.slug, product.name);
+  }
 });

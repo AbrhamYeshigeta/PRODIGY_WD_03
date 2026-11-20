@@ -48,6 +48,25 @@
   </main>
 
   <script>
+    const safeReturnTo = (candidate) => {
+      if (!candidate || !candidate.startsWith('/') || candidate.startsWith('//') || candidate.includes('\\')) {
+        return null;
+      }
+
+      const url = new URL(candidate, window.location.origin);
+      return url.origin === window.location.origin
+        && !/^\/(seller|admin)(\/|$)/.test(url.pathname)
+        ? `${url.pathname}${url.search}${url.hash}`
+        : null;
+    };
+
+    const redirectParam = new URLSearchParams(window.location.search).get('redirect');
+    const returnTo = safeReturnTo(redirectParam);
+    const registerLink = document.querySelector('.auth-footer a');
+    if (returnTo && registerLink) {
+      registerLink.href = `/register.html?redirect=${encodeURIComponent(returnTo)}`;
+    }
+
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault(); // 🚨 THIS STOPS THE GET REQUEST 🚨
 
@@ -61,7 +80,7 @@
       errorBox.style.display = 'none';
 
       try {
-        const response = await fetch('/api/auth/login', {
+        const response = await fetch('/api/auth/customer-login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password }),
@@ -74,12 +93,7 @@
           throw new Error(data.message || 'Invalid email or password');
         }
 
-        // Success! Redirect based on role
-        const role = data.user ? data.user.role : (data.data && data.data.user ? data.data.user.role : 'customer');
-        
-        if (role === 'seller') window.location.href = '/seller/dashboard.html';
-        else if (role === 'admin') window.location.href = '/admin/index.html';
-        else window.location.href = '/';
+        window.location.href = returnTo || '/';
 
       } catch (err) {
         errorBox.textContent = err.message;

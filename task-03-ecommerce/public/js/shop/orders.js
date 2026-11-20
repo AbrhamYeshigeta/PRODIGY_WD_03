@@ -100,7 +100,10 @@ function attachMerchantListeners() {
           image: selectedOffer.product.image,
           category: selectedOffer.product.category,
           pricePerUnit: selectedOffer.pricePerUnit,
+          pricePerKg: selectedOffer.pricePerKg,
           unit: selectedOffer.unit,
+          stock: selectedOffer.stock,
+          estimatedWeightKg: selectedOffer.estimatedWeightKg,
           sellerName: selectedOffer.seller.businessName,
           sellerCity: selectedOffer.seller.city
         });

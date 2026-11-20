@@ -80,7 +80,8 @@ model Cart {
 
 model CartItem {
   id        String   @id @default(uuid())
-  quantity  Int      @default(1)
+  // Kilograms for kg/quintal/ton offers; whole selling units for piece/bunch/pack.
+  quantity  Float    @default(1)
   cartId    String
   cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
   offerId   String
@@ -106,7 +107,7 @@ model Offer {
   pricePerUnit      Int // Stored in cents (e.g., 8500 = 85.00 ETB)
   pricePerKg        Int
   estimatedWeightKg Float? // Weight of one bunch, pack, or piece in kg
-  stock             Int
+  stock             Float // Stored in the merchant's selling unit; may become fractional after a kg order.
   status            String  @default("active")
 
   productId String

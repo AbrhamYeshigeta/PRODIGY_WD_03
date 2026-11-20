@@ -83,7 +83,7 @@ function renderOrderSummary() {
       <div class="checkout-item-meta">
         <strong>${esc(item.name)}</strong>
         <span>${esc(item.merchant || 'Prodigy Farms')}</span>
-        <small>${item.quantity} kg</small>
+        <small>${Number(item.quantity).toLocaleString('en-ET', { maximumFractionDigits: 2 })} ${esc(item.unit)}</small>
       </div>
       <div class="checkout-item-price">${formatPrice(Math.round(item.price * item.quantity))}</div>
     </div>

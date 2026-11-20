@@ -35,10 +35,18 @@ router.post('/register',
    passwordRule],
   validate, register);
 
-router.post('/login',
-  [body('email').isEmail().withMessage('Valid email required').normalizeEmail(),
-   body('password').notEmpty().withMessage('Password required')],
-  validate, login);
+const loginValidators = [
+  body('email').isEmail().withMessage('Valid email required').normalizeEmail(),
+  body('password').notEmpty().withMessage('Password required'),
+];
+
+router.post('/login', loginValidators, validate, login);
+router.post('/customer-login', loginValidators, validate, (req, res, next) => {
+  login(req, res, next, ['customer']);
+});
+router.post('/merchant-login', loginValidators, validate, (req, res, next) => {
+  login(req, res, next, ['seller', 'admin']);
+});
 
 router.post('/logout', logout);
 router.get('/me', protect, getMe);

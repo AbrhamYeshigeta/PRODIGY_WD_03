@@ -304,11 +304,11 @@ body { background: var(--bg); }
   background: linear-gradient(120deg, #0e5c3f 0%, #0a4230 100%);
   border-radius: var(--r-xl);
   padding: 36px 44px;
-  height: 340px;                  /* SHORT fixed height */
-  margin-bottom: 72px;            /* extra space below for image overflow */
+  height: 340px;
+  margin-bottom: 72px;
   color: #fff;
   position: relative;
-  overflow: visible;              /* image can escape */
+  overflow: visible;
 }
 
 .hero-banner::before {
@@ -363,7 +363,7 @@ body { background: var(--bg); }
 
 /* ---------- Hero visual (image overflow container) ---------- */
 .hero-banner-visual {
-  position: relative;             /* parent anchor for absolute child */
+  position: relative;
   height: 100%;
   width: 100%;
   display: flex;
@@ -372,13 +372,13 @@ body { background: var(--bg); }
 }
 
 .hero-carousel {
-  position: absolute;             /* ← KEY: out of flow — doesn't push board taller */
+  position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: 100%;
   max-width: 560px;
-  height: 480px;                  /* image size — unchanged */
+  height: 480px;
   overflow: hidden;
   background: transparent;
   border-radius: 0;
@@ -415,15 +415,8 @@ body { background: var(--bg); }
   transition: transform 0.3s ease;
 }
 
-/* Balance images — 2nd image has more whitespace, so scale it up */
-.hero-slide:nth-child(2) img {
-  transform: scale(1.18);       /* ← tweak this number */
-}
-
-/* Optional: also scale if you add more slides */
-.hero-slide:nth-child(3) img {
-  transform: scale(1.10);
-}
+.hero-slide:nth-child(2) img { transform: scale(1.18); }
+.hero-slide:nth-child(3) img { transform: scale(1.10); }
 
 .hero-dots { display: none; }
 
@@ -1009,12 +1002,14 @@ body { background: var(--bg); }
 .product-prices { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .product-price {
   font-family: var(--font-body);
-  font-size: 1.05rem;
+  font-size: 0.98rem;
   font-weight: 800;
   color: var(--text);
   letter-spacing: -0.02em;
   line-height: 1.1;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .product-compare {
   font-size: 0.78rem;
@@ -1267,7 +1262,7 @@ body { background: var(--bg); }
     grid-template-columns: 1fr;
     height: auto;
     padding: 32px 28px;
-    overflow: hidden;              /* contain image on mobile */
+    overflow: hidden;
     margin-bottom: 40px;
   }
   .hero-banner h1 { font-size: 2rem; }
@@ -1275,11 +1270,11 @@ body { background: var(--bg); }
   .hero-banner-visual {
     position: relative;
     height: 320px;
-    order: -1;                     /* image appears ABOVE text on mobile */
+    order: -1;
     margin-top: 8px;
   }
   .hero-carousel {
-    position: relative;            /* back in flow on mobile */
+    position: relative;
     top: auto;
     left: auto;
     transform: none;
@@ -2707,7 +2702,7 @@ body { background: var(--bg); }
 /* Summary row (always visible) */
 .merchant-summary {
   display: grid;
-  grid-template-columns: 52px 1fr auto auto;
+  grid-template-columns: 52px 1fr auto auto auto;
   gap: 14px;
   align-items: center;
   padding: 14px 16px;
@@ -2828,11 +2823,18 @@ body { background: var(--bg); }
   height: 32px;
   border-radius: 50%;
   background: var(--bg-2);
+  border: 0;
   display: grid;
   place-items: center;
   color: var(--text-muted);
+  font: inherit;
+  cursor: pointer;
   transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), background 0.15s, color 0.15s;
   flex-shrink: 0;
+}
+.merchant-chevron:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 3px;
 }
 .merchant-summary:hover .merchant-chevron { background: var(--green-light); color: var(--green); }
 .merchant-item.expanded .merchant-chevron {
@@ -2841,98 +2843,66 @@ body { background: var(--bg); }
   color: #fff;
 }
 
-/* ---------- Expanded panel ---------- */
-.merchant-detail {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-  background: #fbfdfb;
-  border-top: 1px dashed transparent;
+/* ---------- Expanded panel (Accordion) ---------- */
+.merchant-extra-details {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+  background: var(--bg-2);
 }
-.merchant-item.expanded .merchant-detail {
-  grid-template-rows: 1fr;
-  border-top-color: #d5e8dd;
+.merchant-item.expanded .merchant-extra-details {
+  max-height: 350px; /* adjust if needed */
+  opacity: 1;
+  border-top: 1px dashed var(--border);
 }
-.merchant-detail-inner { overflow: hidden; }
-.merchant-detail-pad {
+.merchant-extra-inner {
   padding: 18px 20px 20px;
 }
-
-/* Detail grid — 2 cols */
-.merchant-detail-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px 22px;
-  margin-bottom: 16px;
-}
-.merchant-detail-row {
+.trust-signals {
   display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;
-}
-.merchant-detail-label {
-  font-size: 0.66rem;
-  text-transform: uppercase;
-  letter-spacing: 0.09em;
-  color: var(--text-soft);
-  font-weight: 700;
-}
-.merchant-detail-value {
-  font-size: 0.88rem;
-  color: var(--text);
-  font-weight: 500;
-  line-height: 1.4;
-  overflow-wrap: anywhere;
-}
-.merchant-detail-value.mono {
-  font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  font-size: 0.82rem;
-  letter-spacing: 0.02em;
-  color: var(--green-dark);
-  font-weight: 600;
-}
-
-/* Trust strip */
-.merchant-trust-strip {
-  display: flex;
-  gap: 8px;
+  gap: 12px;
   flex-wrap: wrap;
-  margin-bottom: 14px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  font-weight: 500;
 }
-.merchant-trust-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 0.72rem;
-  font-weight: 600;
+.merchant-bio {
+  font-size: 0.85rem;
   color: var(--text-2);
-  background: #ffffff;
-  border: 1px solid var(--border);
-  padding: 5px 10px;
-  border-radius: var(--r-pill);
-  line-height: 1;
+  line-height: 1.5;
+  margin: 0 0 16px;
 }
-.merchant-trust-pill strong { color: var(--green-dark); }
+.btn-visit-store {
+  display: inline-block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--green);
+  text-decoration: none;
+}
+.btn-visit-store:hover {
+  text-decoration: underline;
+}
 
-/* CTA */
+/* Select Button */
 .merchant-select-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  width: 100%;
-  padding: 12px 18px;
+  padding: 10px 18px;
   background: var(--green);
   color: #fff;
   border: none;
   border-radius: var(--r-pill);
   font-family: inherit;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 700;
   cursor: pointer;
   box-shadow: 0 4px 14px rgba(14, 92, 63, 0.24);
   transition: background 0.15s, transform 0.08s, box-shadow 0.15s;
+  white-space: nowrap;
 }
 .merchant-select-btn:hover {
   background: var(--green-dark);
@@ -2968,7 +2938,8 @@ body { background: var(--bg); }
     grid-template-columns: 44px 1fr auto;
     grid-template-areas:
       "avatar main stock"
-      "avatar meta chevron";
+      "avatar meta chevron"
+      "btn btn btn";
     gap: 8px 12px;
     padding: 12px 14px;
   }
@@ -2977,6 +2948,7 @@ body { background: var(--bg); }
   .merchant-meta-row     { grid-area: meta; grid-column: 2; }
   .merchant-stock        { grid-area: stock; }
   .merchant-chevron      { grid-area: chevron; align-self: end; }
+  .merchant-select-btn   { grid-area: btn; width: 100%; margin-top: 6px; }
 
   .merchant-detail-grid  { grid-template-columns: 1fr; gap: 10px; }
   .merchant-detail-pad   { padding: 16px 16px 18px; }

@@ -49,7 +49,7 @@ const register = async (req, res, next) => {
 /* ============================================
    LOGIN — POST /api/auth/login
    ============================================ */
-const login = async (req, res, next) => {
+const login = async (req, res, next, allowedRoles = null) => {
   try {
     const { email, password } = req.body;
 
@@ -61,6 +61,13 @@ const login = async (req, res, next) => {
       return res.status(401).json({
         success: false,
         message: 'Invalid email or password',
+      });
+    }
+
+    if (allowedRoles && !allowedRoles.includes(user.role)) {
+      return res.status(403).json({
+        success: false,
+        message: 'This is not a customer account. Use the merchant sign-in page for seller accounts.',
       });
     }
 
