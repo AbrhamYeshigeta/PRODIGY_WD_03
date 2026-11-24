@@ -220,3 +220,4 @@ function render() {
 
 Cart.onChange(render);
 render();
+Cart.fetchCart();

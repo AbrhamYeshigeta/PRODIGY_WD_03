@@ -17,6 +17,7 @@ const offerRoutes = require('./src/routes/offerRoutes.js');
 const orderRoutes = require('./src/routes/orderRoutes.js');
 const { notFound, errorHandler } = require('./src/middleware/error.js');
 const { verifyToken } = require('./src/utils/token.js');
+const { completeDeliveredOrders } = require('./src/services/orderLifecycle');
 
 const app = express();
 
@@ -46,6 +47,11 @@ app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: '10kb' }));
 app.use(cookieParser());
 app.use(morgan('dev'));
+
+app.get('/', (req, res) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 const protectedPages = new Set([
   '/product.html',
@@ -147,6 +153,15 @@ const PORT = process.env.PORT || 5003;
 
 const start = () => {
   // 🚨 MONGODB CONNECT REMOVED. PRISMA CONNECTS AUTOMATICALLY ON FIRST QUERY.
+  const lifecycleTimer = setInterval(() => {
+    completeDeliveredOrders().catch((error) => {
+      console.error('Delivered-order completion sweep failed:', error);
+    });
+  }, 60 * 1000);
+  lifecycleTimer.unref();
+  completeDeliveredOrders().catch((error) => {
+    console.error('Initial delivered-order completion sweep failed:', error);
+  });
   app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
 };
 

@@ -40,7 +40,11 @@ function renderOrder(order) {
       ? 'Awaiting payment'
       : order.paymentStatus === 'failed'
         ? 'Payment failed'
-        : label(order.status);
+        : order.status === 'paid'
+          && order.paymentMethod === 'cod'
+          && order.paymentStatus !== 'paid'
+          ? 'Confirmed · pay on delivery'
+          : label(order.status);
 
   return `
     <article class="order-card">
@@ -67,6 +71,9 @@ function renderOrder(order) {
           <span>${escapeHTML(label(order.paymentMethod || ''))} · Payment ${escapeHTML(label(payment?.status || order.paymentStatus || 'pending'))}</span>
         </div>
         <div class="order-actions">
+          <a class="order-btn order-btn-outline" href="/order-detail.html?id=${encodeURIComponent(order.id)}">
+            ${order.status === 'shipped' ? 'Track Order & Confirm Receipt' : 'Track order'}
+          </a>
           ${order.paymentStatus === 'pending' && payment?.transactionRef
             ? `<button type="button" class="order-btn order-btn-outline" data-verify="${escapeHTML(payment.transactionRef)}">Check payment</button>`
             : ''}

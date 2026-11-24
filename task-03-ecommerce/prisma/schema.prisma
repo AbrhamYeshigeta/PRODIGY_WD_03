@@ -65,9 +65,10 @@ model Seller {
   rating             Float  @default(0)
   fulfillmentRate    Int    @default(100)
 
-  offers    Offer[]
-  orderItems OrderItem[]
-  createdAt DateTime @default(now())
+  offers       Offer[]
+  orderItems   OrderItem[]
+  fulfillments Fulfillment[]
+  createdAt    DateTime @default(now())
 }
 
 model Cart {
@@ -130,21 +131,30 @@ model Order {
   currency        String      @default("ETB")
   status          String      @default("pending_payment")
   paymentStatus   String      @default("pending")
+  settlementStatus String     @default("pending")
   paymentMethod   String
   paymentReference String?
+  deliveredAt     DateTime?
+  completedAt     DateTime?
   shippingAddress Json?
   userId          String
   user            User        @relation(fields: [userId], references: [id])
   items           OrderItem[]
+  fulfillments    Fulfillment[]
   payments        Payment[]
+  events          OrderEvent[]
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @default(now()) @updatedAt
+
+  @@index([status, deliveredAt])
 }
 
 model OrderItem {
   id                 String   @id @default(uuid())
   orderId            String
   order              Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  fulfillmentId      String?
+  fulfillment        Fulfillment? @relation(fields: [fulfillmentId], references: [id], onDelete: SetNull)
   offerId            String?
   offer              Offer?   @relation(fields: [offerId], references: [id], onDelete: SetNull)
   sellerId           String
@@ -166,6 +176,30 @@ model OrderItem {
   @@index([orderId])
 }
 
+model Fulfillment {
+  id                  String      @id @default(uuid())
+  orderId             String
+  order               Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  sellerId            String
+  seller              Seller      @relation(fields: [sellerId], references: [id], onDelete: Restrict)
+  status              String      @default("pending_payment")
+  courierName         String?
+  courierPhone        String?
+  vehicleReference    String?
+  trackingReference   String?
+  estimatedDeliveryAt DateTime?
+  processingAt        DateTime?
+  shippedAt           DateTime?
+  deliveredAt         DateTime?
+  items               OrderItem[]
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+
+  @@unique([orderId, sellerId])
+  @@index([sellerId, createdAt])
+  @@index([orderId])
+}
+
 model Payment {
   id                String   @id @default(uuid())
   orderId           String
@@ -181,4 +215,17 @@ model Payment {
   updatedAt         DateTime @default(now()) @updatedAt
 
   @@index([orderId, status])
+}
+
+model OrderEvent {
+  id        String   @id @default(uuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  actorId   String?
+  actorRole String
+  status    String
+  note      String?
+  createdAt DateTime @default(now())
+
+  @@index([orderId, createdAt])
 }

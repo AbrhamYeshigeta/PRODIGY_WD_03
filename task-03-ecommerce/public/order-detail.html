@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Order Tracking · Etfruit</title>
+  <link rel="stylesheet" href="/css/design.css" />
+  <link rel="stylesheet" href="/css/storefront.css" />
+</head>
+<body>
+  <div class="announce">🚚 Fresh produce from local farms · Delivered with care</div>
+  <header class="site-header">
+    <div class="site-header-inner">
+      <a href="/" class="site-logo">
+        <img src="/img/logo.png" alt="Etfruit" class="site-logo-img" />
+      </a>
+      <nav class="site-nav" aria-label="Main navigation">
+        <a href="/">Shop</a>
+        <a href="/orders.html">My Orders</a>
+      </nav>
+      <div class="site-actions">
+        <a href="/cart.html" class="cart-btn">Cart</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="store-main order-detail-page">
+    <a class="order-detail-back" href="/orders.html">← Back to my orders</a>
+    <div id="order-detail" aria-live="polite">
+      <div class="orders-empty" role="status">Loading order details…</div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-bottom"><p>© 2025 Etfruit · Fresh produce from local farms</p></div>
+  </footer>
+  <script type="module" src="/js/order-detail.js"></script>
+</body>
+</html>

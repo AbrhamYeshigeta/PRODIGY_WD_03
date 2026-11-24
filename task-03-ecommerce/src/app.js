@@ -11,6 +11,7 @@ const connectDB   = require('./config/db');
 const routes      = require('./routes');
 const notFound    = require('./middleware/notFound');
 const errorHandler = require('./middleware/error');
+const { completeDeliveredOrders } = require('./services/orderLifecycle');
 
 const authRoutes   = require('./routes/authRoutes');
 const sellerRoutes = require('./routes/sellerRoutes');
@@ -50,6 +51,15 @@ app.use(errorHandler);
 /* ── Boot ── */
 async function start() {
   await connectDB();
+  const lifecycleTimer = setInterval(() => {
+    completeDeliveredOrders().catch((error) => {
+      console.error('Delivered-order completion sweep failed:', error);
+    });
+  }, 60 * 1000);
+  lifecycleTimer.unref();
+  completeDeliveredOrders().catch((error) => {
+    console.error('Initial delivered-order completion sweep failed:', error);
+  });
   app.listen(env.port, () => {
     console.log(`\n🦬 Etfruit API running on port ${env.port} (${env.nodeEnv})`);
     console.log(`   → http://localhost:${env.port}/api/health\n`);

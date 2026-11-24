@@ -160,8 +160,8 @@ async function handleChapaPayment() {
   if (!button) return;
 
   button.disabled = true;
-  const originalText = button.textContent;
-  button.textContent = 'Opening Chapa...';
+  const paymentMethod = document.querySelector('input[name="payment"]:checked')?.value || 'chapa';
+  button.textContent = paymentMethod === 'cod' ? 'Placing order...' : 'Opening Chapa...';
 
   try {
     const nameValue = document.getElementById('checkout-name').value.trim();
@@ -176,7 +176,6 @@ async function handleChapaPayment() {
     const phone = String(phoneValue || user.phone || '0911111111').replace(/\D/g, '');
     const normalizedPhone = phone.startsWith('251') ? `0${phone.slice(3)}` : phone.startsWith('0') ? phone : `0${phone}`;
 
-    const paymentMethod = document.querySelector('input[name="payment"]:checked')?.value || 'chapa';
     const deliveryMethod = document.querySelector('input[name="shipping"]:checked')?.value || 'standard';
     const result = await API.post('/api/orders/checkout', {
       paymentMethod,
@@ -205,7 +204,9 @@ async function handleChapaPayment() {
     console.error('[checkout] payment failed:', err);
     showToast(err.message || 'Unable to connect to Chapa.', 'error');
     button.disabled = false;
-    button.textContent = originalText;
+    button.textContent = document.querySelector('input[name="payment"]:checked')?.value === 'cod'
+      ? 'Place cash-on-delivery order'
+      : 'Pay securely with Chapa';
   }
 }
 

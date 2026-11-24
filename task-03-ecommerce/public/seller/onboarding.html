@@ -6,22 +6,200 @@
   <title>Setup Your Shop · Etfruit</title>
   <link rel="stylesheet" href="/css/seller.css" />
   <style>
-    /* Full screen wizard override */
-    body { background: var(--bg); display: grid; place-items: center; min-height: 100vh; padding: 20px; }
-    .wizard-container { max-width: 800px; width: 100%; background: var(--card); border-radius: var(--r-xl); box-shadow: var(--shadow-lg); overflow: hidden; }
-    .wizard-header { padding: 30px 40px; background: linear-gradient(135deg, var(--brand), var(--brand-dark)); color: #fff; }
-    .wizard-header h1 { margin: 0 0 8px; font-family: var(--serif); font-size: 28px; }
-    .wizard-header p { margin: 0; color: rgba(255,255,255,0.8); font-size: 15px; }
-    .wizard-body { padding: 40px; }
-    .step { display: none; }
-    .step.active { display: block; animation: fadeIn 0.3s ease; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    .product-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 20px; }
-    .product-checkbox { display: flex; align-items: center; gap: 12px; padding: 16px; border: 2px solid var(--border); border-radius: 12px; cursor: pointer; transition: .15s; }
-    .product-checkbox:hover { border-color: var(--brand); }
+    body {
+      display: grid;
+      min-height: 100vh;
+      place-items: center;
+      padding: 32px 20px;
+      background:
+        radial-gradient(ellipse at 10% 0%, rgba(22, 163, 74, .07), transparent 38%),
+        var(--bg);
+    }
+    .wizard-container {
+      width: min(100%, 1040px);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: var(--r-xl);
+      background: var(--card);
+      box-shadow: var(--shadow-lg);
+    }
+    .wizard-header {
+      padding: 30px clamp(22px, 5vw, 48px);
+      background: linear-gradient(120deg, var(--brand), #0a3025);
+      color: #fff;
+    }
+    .wizard-header h1 {
+      margin: 0 0 8px;
+      color: #fff;
+      font-family: var(--serif);
+      font-size: clamp(24px, 4vw, 32px);
+    }
+    .wizard-header p { margin: 0; color: rgba(255,255,255,.82); font-size: 14px; }
+    .wizard-body { padding: clamp(22px, 5vw, 42px); }
+    .wizard-container .step[hidden] { display: none !important; }
+    .wizard-container .step:not([hidden]) { display: block; }
+    .wizard-step-title {
+      margin: 0 0 6px;
+      color: var(--brand);
+      font-family: var(--serif);
+      font-size: 22px;
+    }
+    .wizard-step-description { margin: 0; color: var(--ink-3); font-size: 13px; }
+    .wizard-progress {
+      display: flex;
+      gap: 8px;
+      margin: 0 0 28px;
+    }
+    .wizard-progress span { height: 4px; flex: 1; border-radius: 99px; background: var(--border); }
+    .wizard-progress span.active { background: var(--gold); }
+    .wizard-container .product-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 22px;
+    }
+    .product-checkbox {
+      display: flex;
+      min-width: 0;
+      align-items: center;
+      gap: 12px;
+      padding: 10px;
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      background: var(--card);
+      cursor: pointer;
+      transition: border-color .16s ease, background .16s ease, box-shadow .16s ease;
+    }
+    .product-checkbox:hover { border-color: var(--brand); box-shadow: var(--shadow-sm); }
     .product-checkbox.checked { border-color: var(--brand); background: var(--brand-tint); }
-    .product-checkbox input { display: none; }
-    .pricing-row { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 16px; align-items: center; background: var(--bg-2); padding: 16px; border-radius: 12px; margin-bottom: 12px; }
+    .product-checkbox input {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 18px;
+      margin: 0;
+      accent-color: var(--brand);
+    }
+    .product-checkbox__image {
+      width: 58px;
+      height: 58px;
+      flex: 0 0 58px;
+      object-fit: cover;
+      border-radius: 10px;
+      background: var(--bg-2);
+    }
+    .product-checkbox__details { display: grid; min-width: 0; gap: 4px; }
+    .product-checkbox__details strong {
+      overflow: hidden;
+      color: var(--ink);
+      font-size: 13px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .product-checkbox__details small { color: var(--ink-3); font-size: 11px; }
+    .wizard-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 26px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+    .wizard-error {
+      margin: 16px 0 0;
+      padding: 11px 13px;
+      border: 1px solid #fecaca;
+      border-radius: 10px;
+      background: var(--red-tint);
+      color: var(--red);
+      font-size: 12px;
+    }
+    .pricing-row {
+      display: grid;
+      grid-template-columns: minmax(150px, 1.3fr) repeat(3, minmax(110px, .8fr));
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 12px;
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--bg-2);
+    }
+    .pricing-product { display: flex; min-width: 0; align-items: center; gap: 12px; }
+    .pricing-product img { width: 48px; height: 48px; flex: 0 0 48px; object-fit: cover; border-radius: 9px; }
+    .pricing-product strong { overflow-wrap: anywhere; color: var(--ink); }
+    .pricing-field label,
+    .pricing-weight-field label {
+      display: block;
+      margin: 0 0 6px;
+      color: var(--ink-3);
+      font-size: 10px;
+      font-weight: 750;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+    .pricing-field input,
+    .pricing-field select,
+    .pricing-weight-field input { min-height: 42px; }
+    .pricing-field select {
+      width: 100%;
+      padding: 9px 10px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: var(--card);
+      color: var(--ink);
+      font: inherit;
+      font-size: 13px;
+    }
+    .pricing-field select:focus {
+      outline: 2px solid rgba(13, 61, 46, .18);
+      border-color: var(--brand);
+    }
+    .pricing-weight-field {
+      grid-column: 2 / -1;
+      display: grid;
+      grid-template-columns: minmax(150px, .8fr) minmax(200px, 1.2fr);
+      align-items: center;
+      gap: 14px;
+      padding: 12px;
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+      background: var(--card);
+    }
+    .pricing-weight-field[hidden] { display: none; }
+    .pricing-weight-field label { margin: 0; }
+    .pricing-weight-field small {
+      display: block;
+      margin-top: 3px;
+      color: var(--ink-3);
+      font-size: 10.5px;
+      font-weight: 400;
+      letter-spacing: 0;
+      line-height: 1.4;
+      text-transform: none;
+    }
+    .wizard-loading, .wizard-empty { grid-column: 1 / -1; padding: 28px; color: var(--ink-3); text-align: center; }
+    .wizard-loading[role="alert"] { color: var(--red); }
+    body.dark-mode .wizard-step-title,
+    body.dark-mode .product-checkbox__details strong,
+    body.dark-mode .pricing-product strong { color: var(--ink) !important; }
+    @media (max-width: 760px) {
+      .wizard-container .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 520px) {
+      body { padding: 12px; }
+      .wizard-container { border-radius: 18px; }
+      .wizard-header { padding: 24px 20px; }
+      .wizard-header p { font-size: 12.5px; }
+      .wizard-body { padding: 22px 18px; }
+      .wizard-container .product-grid { grid-template-columns: 1fr; gap: 9px; }
+      .product-checkbox__image { width: 52px; height: 52px; flex-basis: 52px; }
+      .pricing-row { grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; }
+      .pricing-product { grid-column: 1 / -1; }
+      .pricing-weight-field { grid-column: 1 / -1; grid-template-columns: 1fr; gap: 8px; }
+      .wizard-actions { align-items: stretch; flex-direction: column-reverse; }
+      .wizard-actions .btn { width: 100%; }
+    }
   </style>
 </head>
 <body>
@@ -34,32 +212,36 @@
 
   <div class="wizard-body">
     <!-- STEP 1: SELECT PRODUCTS -->
-    <div class="step active" id="step-1">
-      <h2 style="font-family: var(--serif); margin-top: 0;">Step 1: Select your products</h2>
-      <p class="muted">Choose all the vegetables and fruits you currently have in stock.</p>
+    <div class="step active" id="step-1" aria-hidden="false">
+      <div class="wizard-progress" aria-label="Step 1 of 2"><span class="active"></span><span></span></div>
+      <h2 class="wizard-step-title">Select your products</h2>
+      <p class="wizard-step-description">Choose the products you have ready to sell. You can set stock and pricing next.</p>
       
       <div class="product-grid" id="productGrid">
-        <p class="muted">Loading catalog...</p>
+        <p class="wizard-loading" role="status">Loading the product catalog…</p>
       </div>
 
-      <div style="margin-top: 30px; display: flex; justify-content: space-between;">
-        <button class="btn btn-ghost" onclick="skipWizard()">Skip for now</button>
-        <button class="btn btn-hero" onclick="goToStep(2)">Next: Add Quantities →</button>
+      <p class="wizard-error" id="wizard-error" role="alert" hidden></p>
+      <div class="wizard-actions">
+        <button type="button" class="btn btn-ghost" id="skipWizardBtn">Skip for now</button>
+        <button type="button" class="btn btn-hero" id="nextStepBtn">Next: Add stock &amp; prices →</button>
       </div>
     </div>
 
     <!-- STEP 2: ADD QUANTITIES & PRICES -->
-    <div class="step" id="step-2">
-      <h2 style="font-family: var(--serif); margin-top: 0;">Step 2: Set Stock & Price</h2>
-      <p class="muted">How much do you have, and what is your price per <span id="unitLabel">quintal</span>?</p>
+    <div class="step" id="step-2" aria-hidden="true" hidden>
+      <div class="wizard-progress" aria-label="Step 2 of 2"><span class="active"></span><span class="active"></span></div>
+      <h2 class="wizard-step-title">Set stock &amp; pricing</h2>
+      <p class="wizard-step-description">Choose how each product is sold, then enter its stock and price. Pack, bunch, and piece offers also need an estimated weight for fair price comparison.</p>
       
       <div id="pricingInputs" style="margin-top: 20px;">
         <!-- Dynamically generated based on Step 1 selections -->
       </div>
 
-      <div style="margin-top: 30px; display: flex; justify-content: space-between;">
-        <button class="btn btn-ghost" onclick="goToStep(1)">← Back</button>
-        <button class="btn btn-hero" id="publishBtn" onclick="submitOffers()">🚀 Publish & Open Shop</button>
+      <p class="wizard-error" id="pricing-error" role="alert" hidden></p>
+      <div class="wizard-actions">
+        <button type="button" class="btn btn-ghost" id="backStepBtn">← Back to products</button>
+        <button type="button" class="btn btn-hero" id="publishBtn">🚀 Publish offers</button>
       </div>
     </div>
   </div>
@@ -70,14 +252,16 @@
 
   const seller = guardSeller();
   
-  // 1. Determine the unit based on their scale
-  let unit = 'quintal';
-  let unitShort = 'qtl';
-  if (seller.scale === 'retail') { unit = 'kg'; unitShort = 'kg'; }
-  if (seller.scale === 'bulk') { unit = 'ton'; unitShort = 'ton'; }
-  
-  // Update UI text
-  document.getElementById('unitLabel').textContent = unit;
+  const defaultUnit = seller.scale === 'retail' ? 'kg' : seller.scale === 'bulk' ? 'ton' : 'quintal';
+  const SELLING_UNITS = [
+    { value: 'kg', label: 'Kilogram (kg)', short: 'kg', requiresWeight: false },
+    { value: 'quintal', label: 'Quintal', short: 'quintal', requiresWeight: false },
+    { value: 'ton', label: 'Metric ton', short: 'ton', requiresWeight: false },
+    { value: 'pack', label: 'Packet', short: 'packet', requiresWeight: true },
+    { value: 'bunch', label: 'Bunch', short: 'bunch', requiresWeight: true },
+    { value: 'piece', label: 'Piece', short: 'piece', requiresWeight: true },
+  ];
+  const unitByValue = new Map(SELLING_UNITS.map((unit) => [unit.value, unit]));
 
   // 2. Set First Name (Handle Titles)
   const fullName = seller.user?.name || 'Merchant';
@@ -86,88 +270,254 @@
   let firstName = parts.find(p => !titles.includes(p.toLowerCase().replace(/\./g, ''))) || fullName;
   document.getElementById('merchantFirstName').textContent = firstName;
 
+  const escapeHTML = (value = '') => String(value).replace(/[&<>"']/g, (char) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  }[char]));
+  const safeImageURL = (value) => {
+    if (typeof value !== 'string' || !value.trim()) return '/img/logo.png';
+    try {
+      const url = new URL(value, window.location.origin);
+      return url.protocol === 'https:' || url.origin === window.location.origin
+        ? url.href
+        : '/img/logo.png';
+    } catch {
+      return '/img/logo.png';
+    }
+  };
+
+  function wireImageFallbacks(root) {
+    root.querySelectorAll('img[data-fallback]').forEach((image) => {
+      image.addEventListener('error', () => {
+        if (image.dataset.fallbackApplied) return;
+        image.dataset.fallbackApplied = 'true';
+        image.src = '/img/logo.png';
+      });
+    });
+  }
+
   // 3. Fetch Real Catalog
   let catalog = [];
   try {
     const res = await fetch('/api/products', { credentials: 'include' });
-    const json = await res.json();
-    catalog = json.data || [];
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(json.message || `Catalog could not be loaded (${res.status})`);
+    catalog = Array.isArray(json.data) ? json.data : [];
   } catch (err) {
     console.error('Failed to load catalog', err);
+    const grid = document.getElementById('productGrid');
+    grid.innerHTML = `
+      <div class="wizard-empty" role="alert">
+        <strong>We couldn't load the product catalog.</strong>
+        <p>${escapeHTML(err.message)}</p>
+        <button type="button" class="btn btn-ghost" id="retryCatalog">Try again</button>
+      </div>
+    `;
+    document.getElementById('retryCatalog')?.addEventListener('click', () => window.location.reload());
   }
 
-  // Render Checkboxes
-  document.getElementById('productGrid').innerHTML = catalog.length ? catalog.map(p => `
-    <label class="product-checkbox" onclick="this.classList.toggle('checked')">
-      <input type="checkbox" value="${p._id}" data-name="${p.name}" data-icon="${p.image || '🥦'}">
-      <span style="font-size: 28px;">${p.image || '🥦'}</span>
-      <div>
-        <strong style="display: block; color: var(--ink); font-size: 14px;">${p.name}</strong>
-        <small style="color: var(--ink-3);">${p.category || 'Produce'}</small>
-      </div>
-    </label>
-  `).join('') : '<p class="muted">No products available in the catalog yet.</p>';
+  // Product records use `id`; render image URLs as images instead of text.
+  const productGrid = document.getElementById('productGrid');
+  if (catalog.length) {
+    productGrid.innerHTML = catalog.map((product) => `
+      <label class="product-checkbox">
+        <input type="checkbox"
+          value="${escapeHTML(product.id)}"
+          data-name="${escapeHTML(product.name)}"
+          data-image="${escapeHTML(safeImageURL(product.image))}">
+        <img class="product-checkbox__image" src="${escapeHTML(safeImageURL(product.image))}" alt="" loading="lazy" data-fallback>
+        <span class="product-checkbox__details">
+          <strong>${escapeHTML(product.name || 'Product')}</strong>
+          <small>${escapeHTML(product.category || 'Produce')}</small>
+        </span>
+      </label>
+    `).join('');
+    wireImageFallbacks(productGrid);
+  } else if (!productGrid.querySelector('#retryCatalog')) {
+    productGrid.innerHTML = '<p class="wizard-empty">No products are available in the catalog yet.</p>';
+  }
+
+  productGrid.addEventListener('change', (event) => {
+    if (event.target.matches('input[type="checkbox"]')) {
+      event.target.closest('.product-checkbox')?.classList.toggle('checked', event.target.checked);
+    }
+  });
 
   // Navigation
-  window.goToStep = (stepNum) => {
+  function goToStep(stepNum) {
     if (stepNum === 2) {
-      const selected = document.querySelectorAll('input:checked');
+      const selected = document.querySelectorAll('#productGrid input[type="checkbox"]:checked');
       if (selected.length === 0) {
-        alert('Please select at least one product to continue, or click "Skip".');
+        const error = document.getElementById('wizard-error');
+        error.textContent = 'Select at least one product to continue, or choose “Skip for now”.';
+        error.hidden = false;
         return;
       }
+      document.getElementById('wizard-error').hidden = true;
       renderPricingInputs();
     }
     
-    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-    document.getElementById(`step-${stepNum}`).classList.add('active');
-  };
+    document.querySelectorAll('.wizard-container .step').forEach((step) => {
+      const isActive = step.id === `step-${stepNum}`;
+      step.hidden = !isActive;
+      step.setAttribute('aria-hidden', String(!isActive));
+      step.classList.toggle('active', isActive);
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  document.getElementById('nextStepBtn').addEventListener('click', () => goToStep(2));
+  document.getElementById('backStepBtn').addEventListener('click', () => goToStep(1));
+  document.getElementById('skipWizardBtn').addEventListener('click', () => {
+    localStorage.setItem('onboarding_skipped', 'true');
+    window.location.href = '/seller/dashboard.html';
+  });
 
   // Render Inputs for Step 2
   function renderPricingInputs() {
-    const selected = Array.from(document.querySelectorAll('input:checked'));
+    const selected = Array.from(document.querySelectorAll('#productGrid input[type="checkbox"]:checked'));
     const container = document.getElementById('pricingInputs');
+    const previousValues = new Map(
+      Array.from(container.querySelectorAll('.pricing-row')).map((row) => [
+        row.dataset.productId,
+        {
+          unit: row.querySelector('.unit-input').value,
+          stock: row.querySelector('.qty-input').value,
+          price: row.querySelector('.price-input').value,
+          weight: row.querySelector('.weight-input').value,
+        },
+      ])
+    );
     
-    container.innerHTML = selected.map(p => `
-      <div class="pricing-row">
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <span style="font-size: 24px;">${p.dataset.icon}</span>
-          <strong style="color: var(--ink);">${p.dataset.name}</strong>
+    container.innerHTML = selected.map((product) => {
+      const previous = previousValues.get(product.value);
+      const selectedUnit = unitByValue.has(previous?.unit) ? previous.unit : defaultUnit;
+      const selectedUnitInfo = unitByValue.get(selectedUnit);
+      const options = SELLING_UNITS.map((unit) => `
+        <option value="${unit.value}" ${unit.value === selectedUnit ? 'selected' : ''}>${unit.label}</option>
+      `).join('');
+      return `
+      <div class="pricing-row" data-product-id="${escapeHTML(product.value)}">
+        <div class="pricing-product">
+          <img src="${escapeHTML(product.dataset.image)}" alt="" loading="lazy" data-fallback>
+          <strong>${escapeHTML(product.dataset.name)}</strong>
         </div>
-        <div>
-          <label style="font-size: 11px; color: var(--ink-3); text-transform: uppercase;">Stock (${unitShort})</label>
-          <input type="number" class="input qty-input" data-id="${p.value}" placeholder="e.g. 50" min="1" />
+        <div class="pricing-field">
+          <label>Sold as</label>
+          <select class="unit-input" aria-label="Selling unit for ${escapeHTML(product.dataset.name)}">${options}</select>
         </div>
-        <div>
-          <label style="font-size: 11px; color: var(--ink-3); text-transform: uppercase;">Price / ${unitShort}</label>
-          <input type="number" class="input price-input" data-id="${p.value}" placeholder="e.g. 8500" min="1" />
+        <div class="pricing-field">
+          <label>Stock (<span class="unit-short">${selectedUnitInfo.short}</span>)</label>
+          <input type="number" class="input qty-input" data-id="${escapeHTML(product.value)}" placeholder="${selectedUnit === 'kg' ? 'e.g. 25' : 'e.g. 50'}" min="1" step="1" value="${escapeHTML(previous?.stock || '')}" required />
+        </div>
+        <div class="pricing-field">
+          <label>Price / <span class="unit-short">${selectedUnitInfo.short}</span> (ETB)</label>
+          <input type="number" class="input price-input" data-id="${escapeHTML(product.value)}" placeholder="${selectedUnit === 'kg' ? 'e.g. 85.00' : 'e.g. 8500.00'}" min="0.01" step="0.01" value="${escapeHTML(previous?.price || '')}" required />
+        </div>
+        <div class="pricing-weight-field" ${selectedUnitInfo.requiresWeight ? '' : 'hidden'}>
+          <label>Estimated weight per <span class="unit-long">${selectedUnitInfo.short}</span> (kg) <span aria-hidden="true">*</span>
+            <small>Needed to compare this packet, bunch, or piece with prices per kilogram.</small>
+          </label>
+          <input type="number" class="input weight-input" data-id="${escapeHTML(product.value)}" placeholder="e.g. 0.5" min="0.01" max="1000" step="0.01" value="${escapeHTML(previous?.weight || '')}" ${selectedUnitInfo.requiresWeight ? 'required' : ''} />
         </div>
       </div>
-    `).join('');
+    `;
+    }).join('');
+    wireImageFallbacks(container);
   }
 
+  function updatePricingUnit(row) {
+    const unit = unitByValue.get(row.querySelector('.unit-input').value);
+    const weightField = row.querySelector('.pricing-weight-field');
+    const weightInput = row.querySelector('.weight-input');
+    row.querySelectorAll('.unit-short').forEach((label) => {
+      label.textContent = unit.short;
+    });
+    row.querySelector('.unit-long').textContent = unit.short;
+    weightField.hidden = !unit.requiresWeight;
+    weightInput.required = unit.requiresWeight;
+    if (unit.requiresWeight) {
+      row.querySelector('.qty-input').step = '1';
+      row.querySelector('.qty-input').min = '1';
+      row.querySelector('.qty-input').placeholder = 'e.g. 50';
+      row.querySelector('.price-input').placeholder = 'e.g. 120.00';
+    } else {
+      const isKg = unit.value === 'kg';
+      row.querySelector('.qty-input').step = '1';
+      row.querySelector('.qty-input').min = '1';
+      row.querySelector('.qty-input').placeholder = isKg ? 'e.g. 25' : 'e.g. 50';
+      row.querySelector('.price-input').placeholder = isKg ? 'e.g. 85.00' : 'e.g. 8500.00';
+    }
+  }
+
+  document.getElementById('pricingInputs').addEventListener('change', (event) => {
+    if (event.target.matches('.unit-input')) {
+      updatePricingUnit(event.target.closest('.pricing-row'));
+    }
+  });
+
   // Submit to Backend
-  window.submitOffers = async () => {
+  async function submitOffers() {
     const btn = document.getElementById('publishBtn');
-    const qtyInputs = document.querySelectorAll('.qty-input');
-    const priceInputs = document.querySelectorAll('.price-input');
+    const pricingRows = Array.from(document.querySelectorAll('.pricing-row'));
+    const error = document.getElementById('pricing-error');
+    error.hidden = true;
     
     const offers = [];
     
-    // Validate
-    for (let i = 0; i < qtyInputs.length; i++) {
-      const qty = qtyInputs[i].value;
-      const price = priceInputs[i].value;
-      if (!qty || !price) {
-        alert('Please fill out all quantities and prices, or uncheck the product.');
+    for (const row of pricingRows) {
+      const selectedUnit = row.querySelector('.unit-input').value;
+      const unit = unitByValue.get(selectedUnit);
+      const quantityInput = row.querySelector('.qty-input');
+      const priceInput = row.querySelector('.price-input');
+      const weightInput = row.querySelector('.weight-input');
+      const quantity = Number(quantityInput.value);
+      const price = Number(priceInput.value);
+
+      if (!quantityInput.value || !Number.isFinite(quantity) || quantity <= 0
+        || !priceInput.value || !Number.isFinite(price) || price <= 0) {
+        error.textContent = 'Enter a valid stock quantity and a price greater than zero for every selected product.';
+        error.hidden = false;
+        (quantityInput.value && quantity > 0 ? priceInput : quantityInput).focus();
         return;
       }
-      offers.push({
-        productId: qtyInputs[i].dataset.id,
-        unit: unit, 
-        stock: Number(qty),
-        pricePerUnit: Number(price) * 100 // convert to cents
-      });
+
+      if (!Number.isInteger(quantity)) {
+        error.textContent = `${unit.label} stock must be entered as a whole number.`;
+        error.hidden = false;
+        quantityInput.focus();
+        return;
+      }
+
+      const offer = {
+        productId: row.dataset.productId,
+        unit: selectedUnit,
+        stock: quantity,
+        pricePerUnit: price,
+      };
+
+      if (unit.requiresWeight) {
+        const estimatedWeightKg = Number(weightInput.value);
+        if (!weightInput.value || !Number.isFinite(estimatedWeightKg)
+          || estimatedWeightKg <= 0 || estimatedWeightKg > 1000) {
+          error.textContent = `Enter the estimated weight in kilograms for each ${unit.short}.`;
+          error.hidden = false;
+          weightInput.focus();
+          return;
+        }
+        offer.estimatedWeightKg = estimatedWeightKg;
+      }
+
+      offers.push(offer);
+    }
+
+    if (!offers.length) {
+      error.textContent = 'Select at least one product before publishing.';
+      error.hidden = false;
+      return;
     }
 
     btn.disabled = true;
@@ -183,8 +533,8 @@
         });
         
         if (!res.ok) {
-          const error = await res.json();
-          throw new Error(error.message || 'Failed to create offer');
+          const responseBody = await res.json().catch(() => ({}));
+          throw new Error(responseBody.message || 'Failed to create offer');
         }
       }
 
@@ -193,17 +543,14 @@
       window.location.href = '/seller/dashboard.html';
 
     } catch (err) {
-      alert(err.message || 'Something went wrong. Please try again.');
+      error.textContent = err.message || 'Something went wrong. Please try again.';
+      error.hidden = false;
       btn.disabled = false;
-      btn.innerHTML = '🚀 Publish & Open Shop';
+      btn.innerHTML = '🚀 Publish offers';
     }
-  };
+  }
 
-  // Skip Wizard
-  window.skipWizard = () => {
-    localStorage.setItem('onboarding_skipped', 'true');
-    window.location.href = '/seller/dashboard.html';
-  };
+  document.getElementById('publishBtn').addEventListener('click', submitOffers);
 </script>
 </body>
 </html>

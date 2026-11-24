@@ -3,11 +3,17 @@ const prisma = require('../config/prisma');
 const asyncHandler = require('../utils/asyncHandler');
 const ApiError = require('../utils/ApiError');
 const chapa = require('../services/chapa');
+const env = require('../config/env');
 const { OFFER_UNITS, PLATFORM_COMMISSION_PCT } = require('../config/constants');
 
 const FREE_DELIVERY_THRESHOLD = 50000;
 const STANDARD_DELIVERY_FEE = 5000;
 const EXPRESS_DELIVERY_FEE = 12000;
+
+const recordOrderEvent = (tx, { orderId, actorId = null, actorRole, status, note }) =>
+  tx.orderEvent.create({
+    data: { orderId, actorId, actorRole, status, note },
+  });
 
 const getUnitPrice = (offer) => OFFER_UNITS[offer.unit]?.kgFactor
   ? offer.pricePerKg
@@ -46,6 +52,10 @@ async function releaseReservedOrder(orderId, paymentStatus = 'failed') {
       data: { status: 'cancelled', paymentStatus },
     });
     await tx.orderItem.updateMany({
+      where: { orderId },
+      data: { status: 'cancelled' },
+    });
+    await tx.fulfillment.updateMany({
       where: { orderId },
       data: { status: 'cancelled' },
     });
@@ -105,12 +115,22 @@ async function verifyTransaction(transactionRef) {
     });
     const updatedOrder = await tx.order.update({
       where: { id: payment.orderId },
-      data: { status: 'paid', paymentStatus: 'paid' },
+      data: { status: 'paid', paymentStatus: 'paid', settlementStatus: 'held' },
       include: { items: true },
     });
     await tx.orderItem.updateMany({
       where: { orderId: payment.orderId },
       data: { status: 'paid' },
+    });
+    await tx.fulfillment.updateMany({
+      where: { orderId: payment.orderId },
+      data: { status: 'paid' },
+    });
+    await recordOrderEvent(tx, {
+      orderId: payment.orderId,
+      actorRole: 'system',
+      status: 'paid',
+      note: 'Chapa payment verified. Seller settlement is held until delivery confirmation.',
     });
     return updatedOrder;
   });
@@ -127,6 +147,9 @@ exports.createOrder = asyncHandler(async (req, res) => {
   }
   if (!['standard', 'express'].includes(deliveryMethod)) {
     throw ApiError.badRequest('Choose a supported delivery option.');
+  }
+  if (paymentMethod === 'chapa' && !env.chapa.secretKey) {
+    throw ApiError.internal('Online payment is not configured. Set CHAPA_SECRET_KEY to enable Chapa checkout.');
   }
 
   const cart = await prisma.cart.findUnique({
@@ -148,6 +171,7 @@ exports.createOrder = asyncHandler(async (req, res) => {
   const order = await prisma.$transaction(async (tx) => {
     let subtotal = 0;
     const itemSnapshots = [];
+    const fulfillmentGroups = new Map();
 
     for (const cartItem of cart.items) {
       const { offer } = cartItem;
@@ -186,25 +210,51 @@ exports.createOrder = asyncHandler(async (req, res) => {
         lineTotal,
         commissionAmount,
         sellerAmount: lineTotal - commissionAmount,
-        status: paymentMethod === 'cod' ? 'processing' : 'pending_payment',
+        status: paymentMethod === 'cod' ? 'paid' : 'pending_payment',
       });
+      if (!fulfillmentGroups.has(offer.sellerId)) {
+        fulfillmentGroups.set(offer.sellerId, {
+          sellerId: offer.sellerId,
+          status: paymentMethod === 'cod' ? 'paid' : 'pending_payment',
+        });
+      }
     }
 
     const shipping = (subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : STANDARD_DELIVERY_FEE)
       + (deliveryMethod === 'express' ? EXPRESS_DELIVERY_FEE : 0);
     const totalAmount = subtotal + shipping;
-    return tx.order.create({
+    const estimatedDeliveryAt = new Date(
+      Date.now() + (deliveryMethod === 'express' ? 24 : 72) * 60 * 60 * 1000
+    );
+    const createdOrder = await tx.order.create({
       data: {
         userId: req.user.id,
         subtotal,
         shipping,
         totalAmount,
-        status: paymentMethod === 'cod' ? 'processing' : 'pending_payment',
+        status: paymentMethod === 'cod' ? 'paid' : 'pending_payment',
         paymentStatus: paymentMethod === 'cod' ? 'unpaid' : 'pending',
+        settlementStatus: paymentMethod === 'cod' ? 'not_applicable' : 'pending',
         paymentMethod,
         paymentReference: txRef,
         shippingAddress,
-        items: { create: itemSnapshots },
+        fulfillments: {
+          create: [...fulfillmentGroups.values()].map((fulfillment) => ({
+            sellerId: fulfillment.sellerId,
+            status: fulfillment.status,
+            estimatedDeliveryAt,
+          })),
+        },
+        events: {
+          create: {
+            actorId: req.user.id,
+            actorRole: 'customer',
+            status: paymentMethod === 'cod' ? 'paid' : 'pending_payment',
+            note: paymentMethod === 'cod'
+              ? 'Cash-on-delivery order accepted.'
+              : 'Order placed and awaiting verified Chapa payment.',
+          },
+        },
         payments: {
           create: {
             provider: paymentMethod,
@@ -214,6 +264,28 @@ exports.createOrder = asyncHandler(async (req, res) => {
           },
         },
       },
+      include: { fulfillments: { select: { id: true, sellerId: true } } },
+    });
+
+    const fulfillmentIds = new Map(
+      createdOrder.fulfillments.map((fulfillment) => [fulfillment.sellerId, fulfillment.id])
+    );
+    await tx.orderItem.createMany({
+      data: itemSnapshots.map((item) => {
+        const fulfillmentId = fulfillmentIds.get(item.sellerId);
+        if (!fulfillmentId) {
+          throw new Error(`Missing fulfillment for seller ${item.sellerId}.`);
+        }
+        return {
+          ...item,
+          orderId: createdOrder.id,
+          fulfillmentId,
+        };
+      }),
+    });
+
+    return tx.order.findUnique({
+      where: { id: createdOrder.id },
       include: { items: true },
     });
   });
@@ -227,10 +299,9 @@ exports.createOrder = asyncHandler(async (req, res) => {
   }
 
   try {
-    if (!process.env.CHAPA_SECRET_KEY) {
-      throw new Error('Online payment is not configured. Set CHAPA_SECRET_KEY to enable Chapa checkout.');
-    }
     const origin = `${req.protocol}://${req.get('host')}`;
+    const returnUrl = new URL(env.chapa.returnUrl || `${origin}/orders.html`);
+    returnUrl.searchParams.set('tx_ref', txRef);
     const chapaResponse = await chapa.initialize({
       amount: (order.totalAmount / 100).toFixed(2),
       currency: order.currency,
@@ -239,8 +310,8 @@ exports.createOrder = asyncHandler(async (req, res) => {
       lastName: shippingAddress.name.trim().split(/\s+/).slice(1).join(' ') || 'Customer',
       phone: shippingAddress.phone,
       txRef,
-      callbackUrl: process.env.CHAPA_CALLBACK_URL || `${origin}/api/orders/webhook`,
-      returnUrl: `${origin}/orders.html?tx_ref=${encodeURIComponent(txRef)}`,
+      callbackUrl: env.chapa.callbackUrl || `${origin}/api/orders/webhook`,
+      returnUrl: returnUrl.toString(),
     });
     const checkoutUrl = chapaResponse?.data?.checkout_url || chapaResponse?.checkout_url;
     if (chapaResponse?.status !== 'success' || !checkoutUrl) {
@@ -263,6 +334,8 @@ exports.listMine = asyncHandler(async (req, res) => {
     where: { userId: req.user.id },
     include: {
       items: true,
+      fulfillments: { include: { seller: { select: { businessName: true, city: true } } } },
+      events: { orderBy: { createdAt: 'asc' } },
       payments: {
         select: {
           provider: true,
@@ -277,6 +350,135 @@ exports.listMine = asyncHandler(async (req, res) => {
     orderBy: { createdAt: 'desc' },
   });
   res.json({ success: true, data: orders });
+});
+
+/* GET /api/orders/:id */
+exports.getMine = asyncHandler(async (req, res) => {
+  const order = await prisma.order.findFirst({
+    where: { id: req.params.id, userId: req.user.id },
+    include: {
+      items: true,
+      fulfillments: {
+        include: {
+          seller: { select: { businessName: true, city: true } },
+          items: { orderBy: { createdAt: 'asc' } },
+        },
+        orderBy: { createdAt: 'asc' },
+      },
+      events: { orderBy: { createdAt: 'asc' } },
+      payments: {
+        select: {
+          provider: true,
+          transactionRef: true,
+          amount: true,
+          currency: true,
+          status: true,
+          verifiedAt: true,
+        },
+      },
+    },
+  });
+  if (!order) throw ApiError.notFound('Order not found.');
+  res.json({ success: true, data: order });
+});
+
+/* POST /api/orders/:id/fulfillments/:fulfillmentId/confirm-receipt */
+exports.confirmFulfillmentReceipt = asyncHandler(async (req, res) => {
+  const order = await prisma.$transaction(async (tx) => {
+    const existing = await tx.fulfillment.findFirst({
+      where: {
+        id: req.params.fulfillmentId,
+        orderId: req.params.id,
+        order: { userId: req.user.id },
+      },
+      include: { items: true, seller: { select: { businessName: true } } },
+    });
+    if (!existing) throw ApiError.notFound('Fulfillment not found.');
+    if (existing.status !== 'shipped' || !existing.items.length
+      || existing.items.some((item) => item.status !== 'shipped')) {
+      throw ApiError.conflict('You can confirm receipt after this supermarket shipment has been shipped.');
+    }
+
+    const now = new Date();
+    const updated = await tx.fulfillment.updateMany({
+      where: { id: existing.id, status: 'shipped' },
+      data: { status: 'delivered', deliveredAt: now },
+    });
+    if (updated.count !== 1) throw ApiError.conflict('This shipment changed before receipt could be confirmed.');
+
+    await tx.orderItem.updateMany({
+      where: { fulfillmentId: existing.id, status: 'shipped' },
+      data: { status: 'delivered' },
+    });
+
+    const remaining = await tx.fulfillment.count({
+      where: { orderId: existing.orderId, status: { notIn: ['delivered', 'completed', 'cancelled'] } },
+    });
+    const orderUpdate = remaining === 0
+      ? { status: 'delivered', deliveredAt: now }
+      : { status: 'processing' };
+    await tx.order.update({ where: { id: existing.orderId }, data: orderUpdate });
+    await recordOrderEvent(tx, {
+      orderId: existing.orderId,
+      actorId: req.user.id,
+      actorRole: 'customer',
+      status: 'delivered',
+      note: `${existing.seller.businessName} shipment confirmed received by the buyer.`,
+    });
+
+    return tx.order.findUnique({
+      where: { id: existing.orderId },
+      include: {
+        items: true,
+        fulfillments: { include: { seller: { select: { businessName: true, city: true } } } },
+        events: { orderBy: { createdAt: 'asc' } },
+      },
+    });
+  });
+  res.json({ success: true, data: order });
+});
+
+/* POST /api/orders/:id/confirm-receipt */
+exports.confirmReceipt = asyncHandler(async (req, res) => {
+  const order = await prisma.$transaction(async (tx) => {
+    const existing = await tx.order.findFirst({
+      where: { id: req.params.id, userId: req.user.id },
+      include: { items: true },
+    });
+    if (!existing) throw ApiError.notFound('Order not found.');
+    if (existing.status !== 'shipped' || !existing.items.length
+      || existing.items.some((item) => item.status !== 'shipped')) {
+      throw ApiError.conflict('You can confirm receipt after every item in the order has shipped.');
+    }
+
+    const now = new Date();
+    const updated = await tx.order.updateMany({
+      where: { id: existing.id, userId: req.user.id, status: 'shipped' },
+      data: { status: 'delivered', deliveredAt: now },
+    });
+    if (updated.count !== 1) {
+      throw ApiError.conflict('This order changed before receipt could be confirmed. Refresh and try again.');
+    }
+    const changedItems = await tx.orderItem.updateMany({
+      where: { orderId: existing.id, status: 'shipped' },
+      data: { status: 'delivered' },
+    });
+    if (changedItems.count !== existing.items.length) {
+      throw ApiError.conflict('Order items changed before receipt could be confirmed. Refresh and try again.');
+    }
+    await recordOrderEvent(tx, {
+      orderId: existing.id,
+      actorId: req.user.id,
+      actorRole: 'customer',
+      status: 'delivered',
+      note: 'Buyer confirmed receipt of the order.',
+    });
+    return tx.order.findUnique({
+      where: { id: existing.id },
+      include: { items: true, events: { orderBy: { createdAt: 'asc' } } },
+    });
+  });
+  res.json({ success: true, data: order });
 });
 
 /* GET /api/orders/verify/:transactionRef */

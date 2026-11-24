@@ -3,6 +3,7 @@ import { API } from '../api.js';
 import { Cart } from '../cart.js';
 
 let allProducts = [];
+let currentUser = null;
 
 const filters = {
   search: '',
@@ -139,7 +140,7 @@ function renderProductCard(product) {
   const merchantCount = `${product.sellerCount || 0} verified merchant${product.sellerCount === 1 ? '' : 's'}`;
 
   return `
-        <article class="product-card" data-slug="${escapeHTML(product.slug)}">
+        <article class="product-card" data-slug="${escapeHTML(product.slug)}" role="link" tabindex="0" aria-label="View ${name}">
           <div class="product-thumb">
             <img src="${image}" alt="${name}" loading="lazy" />
           </div>
@@ -170,7 +171,21 @@ document.getElementById('product-grid')?.addEventListener('click', (event) => {
   const card = event.target.closest('.product-card');
   if (!card || !window.openMerchantsModal) return;
 
+  if (!currentUser) {
+    const returnTo = `/?product=${encodeURIComponent(card.dataset.slug)}`;
+    window.location.href = `/login.html?${new URLSearchParams({ redirect: returnTo })}`;
+    return;
+  }
+
   window.openMerchantsModal(card.dataset.slug, card.querySelector('.product-name').textContent);
+});
+
+document.getElementById('product-grid')?.addEventListener('keydown', (event) => {
+  if (event.key !== 'Enter' && event.key !== ' ') return;
+  const card = event.target.closest('.product-card');
+  if (!card) return;
+  event.preventDefault();
+  card.click();
 });
 
 document.getElementById('product-search')?.addEventListener('input', (event) => {
@@ -271,6 +286,7 @@ async function updateHeaderForCurrentUser() {
 
   try {
     const { user } = await API.get('/api/auth/me');
+    currentUser = user;
     const name = user.name || user.email;
     document.getElementById('user-name').textContent = name;
     document.getElementById('user-avatar').textContent = name[0].toUpperCase();
@@ -280,6 +296,7 @@ async function updateHeaderForCurrentUser() {
     userMenu.classList.add('logged-in');
     dropdown?.classList.add('hidden');
     if (login) login.hidden = true;
+    Cart.fetchCart();
     
     document.getElementById('logout-btn')?.addEventListener('click', async () => {
       try {

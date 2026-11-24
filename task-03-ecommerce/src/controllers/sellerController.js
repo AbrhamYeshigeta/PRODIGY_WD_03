@@ -58,12 +58,43 @@ exports.getSellerOrders = asyncHandler(async (req, res) => {
 
 /* ── PATCH /api/sellers/me/orders/:id/status ── */
 exports.updateOrderStatus = asyncHandler(async (req, res) => {
-  const { status } = req.body;
-  if (!['processing', 'shipped', 'delivered'].includes(status)) {
+  const {
+    status,
+    courierName,
+    courierPhone,
+    vehicleReference,
+    trackingReference,
+    estimatedDeliveryAt,
+  } = req.body || {};
+  if (!['processing', 'shipped'].includes(status)) {
     throw ApiError.badRequest('Choose a valid fulfillment status.');
+  }
+  const normalizedCourierName = typeof courierName === 'string' ? courierName.trim() : '';
+  const normalizedCourierPhone = typeof courierPhone === 'string' ? courierPhone.trim() : '';
+  const normalizedVehicleReference = typeof vehicleReference === 'string' ? vehicleReference.trim() : '';
+  const normalizedTrackingReference = typeof trackingReference === 'string' ? trackingReference.trim() : '';
+
+  if (status === 'shipped') {
+    const phoneDigits = normalizedCourierPhone.replace(/\D/g, '');
+    if (normalizedCourierName.length < 2 || normalizedCourierName.length > 80) {
+      throw ApiError.badRequest('Enter the courier or driver name (2–80 characters).');
+    }
+    if (normalizedCourierPhone.length > 24 || phoneDigits.length < 7 || phoneDigits.length > 15) {
+      throw ApiError.badRequest('Enter a valid courier phone number with 7–15 digits.');
+    }
+    if (normalizedVehicleReference.length > 80 || normalizedTrackingReference.length > 120) {
+      throw ApiError.badRequest('The vehicle or tracking reference is too long.');
+    }
+    if (!estimatedDeliveryAt || Number.isNaN(new Date(estimatedDeliveryAt).getTime())) {
+      throw ApiError.badRequest('Enter a valid estimated delivery date and time.');
+    }
+    if (new Date(estimatedDeliveryAt).getTime() <= Date.now()) {
+      throw ApiError.badRequest('Estimated delivery must be in the future.');
+    }
   }
 
   const updated = await prisma.$transaction(async (tx) => {
+    await tx.$queryRaw`SELECT "id" FROM "Order" WHERE "id" = ${req.params.id} FOR UPDATE`;
     const order = await tx.order.findFirst({
       where: {
         id: req.params.id,
@@ -75,26 +106,115 @@ exports.updateOrderStatus = asyncHandler(async (req, res) => {
     if (order.paymentStatus === 'pending' || order.paymentStatus === 'failed') {
       throw ApiError.badRequest('This order is not ready for fulfillment.');
     }
+    if (order.status === 'cancelled') {
+      throw ApiError.conflict('Cancelled orders cannot be fulfilled.');
+    }
 
-    await tx.orderItem.updateMany({
-      where: { orderId: order.id, sellerId: req.seller.id },
+    const sellerItems = order.items.filter((item) => item.sellerId === req.seller.id);
+    const previousStatus = status === 'processing' ? 'paid' : 'processing';
+    if (!sellerItems.length || sellerItems.some((item) => item.status !== previousStatus)) {
+      throw ApiError.conflict(`Your order items must all be ${previousStatus} before marking them ${status}.`);
+    }
+
+    const changedItems = await tx.orderItem.updateMany({
+      where: {
+        orderId: order.id,
+        sellerId: req.seller.id,
+        status: previousStatus,
+      },
       data: { status },
     });
+    if (changedItems.count !== sellerItems.length) {
+      throw ApiError.conflict('Order items changed during this update. Refresh and try again.');
+    }
 
-    const allItems = order.items.map((item) => item.sellerId === req.seller.id
-      ? status
-      : item.status);
-    const orderStatus = allItems.every((itemStatus) => itemStatus === 'delivered')
-      ? 'delivered'
-      : allItems.some((itemStatus) => itemStatus === 'shipped')
-        ? 'shipped'
-        : allItems.some((itemStatus) => itemStatus === 'processing')
-          ? 'processing'
-          : 'paid';
-    return tx.order.update({
+    const itemsBySeller = new Map();
+    for (const item of order.items) {
+      const sellerItemsForOrder = itemsBySeller.get(item.sellerId) || [];
+      sellerItemsForOrder.push(item);
+      itemsBySeller.set(item.sellerId, sellerItemsForOrder);
+    }
+
+    for (const [sellerId, sellerOrderItems] of itemsBySeller) {
+      const itemStatuses = sellerOrderItems.map((item) => (
+        sellerId === req.seller.id ? status : item.status
+      ));
+      const fulfillmentStatus = itemStatuses.every((itemStatus) => itemStatus === itemStatuses[0])
+        ? itemStatuses[0]
+        : 'processing';
+      const existingFulfillment = await tx.fulfillment.findUnique({
+        where: { orderId_sellerId: { orderId: order.id, sellerId } },
+      });
+
+      if (!existingFulfillment) {
+        await tx.fulfillment.create({
+          data: {
+            orderId: order.id,
+            sellerId,
+            status: fulfillmentStatus,
+            ...(status === 'processing' ? { processingAt: new Date() } : {}),
+            items: { connect: sellerOrderItems.map((item) => ({ id: item.id })) },
+            ...(sellerId === req.seller.id && status === 'shipped' ? {
+              courierName: normalizedCourierName,
+              courierPhone: normalizedCourierPhone,
+              vehicleReference: normalizedVehicleReference || null,
+              trackingReference: normalizedTrackingReference || null,
+              estimatedDeliveryAt: new Date(estimatedDeliveryAt),
+              shippedAt: new Date(),
+            } : {}),
+          },
+        });
+      } else if (sellerId === req.seller.id) {
+        await tx.fulfillment.update({
+          where: { id: existingFulfillment.id },
+          data: {
+            status,
+            ...(status === 'processing' ? { processingAt: new Date() } : {}),
+            ...(status === 'shipped' ? {
+              courierName: normalizedCourierName,
+              courierPhone: normalizedCourierPhone,
+              vehicleReference: normalizedVehicleReference || null,
+              trackingReference: normalizedTrackingReference || null,
+              estimatedDeliveryAt: new Date(estimatedDeliveryAt),
+              shippedAt: new Date(),
+            } : {}),
+          },
+        });
+        await tx.orderItem.updateMany({
+          where: { orderId: order.id, sellerId, fulfillmentId: null },
+          data: { fulfillmentId: existingFulfillment.id },
+        });
+      }
+    }
+
+    const allFulfillments = await tx.fulfillment.findMany({
+      where: { orderId: order.id },
+      select: { status: true },
+    });
+    const statuses = allFulfillments.map((item) => item.status);
+    const orderStatus = statuses.every((itemStatus) => itemStatus === 'shipped')
+      ? 'shipped'
+      : statuses.some((itemStatus) => ['processing', 'shipped'].includes(itemStatus))
+        ? 'processing'
+        : statuses.every((itemStatus) => itemStatus === 'paid')
+          ? 'paid'
+          : order.status;
+    await tx.order.update({
       where: { id: order.id },
       data: { status: orderStatus },
     });
+    await tx.orderEvent.create({
+      data: {
+        orderId: order.id,
+        actorId: req.user.id,
+        actorRole: 'seller',
+        status,
+        note: status === 'shipped'
+          ? `${req.seller.businessName} shipped the order with ${normalizedCourierName}.`
+          : `${req.seller.businessName} marked their items ${status}.`,
+      },
+    });
+    return tx.order.findUnique({ where: { id: order.id } });
   });
 
   res.json({ success: true, data: updated });
@@ -181,6 +301,11 @@ async function listSellerOrderRows(sellerId, take) {
           },
         },
       },
+      fulfillment: {
+        include: {
+          seller: { select: { businessName: true } },
+        },
+      },
     },
     orderBy: { createdAt: 'desc' },
     ...(take ? { take: take * 10 } : {}),
@@ -190,11 +315,21 @@ async function listSellerOrderRows(sellerId, take) {
     let order = grouped.get(item.orderId);
     if (!order) {
       const payment = item.order.payments[0];
+      const fulfillment = item.fulfillment;
       order = {
         id: item.order.id,
         createdAt: item.order.createdAt,
         status: item.order.status,
+        fulfillmentStatus: item.fulfillment?.status || item.status,
+        courierName: fulfillment?.courierName || null,
+        courierPhone: fulfillment?.courierPhone || null,
+        vehicleReference: fulfillment?.vehicleReference || null,
+        trackingReference: fulfillment?.trackingReference || null,
+        estimatedDeliveryAt: fulfillment?.estimatedDeliveryAt || null,
+        shippedAt: fulfillment?.shippedAt || null,
+        deliveredAt: fulfillment?.deliveredAt || null,
         paymentStatus: item.order.paymentStatus,
+        settlementStatus: item.order.settlementStatus,
         paymentMethod: item.order.paymentMethod,
         transactionRef: payment?.transactionRef || null,
         buyer: item.order.user,

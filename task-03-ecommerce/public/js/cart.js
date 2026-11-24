@@ -245,10 +245,3 @@ export const Cart = {
 
 // Make it globally accessible so inline HTML onclick handlers can call it
 window.Cart = Cart;
-
-/* ============================================
-   Auto-initialize on Page Load
-   ============================================ */
-document.addEventListener('DOMContentLoaded', () => {
-  Cart.fetchCart();
-});
